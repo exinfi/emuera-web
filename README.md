@@ -1,10 +1,10 @@
 # emuera-web
 
-**Try it:** [GitHub Pages link goes here]
+**[0]** https://exinfi.github.io/emuera-web/
 
-## What is This?
+## What is this?
 
-emuera-web is a browser-based Emuera interpreter that aims to run era text games on a computer or a phone. Once the page has loaded, it runs entirely on your local device and needs no network connection.
+emuera-web is a browser-based Emuera interpreter that aims to run era games on a computer or a phone. Once the page has loaded, it runs entirely on your local device and needs no network connection.
 
 The interpreter is an independent browser port of Emuera. It is not an official Emuera release: it aims to run the same games in a faithful manner, but it is a separate program. It was not made by the authors of Emuera or its branches. Issues you run into may be caused by this implementation rather than by the game or by Emuera. Please do not contact the game authors, or of Emuera or its branches, about them.
 
@@ -77,7 +77,7 @@ A resource pack is an extra zip whose files are laid over the game's own files w
 - A pack can include a `pack.txt` at its root (name, author, version, game, url, description). It is only displayed in the list and is never loaded into the game.
 - Changes take effect on the next load. Press **Apply: reload game** to reload the open game with the current pack list.
 
-More info on resource packs: [wiki page, link to be added].
+For more info on resource packs see the [wiki page.](https://github.com/exinfi/emuera-web/wiki/Resource-Packs)
 
 
 ### Translation
@@ -92,7 +92,7 @@ An optional, offline machine translation module for games. It is off by default.
 - Translated lines are remembered per game so they are not translated twice. **Clear cached lines** deletes them.
 - **Enable copy to clipboard** lets you tap a line in the panel to copy it, hold to copy from that line to the latest, or hold the latest line to copy the last 50.
 
-How to build your own translation pack: [wiki page, link to be added].
+For more information on in-game translation and how to build your own pack see the [wiki page.](https://github.com/exinfi/emuera-web/wiki/Translation)
 
 ### Widgets
 
@@ -112,7 +112,7 @@ On-screen controls to help play without a keyboard. All are optional and are con
 
 ### Reporting a problem
 
-Open an issue on this repository and include:
+Open an issue on this repository and include as necessary:
 
 - the game's name and version, and which build of emuera-web you are using (shown at the bottom of the control panel);
 - what you did, what you expected, and what happened instead;
@@ -126,7 +126,7 @@ The debug tools are in the **dbg** button in the top bar (your top bar must not 
 - **Export game snapshot** downloads a JSON copy of every game variable that differs from its default (characters, flags, tables, maps). It lets someone restore your exact game state to reproduce a problem. It holds no screen, call stack or files, at the time of export.
 - **Crash snapshot** appears after a crash and holds the game state at that moment.
 
-The log and snapshot contain text from the game and the inputs you typed, and the snapshot contains your game state. Look through them before you post them publicly. Your saved files and the game itself are not included.
+The log and snapshot contain text from the game and the inputs you typed, and the snapshot contains your game state. Look through them before you post them publicly. Your save files and the game itself are not included.
 
 ## Attribution
 
@@ -183,6 +183,3 @@ All files in this section are included **unmodified**, as released by their auth
 
 
 Mozilla, Firefox and Bergamot are the names of their respective owners. This project is not affiliated with or endorsed by them.
-
-...\
-eramakerを作ってくださった方、Emueraを育て受け継いでこられた方々、そしてゲームを作り、遊び、支え続けているすべての皆さまへ。長年のものづくりに、心から感謝します。
