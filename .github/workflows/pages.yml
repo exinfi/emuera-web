@@ -5,9 +5,8 @@
 # and local builds do not get the button unless they set it up themselves. No game files are ever bundled.
 name: Pages
 
+# Manual only: nothing deploys until someone presses "Run workflow" on the Actions tab.
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:
