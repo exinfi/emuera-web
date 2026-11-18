@@ -1,0 +1,27 @@
+{
+  "name": "emuera-web",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "An Emuera interpreter that runs in the web browser.",
+  "scripts": {
+    "build:mobile": "tsx tools/build-mobile.mts",
+    "build:site": "tsx tools/build-site.mts",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsx tools/typecheck.mts",
+    "test": "tsx tools/run-tests.mts",
+    "test:engine": "tsx tools/run-tests.mts engine",
+    "test:host": "tsx tools/run-tests.mts host",
+    "test:data": "tsx tools/run-tests.mts data",
+    "test:changed": "tsx tools/run-tests.mts --changed"
+  },
+  "dependencies": {
+    "jszip": "^3.10.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

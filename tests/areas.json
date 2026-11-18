@@ -1,0 +1,22 @@
+{
+  "engine": {
+    "about": "the interpreter core: parsing, expressions, control flow, functions, strings, variables, saves",
+    "sources": ["src/engine/"]
+  },
+  "host": {
+    "about": "the page-facing layer without a DOM: protocol, client input rules, pure screen helpers, loading zips and packs",
+    "sources": [
+      "src/host/protocol.ts",
+      "src/host/client.ts",
+      "src/host/screen.ts",
+      "src/host/web/gamezip.ts",
+      "src/host/web/packs.ts",
+      "src/mobile/drop.ts",
+      "src/play/"
+    ]
+  },
+  "data": {
+    "about": "reference tables and other data files the code relies on",
+    "sources": ["reference/", "src/engine/compiler/arity-table.ts", "src/engine/compiler/stmt-arity-table.ts"]
+  }
+}

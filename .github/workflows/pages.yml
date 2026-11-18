@@ -1,0 +1,49 @@
+# Builds the site and publishes it to GitHub Pages.
+# Setup (once): Settings > Pages > Source: "GitHub Actions".
+# Optional: set the repository variable BUNDLE_TRANSLATION to "true" (Settings > Secrets and variables > Actions > Variables)
+# to also offer the "Load bundled translation files" button on the published page. It is a variable, not code, so forks
+# and local builds do not get the button unless they set it up themselves. No game files are ever bundled.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+      - name: Bundle the translation engine and the Japanese model
+        if: vars.BUNDLE_TRANSLATION == 'true'
+        run: |
+          mkdir -p bundled-assets
+          cp other/translationpacks/translation.engine.zip bundled-assets/translation.engine.zip
+          cp other/translationpacks/translation.ja-en.zip bundled-assets/translation.ja-en.zip
+      - run: npm run build:site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4

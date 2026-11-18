@@ -1,0 +1,106 @@
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;overscroll-behavior:none;background:#0b0b0e;color:#ddd;font:14px/1.35 system-ui,sans-serif}
+#app{position:fixed;inset:0;display:flex;flex-direction:column;padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left)}
+button,label.btn,select,input[type=text]{font:inherit;color:#ddd;background:#23232b;border:1px solid #4a4a58;border-radius:6px;padding:6px 10px;min-height:36px}
+button:active,label.btn:active{background:#3a3a48}button:disabled{opacity:.4}
+#top{flex:none;display:flex;align-items:center;gap:4px;padding:3px 6px;background:#16161c;border-bottom:1px solid #333;min-height:50px}
+.tb{min-width:40px;height:44px;padding:0 6px;display:inline-flex;align-items:center;justify-content:center;flex:none}.tb[hidden]{display:none}   /* display:inline-flex would otherwise override the hidden attribute */
+.tb.on{background:#2d3f5c;border-color:#5c82c4}
+.tb span{font-size:12px}
+#mode b{font-size:17px}#mode[data-mode=left]{background:#25405f;border-color:#5c9be0}#mode[data-mode=right]{background:#5a2a2a;border-color:#e06c6c}#mode[data-mode=hover]{background:#2a4a30;border-color:#6cc27a}
+#bdbg.warn{background:#6b3a0a;border-color:#ff9a2e;color:#ffd9a8}#bdbg.err{background:#7a2a0a;border-color:#ff7a2e;color:#fff}
+#quick{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}#quick::-webkit-scrollbar{display:none}
+#quick button{flex:none;height:38px;padding:0 10px;white-space:nowrap}#quick button.rec{background:#7a2020;border-color:#e06c6c}#quick button.run{background:#5a4a14;border-color:#e0c35c}
+#bhide .dn{display:none}body.hdrc #bhide .up{display:none}body.hdrc #bhide .dn{display:inline}
+/* the top bar hidden: the bar itself (background, height, quick inputs and the other buttons) goes; the tap mode button stays top left and the control panel, input window and show buttons stay at the right end, same place and size; the game gets the bar's height */
+body.hdrc #top{position:absolute;top:env(safe-area-inset-top);left:env(safe-area-inset-left);right:env(safe-area-inset-right);z-index:30;background:none;border:0;min-height:0;pointer-events:none}
+body.hdrc #top .tb{pointer-events:auto}body.hdrc #quick{display:none}body.hdrc #tools{margin-left:auto}
+body.hdrc #tools>.tb:not(#bpanel):not(#binp):not(#bhide):not(#btl):not(#bdpad){display:none}
+body.hdrc.tlover #top{z-index:18}   /* phone overlay only (a desktop is always docked, so never here): the panel covers the buttons and closes by its tab, the sliver or Esc */
+body.hdrc .sheet{padding-top:54px}body.hdrc #tlpanel.dock{padding-top:54px;box-sizing:border-box}   /* sheets and the docked panel start below the buttons */
+#tools{flex:none;display:flex;gap:4px}#mode{min-width:48px}.stabs button.on{background:#2d3f5c;border-color:#5c82c4}
+#mainrow{flex:1;min-height:0;display:flex}
+#main{flex:1;min-width:0;min-height:0;position:relative}
+#vp{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#000}
+#vp.panning{cursor:grabbing}
+.desk{display:none}
+.opts label.desk{display:none}
+@media (hover:hover) and (pointer:fine){.opts label.desk{display:flex}div.mobonly{display:none}}   /* mobonly: phone-only settings (side-by-side is not a choice on a desktop) */
+@media (hover:hover) and (pointer:fine) and (min-width:620px){button.desk{display:inline-flex}}
+body.tsel:not(.mtap) #vp{user-select:text;-webkit-user-select:text}
+#dropov{position:fixed;inset:0;z-index:60;background:#0b0b0ecc;border:3px dashed #5c9be0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:20px;pointer-events:none}#dropov[hidden]{display:none}#dropov small{font-size:13px;color:#9ab}
+#pan{position:absolute;left:0;top:0;transform-origin:0 0}
+#stage{position:relative;overflow:visible}
+/* Emuera: the newest line sits on the bottom edge of the window, so a short screen piles up at the bottom of a window-high stage (taller logs grow as before) */
+#stage.emu-outer>.emu-out{display:flex;flex-direction:column;min-height:var(--cfgh,0px)}#stage.emu-outer>.emu-out>div{flex:none}#stage.emu-outer>.emu-out>div:first-child{margin-top:auto}
+/* CBG layers and buttons cover the last cfg.h px of the stage (see placeCbg in mobile.ts) */
+#stage>canvas.emu-bg,#stage>.emu-cbgbtn{transform:translateY(var(--cbgy,0px))}
+/* fixed-image layer and fade veil (eraSumireTeru only) are the game window too: the view draws them over the whole root, which here is as tall as the log */
+.emu-fix,.emu-fixveil{top:var(--cbgy,0px)!important;bottom:auto!important;height:var(--cfgh,100%)!important}
+.flash{position:absolute;pointer-events:none;border-radius:3px;z-index:20;outline:2px solid #6cf;background:#6cf4;animation:fl .35s forwards}.flash.r{outline-color:#f77;background:#f774}.flash.h{outline-color:#7e8;background:#7e84}
+@keyframes fl{to{opacity:0}}
+#busy{position:absolute;right:10px;bottom:10px;width:22px;height:22px;border:3px solid #667a;border-top-color:#7cf;border-radius:50%;animation:spin .8s linear infinite;pointer-events:none;z-index:30;background:#0008}#busy[hidden]{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sheet{position:absolute;left:0;right:0;top:0;max-height:100%;overflow-y:auto;background:#14141afa;border-bottom:2px solid #445;padding:4px 12px 12px;z-index:25;overscroll-behavior:contain}
+.sheet[hidden]{display:none}.sheet h3{margin:12px 0 4px;font-size:13px;color:#9ab;text-transform:uppercase;letter-spacing:.05em}
+.row{display:flex;flex-wrap:wrap;gap:6px;margin:4px 0;align-items:center}.row select,.row input[type=text]{flex:1;min-width:0}
+#panel .subh{font-weight:600;color:#9ab;margin-top:8px}#cdel{margin-left:auto;color:#e99;border-color:#744}#cdel:disabled{color:#755;border-color:#433}
+.opts{display:flex;flex-direction:column;gap:4px}.opts label,.row label:not(.btn){display:flex;gap:6px;align-items:center;font-size:13px}
+label.btn{display:inline-flex;align-items:center;cursor:pointer}
+#status{color:#8c8;font-size:13px;margin:4px 0;word-break:break-word}#fwarn{color:#fb4}#cardwarn{color:#fb4;font-size:12px}
+.small{font-size:12px;color:#999;word-break:break-word}
+#dlist{display:flex;flex-direction:column;gap:6px;margin:6px 0}.dent{border-left:3px solid #666;padding:2px 8px;font:12px/1.3 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word}.dent.error{border-color:#ff5a3a;color:#fcb}.dent.warn{border-color:#ff9a2e;color:#fd9}.dent time{color:#888;margin-right:6px}
+#ilist{white-space:pre-wrap;font:12px/1.4 ui-monospace,monospace;margin:6px 0}
+#inbar{flex:none;display:flex;gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:#16161c;border-top:1px solid #333}#inbar[hidden]{display:none}
+#inp{flex:1;min-width:0;background:#000;color:#fff;font-size:16px}#send{flex:none;padding:0 16px}
+/* game buttons: boxed (default on a phone; pads and widens them, so columns shift) or plain text as in Emuera (body without .bbtn) */
+body.bbtn .emu-screen a.btn{font:inherit;color:#ddd;background:#23232b;border:1px solid #4a4a58;border-radius:6px;padding:6px 10px;min-height:36px;display:inline-flex;align-items:center;cursor:pointer}
+body.bbtn .emu-screen a.btn:active{background:#3a3a48}
+
+.fpick{position:absolute;left:-9999px;width:1px;height:1px;opacity:0;overflow:hidden}
+
+.pack{border:1px solid #3a3a48;border-radius:6px;padding:6px 8px;margin:6px 0}.pack.off{opacity:.55}.pack .row{margin:4px 0 0}.pack .row button{min-height:32px;padding:4px 10px}
+.pinfo{margin-top:4px}.pinfo .pmeta{font-weight:600}.pinfo .pdesc{white-space:pre-wrap;max-height:110px;overflow-y:auto;border:1px solid #444;border-radius:6px;padding:3px 6px;margin-top:3px}
+.pfiles{white-space:pre-wrap;font-family:ui-monospace,monospace;max-height:160px;overflow-y:auto;margin-top:4px}
+
+.patchhead{margin:8px 0 2px;font-weight:bold;font-size:13px}#bootsum{white-space:pre-wrap;color:#9a9;margin:6px 0}#bootsum:empty{display:none}
+.patchlist{max-height:14em;overflow-y:auto;border:1px solid #444;border-radius:6px;padding:2px 8px;margin-top:4px}
+.patchrow{display:flex;gap:8px;align-items:flex-start;margin:6px 0;font-size:13px}.patchrow input{margin-top:3px}#patchopen{margin:2px 0 2px 22px;min-height:30px;padding:2px 10px;font-size:12px}#patchpanel{margin:4px 0 8px;padding:4px 8px;border:1px solid #3a3a48;border-radius:6px}
+#patchopen{align-self:flex-start}
+
+/* direction pad (widget): a plus-shaped overlay at the bottom right of the game area */
+#dpad{position:absolute;right:10px;bottom:10px;z-index:15;display:grid;grid-template-columns:repeat(3,var(--pd,54px));grid-template-rows:repeat(3,var(--pd,54px));gap:4px;touch-action:none;user-select:none;-webkit-user-select:none}
+#dpad[hidden],#dpad.gone{display:none}
+#dpadx{display:none;position:absolute;right:-14px;top:-14px;width:26px;height:26px;border-radius:50%;background:#7a2b2b;border:1px solid #d07070;color:#fff;align-items:center;justify-content:center;font-size:14px;line-height:1;touch-action:none;z-index:2;cursor:pointer}
+#dpad.editing #dpadx{display:flex}
+#dpad button[data-d]{position:relative;padding:0;min-height:0;width:var(--pd,54px);height:var(--pd,54px);font-size:calc(var(--pd,54px) * .38);background:#23232bcc;border-color:#6a6a80;opacity:.82;touch-action:none}
+#dpad button[data-d]:active,#dpad button.held{background:#3a4a6a;opacity:1}
+#dpad.off button[data-d]{opacity:.3}
+#dpad [data-d=up]{grid-column:2;grid-row:1}#dpad [data-d=left]{grid-column:1;grid-row:2}#dpad [data-d=mid]{grid-column:2;grid-row:2}#dpad [data-d=right]{grid-column:3;grid-row:2}#dpad [data-d=down]{grid-column:2;grid-row:3}
+#bdpad.on{background:#2d3f5c;border-color:#5c82c4}
+#dpad button[data-val]::after{content:attr(data-val);position:absolute;right:4px;bottom:2px;font-size:11px;color:#9cf}
+#dpad.editing{outline:2px dashed #5c9be0;outline-offset:6px;cursor:move}
+#dpad.editing button[data-d]{opacity:1;cursor:move}
+#dpadgrip[hidden]{display:none}
+#padscrim{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.62);touch-action:none}#padscrim[hidden]{display:none}
+#dpad.editing,#xpad.editing{z-index:40}
+#dpadbar,#padedit{position:fixed;left:8px;right:8px;max-width:520px;margin:0 auto;box-sizing:border-box;background:#1b1b24;border:1px solid #5c82c4;border-radius:8px;padding:8px 10px;box-shadow:0 4px 18px #000a}
+#dpadbar{top:calc(env(safe-area-inset-top) + 8px);z-index:50}#padedit{top:calc(env(safe-area-inset-top) + 120px);z-index:60}
+#dpadbar[hidden],#padedit[hidden]{display:none}
+#dpadbar .row,#padedit .row{display:flex;gap:6px;margin-top:6px}
+#dpadbar button,#padedit button{min-height:34px;padding:2px 12px;touch-action:manipulation}
+#padedit input{width:100%;box-sizing:border-box;margin-top:4px;font-size:16px}
+#xpad{position:absolute;inset:0;z-index:15;pointer-events:none}#xpad[hidden]{display:none}
+.xb{position:absolute;pointer-events:auto;padding:0;min-height:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;background:#23232bcc;border-color:#6a6a80;opacity:.82;touch-action:none;user-select:none;-webkit-user-select:none}
+.xb:active,.xb.held{background:#3a4a6a;opacity:1}
+.xb.off{opacity:.3}
+#xpad.editing .xb{opacity:1;cursor:move;overflow:visible}
+.xb.sel{outline:2px solid #5c9be0;outline-offset:2px}
+.xb .xg{display:none;position:absolute;left:-16px;top:-16px;width:26px;height:26px;border-radius:50%;background:#2d3f5c;border:1px solid #5c82c4;align-items:center;justify-content:center;font-size:15px;cursor:nwse-resize;touch-action:none;z-index:2}
+.xb .xd{display:none;position:absolute;right:-14px;top:-14px;width:26px;height:26px;border-radius:50%;background:#7a2b2b;border:1px solid #d07070;color:#fff;align-items:center;justify-content:center;font-size:14px;line-height:1;touch-action:none;z-index:2}
+#xpad.editing .xb.sel .xg,#xpad.editing .xb.sel .xd{display:flex}
+#bdpad{margin:0 12px 0 6px}
+#dpadgrip{position:absolute;left:-18px;top:-18px;width:28px;height:28px;border-radius:50%;background:#2d3f5c;border:1px solid #5c82c4;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:nwse-resize;z-index:2;touch-action:none}
+
+#xgroup{margin:6px 0;padding:4px 8px 6px;border:1px solid #444;border-radius:3px}#xgroup legend{font-size:12px;color:#c9c;padding:0 4px}#xgroup #xnote{width:100%;box-sizing:border-box}#xgroup label{margin-left:8px}
+#dsnap[hidden]{display:none}

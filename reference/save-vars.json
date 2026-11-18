@@ -1,0 +1,1435 @@
+{
+ "source": "EvilMask/emuera.em (master zip)",
+ "note": "order = varTokenDic.Add order; saved per VariableToken rule",
+ "counts": {
+  "all": 158,
+  "saved": 94,
+  "savedChara": 29,
+  "savedGlobal": 2,
+  "savedStatic": 63
+ },
+ "variables": [
+  {
+   "name": "DAY",
+   "code": "0x0",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "MONEY",
+   "code": "0x1",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "ITEM",
+   "code": "0x2",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "FLAG",
+   "code": "0x3",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TFLAG",
+   "code": "0x4",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "UP",
+   "code": "0x5",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "PALAMLV",
+   "code": "0x6",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "EXPLV",
+   "code": "0x7",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "EJAC",
+   "code": "0x8",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DOWN",
+   "code": "0x9",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "RESULT",
+   "code": "0xA",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "COUNT",
+   "code": "0xB",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TARGET",
+   "code": "0xC",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "ASSI",
+   "code": "0xD",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "MASTER",
+   "code": "0xE",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "NOITEM",
+   "code": "0xF",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "LOSEBASE",
+   "code": "0x10",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "SELECTCOM",
+   "code": "0x11",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "ASSIPLAY",
+   "code": "0x12",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "PREVCOM",
+   "code": "0x13",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TIME",
+   "code": "0x16",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "ITEMSALES",
+   "code": "0x17",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "PLAYER",
+   "code": "0x18",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "NEXTCOM",
+   "code": "0x19",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "PBAND",
+   "code": "0x1A",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "BOUGHT",
+   "code": "0x1B",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "A",
+   "code": "0x1E",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "B",
+   "code": "0x1F",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "C",
+   "code": "0x20",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "D",
+   "code": "0x21",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "E",
+   "code": "0x22",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "F",
+   "code": "0x23",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "G",
+   "code": "0x24",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "H",
+   "code": "0x25",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "I",
+   "code": "0x26",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "J",
+   "code": "0x27",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "K",
+   "code": "0x28",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "L",
+   "code": "0x29",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "M",
+   "code": "0x2A",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "N",
+   "code": "0x2B",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "O",
+   "code": "0x2C",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "P",
+   "code": "0x2D",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "Q",
+   "code": "0x2E",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "R",
+   "code": "0x2F",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "S",
+   "code": "0x30",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "T",
+   "code": "0x31",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "U",
+   "code": "0x32",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "V",
+   "code": "0x33",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "W",
+   "code": "0x34",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "X",
+   "code": "0x35",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "Y",
+   "code": "0x36",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "Z",
+   "code": "0x37",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "GLOBAL",
+   "code": "0x3F",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": true,
+   "saved": true
+  },
+  {
+   "name": "RANDDATA",
+   "code": "0x40",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "SAVESTR",
+   "code": "0x0",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TSTR",
+   "code": "0x6",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "STR",
+   "code": "0x1",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "RESULTS",
+   "code": "0x2",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GLOBALS",
+   "code": "0x5",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": true,
+   "saved": true
+  },
+  {
+   "name": "SAVEDATA_TEXT",
+   "code": "0x0",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "ISASSI",
+   "code": "0x0",
+   "str": false,
+   "dim": 0,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "NO",
+   "code": "0x1",
+   "str": false,
+   "dim": 0,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "BASE",
+   "code": "0x0",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "MAXBASE",
+   "code": "0x1",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "ABL",
+   "code": "0x2",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TALENT",
+   "code": "0x3",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "EXP",
+   "code": "0x4",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "MARK",
+   "code": "0x5",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "PALAM",
+   "code": "0x6",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "SOURCE",
+   "code": "0x7",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "EX",
+   "code": "0x8",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "CFLAG",
+   "code": "0x9",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "JUEL",
+   "code": "0xA",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "RELATION",
+   "code": "0xB",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "EQUIP",
+   "code": "0xC",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TEQUIP",
+   "code": "0xD",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "STAIN",
+   "code": "0xE",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "GOTJUEL",
+   "code": "0xF",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "NOWEX",
+   "code": "0x10",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DOWNBASE",
+   "code": "0x11",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "CUP",
+   "code": "0x12",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "CDOWN",
+   "code": "0x13",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TCVAR",
+   "code": "0x14",
+   "str": false,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "NAME",
+   "code": "0x0",
+   "str": true,
+   "dim": 0,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "CALLNAME",
+   "code": "0x1",
+   "str": true,
+   "dim": 0,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "NICKNAME",
+   "code": "0x2",
+   "str": true,
+   "dim": 0,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "MASTERNAME",
+   "code": "0x3",
+   "str": true,
+   "dim": 0,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "CSTR",
+   "code": "0x0",
+   "str": true,
+   "dim": 1,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "CDFLAG",
+   "code": "0x0",
+   "str": false,
+   "dim": 2,
+   "chara": true,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DITEMTYPE",
+   "code": "0x0",
+   "str": false,
+   "dim": 2,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DA",
+   "code": "0x1",
+   "str": false,
+   "dim": 2,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DB",
+   "code": "0x2",
+   "str": false,
+   "dim": 2,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DC",
+   "code": "0x3",
+   "str": false,
+   "dim": 2,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DD",
+   "code": "0x4",
+   "str": false,
+   "dim": 2,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "DE",
+   "code": "0x5",
+   "str": false,
+   "dim": 2,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TA",
+   "code": "0x0",
+   "str": false,
+   "dim": 3,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "TB",
+   "code": "0x1",
+   "str": false,
+   "dim": 3,
+   "chara": false,
+   "global": false,
+   "saved": true
+  },
+  {
+   "name": "ITEMPRICE",
+   "code": "0x3C",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "ABLNAME",
+   "code": "0x0",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TALENTNAME",
+   "code": "0x2",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "EXPNAME",
+   "code": "0x1",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "MARKNAME",
+   "code": "0x5",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "PALAMNAME",
+   "code": "0x3",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "ITEMNAME",
+   "code": "0x6",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TRAINNAME",
+   "code": "0x4",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "BASENAME",
+   "code": "0x7",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "SOURCENAME",
+   "code": "0x8",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "EXNAME",
+   "code": "0x9",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "EQUIPNAME",
+   "code": "0xB",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TEQUIPNAME",
+   "code": "0xC",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "FLAGNAME",
+   "code": "0xD",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TFLAGNAME",
+   "code": "0xE",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "CFLAGNAME",
+   "code": "0xF",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TCVARNAME",
+   "code": "0x10",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "CSTRNAME",
+   "code": "0x11",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "STAINNAME",
+   "code": "0x12",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "CDFLAGNAME1",
+   "code": "0x13",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "CDFLAGNAME2",
+   "code": "0x14",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "STRNAME",
+   "code": "0x15",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TSTRNAME",
+   "code": "0x16",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "SAVESTRNAME",
+   "code": "0x17",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GLOBALNAME",
+   "code": "0x18",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GLOBALSNAME",
+   "code": "0x19",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "DAYNAME",
+   "code": "0x1A",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "TIMENAME",
+   "code": "0x1B",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "MONEYNAME",
+   "code": "0x1C",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_INFO",
+   "code": "0x1",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_YEAR",
+   "code": "0x2",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_TITLE",
+   "code": "0x3",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_URL",
+   "code": "0xB",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_URL",
+   "code": "0xB",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_GAMECODE",
+   "code": "0x0",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_VERSION",
+   "code": "0x1",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_ALLOWVERSION",
+   "code": "0x2",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_DEFAULTCHARA",
+   "code": "0x3",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "GAMEBASE_NOITEM",
+   "code": "0x4",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "CHARANUM",
+   "code": "0x1",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "LASTLOAD_TEXT",
+   "code": "0x5",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "LASTLOAD_VERSION",
+   "code": "0x5",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "LASTLOAD_NO",
+   "code": "0x6",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "LINECOUNT",
+   "code": "0x8",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "ISTIMEOUT",
+   "code": "0xB",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__INT_MAX__",
+   "code": "0x9",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__INT_MIN__",
+   "code": "0xA",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "EMUERA_VERSION",
+   "code": "0xA",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "WINDOW_TITLE",
+   "code": "0x5",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "MONEYLABEL",
+   "code": "0x8",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "DRAWLINESTR",
+   "code": "0x9",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__FILE__",
+   "code": "0x6",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__FUNCTION__",
+   "code": "0x7",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__LINE__",
+   "code": "0x7",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__FILE__",
+   "code": "0x6",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__FUNCTION__",
+   "code": "0x7",
+   "str": true,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "__LINE__",
+   "code": "0x7",
+   "str": false,
+   "dim": 0,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "LOCAL",
+   "code": "0x3D",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "ARG",
+   "code": "0x3E",
+   "str": false,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "LOCALS",
+   "code": "0x3",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  },
+  {
+   "name": "ARGS",
+   "code": "0x4",
+   "str": true,
+   "dim": 1,
+   "chara": false,
+   "global": false,
+   "saved": false
+  }
+ ]
+}

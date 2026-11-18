@@ -1,0 +1,39 @@
+MIT License
+
+Copyright (c) 2026 The emuera-web contributors
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+NOTICE ABOUT THE SCOPE OF THIS LICENSE
+
+The MIT License above covers only the code that was written for this project.
+It does not cover the whole repository, and it does not clean or replace the
+terms of anything derived from elsewhere.
+
+In particular, this project reimplements Emuera. Parts of the code follow
+Emuera's structure and behavior (and that of its branches), and those parts
+are derived from Emuera. They are subject to Emuera's own license (zlib/libpng,
+Copyright (C) 2008- MinorShift, 妊）|дﾟ)の中の人), which still applies to
+them and which must be kept with any distribution of the source. The MIT
+License does not remove or relax it.
+
+The bundled fonts, the libraries included in the page, and the optional
+translation files each carry their own licenses and are not relicensed here.
+
+The full details are in the ATTRIBUTION section of README.md.

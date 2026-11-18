@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+# Game archives and extracted copies are never committed
+games/
+*.zip
+# The translation packs (MPL-2.0) are kept in the repo
+!other/translationpacks/
+!other/translationpacks/*.zip
+# Build output (the one committed exception is dist-play/play.html)
+site/

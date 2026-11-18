@@ -1,0 +1,4748 @@
+{
+ "source": "EvilMask/emuera.em (master zip)",
+ "generated": "2026-11-04",
+ "counts": {
+  "commands": 304,
+  "functions": 270,
+  "variables": 182
+ },
+ "commands": [
+  {
+   "name": "SET",
+   "flags": [],
+   "arg": null
+  },
+  {
+   "name": "PRINT",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTL",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTW",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTV",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTVL",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTVW",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTS",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSL",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSW",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORM",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORML",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMW",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMS",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMSL",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMSW",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTC",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "CLEARLINE",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "REUSELASTLINE",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "WAIT",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "INPUT",
+   "flags": [],
+   "arg": "SP_INPUT"
+  },
+  {
+   "name": "INPUTS",
+   "flags": [],
+   "arg": "SP_INPUTS"
+  },
+  {
+   "name": "TINPUT",
+   "flags": [],
+   "arg": "SP_TINPUT"
+  },
+  {
+   "name": "TINPUTS",
+   "flags": [],
+   "arg": "SP_TINPUTS"
+  },
+  {
+   "name": "TWAIT",
+   "flags": [],
+   "arg": "SP_SWAP"
+  },
+  {
+   "name": "WAITANYKEY",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "FORCEWAIT",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "ONEINPUT",
+   "flags": [],
+   "arg": "SP_INPUT"
+  },
+  {
+   "name": "ONEINPUTS",
+   "flags": [],
+   "arg": "SP_INPUTS"
+  },
+  {
+   "name": "TONEINPUT",
+   "flags": [],
+   "arg": "SP_TINPUT"
+  },
+  {
+   "name": "TONEINPUTS",
+   "flags": [],
+   "arg": "SP_TINPUTS"
+  },
+  {
+   "name": "AWAIT",
+   "flags": [],
+   "arg": "EXPRESSION_NULLABLE"
+  },
+  {
+   "name": "DRAWLINE",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "BAR",
+   "flags": [],
+   "arg": "SP_BAR"
+  },
+  {
+   "name": "BARL",
+   "flags": [],
+   "arg": "SP_BAR"
+  },
+  {
+   "name": "TIMES",
+   "flags": [],
+   "arg": "SP_TIMES"
+  },
+  {
+   "name": "PRINT_ABL",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINT_TALENT",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINT_MARK",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINT_EXP",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINT_PALAM",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINT_ITEM",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "PRINT_SHOPITEM",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "UPCHECK",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "CUPCHECK",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "ADDCHARA",
+   "flags": [],
+   "arg": "INT_ANY"
+  },
+  {
+   "name": "ADDSPCHARA",
+   "flags": [],
+   "arg": "INT_ANY"
+  },
+  {
+   "name": "ADDDEFCHARA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "ADDVOIDCHARA",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "DELCHARA",
+   "flags": [],
+   "arg": "INT_ANY"
+  },
+  {
+   "name": "PUTFORM",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "QUIT",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "BEGIN",
+   "flags": [],
+   "arg": "STR"
+  },
+  {
+   "name": "SAVEGAME",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "LOADGAME",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "SIF",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "IF",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "ELSE",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "ELSEIF",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "ENDIF",
+   "flags": [
+    "METHOD_SAFE"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "REPEAT",
+   "flags": [],
+   "arg": "SP_FOR_NEXT|INT_EXPRESSION"
+  },
+  {
+   "name": "REND",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "CONTINUE",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "BREAK",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "GOTO",
+   "flags": [],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "JUMP",
+   "flags": [],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "CALL",
+   "flags": [],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "CALLEVENT",
+   "flags": [],
+   "arg": "STR"
+  },
+  {
+   "name": "RETURN",
+   "flags": [],
+   "arg": "INT_ANY"
+  },
+  {
+   "name": "RETURNFORM",
+   "flags": [],
+   "arg": "FORM_STR_ANY|FORM_STR"
+  },
+  {
+   "name": "RETURNF",
+   "flags": [],
+   "arg": "EXPRESSION_NULLABLE"
+  },
+  {
+   "name": "RESTART",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "STRLEN",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "STRLENFORM",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "STRLENU",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "STRLENFORMU",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "PRINTLC",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMC",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMLC",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "SWAPCHARA",
+   "flags": [],
+   "arg": "SP_SWAP"
+  },
+  {
+   "name": "COPYCHARA",
+   "flags": [],
+   "arg": "SP_SWAP"
+  },
+  {
+   "name": "ADDCOPYCHARA",
+   "flags": [],
+   "arg": "INT_ANY"
+  },
+  {
+   "name": "VARSIZE",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_VAR"
+  },
+  {
+   "name": "SPLIT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_SPLIT"
+  },
+  {
+   "name": "PRINTSINGLE",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEV",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTSINGLES",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSINGLEFORM",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEFORMS",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTBUTTON",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_BUTTON"
+  },
+  {
+   "name": "PRINTBUTTONC",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_BUTTON"
+  },
+  {
+   "name": "PRINTBUTTONLC",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_BUTTON"
+  },
+  {
+   "name": "PRINTPLAIN",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTPLAINFORM",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "SAVEDATA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_SAVEDATA"
+  },
+  {
+   "name": "LOADDATA",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "DELDATA",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "GETTIME",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "TRYJUMP",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCALL",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYGOTO",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "JUMPFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "CALLFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "GOTOFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYJUMPFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCALLFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYGOTOFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "CALLTRAIN",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "STOPCALLTRAIN",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "CATCH",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "ENDCATCH",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "TRYCJUMP",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCCALL",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCGOTO",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCJUMPFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCCALLFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCGOTOFORM",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_CALLFORM|SP_CALL"
+  },
+  {
+   "name": "TRYCALLLIST",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL",
+    "PARTIAL",
+    "IS_TRY"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "TRYJUMPLIST",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL",
+    "PARTIAL",
+    "IS_JUMP",
+    "IS_TRY"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "TRYGOTOLIST",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL",
+    "PARTIAL",
+    "IS_TRY"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "FUNC",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL",
+    "PARTIAL",
+    "FORCE_SETARG"
+   ],
+   "arg": "SP_CALLFORM"
+  },
+  {
+   "name": "ENDFUNC",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "CALLF",
+   "flags": [],
+   "arg": "SP_CALLFORMF|SP_CALLF"
+  },
+  {
+   "name": "CALLFORMF",
+   "flags": [],
+   "arg": "SP_CALLFORMF|SP_CALLF"
+  },
+  {
+   "name": "CALLSHARP",
+   "flags": [],
+   "arg": "SP_CALLCSHARP"
+  },
+  {
+   "name": "SETCOLOR",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_COLOR"
+  },
+  {
+   "name": "SETCOLORBYNAME",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "STR"
+  },
+  {
+   "name": "RESETCOLOR",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "SETBGCOLOR",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_COLOR"
+  },
+  {
+   "name": "SETBGIMAGE",
+   "flags": [],
+   "arg": "FORM_STR_ANY"
+  },
+  {
+   "name": "SETBGCOLORBYNAME",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "STR"
+  },
+  {
+   "name": "RESETBGCOLOR",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "CLEARBGIMAGE",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "REMOVEBGIMAGE",
+   "flags": [],
+   "arg": "FORM_STR_ANY"
+  },
+  {
+   "name": "FONTBOLD",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "FONTITALIC",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "FONTREGULAR",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "SORTCHARA",
+   "flags": [],
+   "arg": "SP_SORTCHARA"
+  },
+  {
+   "name": "FONTSTYLE",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION_NULLABLE"
+  },
+  {
+   "name": "ALIGNMENT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "STR"
+  },
+  {
+   "name": "CUSTOMDRAWLINE",
+   "flags": [],
+   "arg": null
+  },
+  {
+   "name": "DRAWLINEFORM",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "FORM_STR"
+  },
+  {
+   "name": "CLEARTEXTBOX",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "SETFONT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "STR_EXPRESSION_NULLABLE"
+  },
+  {
+   "name": "FOR",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "SP_FOR_NEXT|INT_EXPRESSION"
+  },
+  {
+   "name": "NEXT",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "WHILE",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "WEND",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "POWER",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_POWER"
+  },
+  {
+   "name": "SAVEGLOBAL",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "LOADGLOBAL",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "SWAP",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_SWAPVAR"
+  },
+  {
+   "name": "RESETDATA",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "RESETGLOBAL",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "RANDOMIZE",
+   "flags": [],
+   "arg": "INT_EXPRESSION_NULLABLE"
+  },
+  {
+   "name": "DUMPRAND",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "INITRAND",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "REDRAW",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "DOTRAIN",
+   "flags": [
+    "EXTENDED",
+    "FLOW_CONTROL"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "SELECTCASE",
+   "flags": [],
+   "arg": "EXPRESSION"
+  },
+  {
+   "name": "CASE",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "CASE"
+  },
+  {
+   "name": "CASEELSE",
+   "flags": [
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "ENDSELECT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "DO",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "LOOP",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINTDATA",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTDATAL",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTDATAW",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "DATA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "DATAFORM",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "ENDDATA",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "DATALIST",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "ENDLIST",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "STRDATA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "VAR_STR"
+  },
+  {
+   "name": "PRINTCPERLINE",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_GETINT"
+  },
+  {
+   "name": "SETBIT",
+   "flags": [],
+   "arg": "BIT_ARG"
+  },
+  {
+   "name": "CLEARBIT",
+   "flags": [],
+   "arg": "BIT_ARG"
+  },
+  {
+   "name": "INVERTBIT",
+   "flags": [],
+   "arg": "BIT_ARG"
+  },
+  {
+   "name": "DELALLCHARA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "PICKUPCHARA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_ANY"
+  },
+  {
+   "name": "VARSET",
+   "flags": [],
+   "arg": "SP_VAR_SET"
+  },
+  {
+   "name": "CVARSET",
+   "flags": [],
+   "arg": "SP_CVAR_SET"
+  },
+  {
+   "name": "RESET_STAIN",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "SAVENOS",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_GETINT"
+  },
+  {
+   "name": "FORCEKANA",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "SKIPDISP",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "NOSKIP",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "ENDNOSKIP",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "PARTIAL"
+   ],
+   "arg": "VOID"
+  },
+  {
+   "name": "ARRAYSHIFT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_SHIFT_ARRAY"
+  },
+  {
+   "name": "ARRAYREMOVE",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_CONTROL_ARRAY"
+  },
+  {
+   "name": "ARRAYSORT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_SORTARRAY"
+  },
+  {
+   "name": "ARRAYCOPY",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "SP_COPY_ARRAY"
+  },
+  {
+   "name": "ENCODETOUNI",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "DEBUGPRINT",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "DEBUGPRINTL",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "DEBUGPRINTFORM",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "DEBUGPRINTFORML",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE|STR_NULLABLE"
+  },
+  {
+   "name": "DEBUGCLEAR",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "ASSERT",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED",
+    "DEBUG_FUNC"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "THROW",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "SAVEVAR",
+   "flags": [],
+   "arg": "SP_SAVEVAR"
+  },
+  {
+   "name": "LOADVAR",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "SAVECHARA",
+   "flags": [],
+   "arg": "SP_SAVECHARA"
+  },
+  {
+   "name": "LOADCHARA",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "REF",
+   "flags": [],
+   "arg": "SP_REFBYNAME|SP_REF"
+  },
+  {
+   "name": "REFBYNAME",
+   "flags": [],
+   "arg": "SP_REFBYNAME|SP_REF"
+  },
+  {
+   "name": "PRINTK",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTKL",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTKW",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTVK",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTVKL",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTVKW",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTSK",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSKL",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSKW",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMK",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMKL",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMKW",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMSK",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMSKL",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMSKW",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTCK",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTLCK",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMCK",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMLCK",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEK",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEVK",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTSINGLESK",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSINGLEFORMK",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEFORMSK",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTDATAK",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTDATAKL",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTDATAKW",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTD",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTDL",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTDW",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTVD",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTVDL",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTVDW",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTSD",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSDL",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSDW",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMD",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMDL",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMDW",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMSD",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMSDL",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMSDW",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTCD",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTLCD",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMCD",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMLCD",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLED",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEVD",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTSINGLESD",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTSINGLEFORMD",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTSINGLEFORMSD",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTDATAD",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTDATADL",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "PRINTDATADW",
+   "flags": [],
+   "arg": "VAR_INT"
+  },
+  {
+   "name": "HTML_PRINT",
+   "flags": [],
+   "arg": "SP_HTML_PRINT"
+  },
+  {
+   "name": "HTML_TAGSPLIT",
+   "flags": [],
+   "arg": "SP_HTMLSPLIT"
+  },
+  {
+   "name": "TOOLTIP_SETCOLOR",
+   "flags": [],
+   "arg": "SP_SWAP"
+  },
+  {
+   "name": "TOOLTIP_SETDELAY",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "TOOLTIP_SETDURATION",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "PRINT_IMG",
+   "flags": [],
+   "arg": "STR_EXPRESSION|SP_PRINT_IMG"
+  },
+  {
+   "name": "PRINT_RECT",
+   "flags": [],
+   "arg": "INT_ANY|SP_PRINT_RECT"
+  },
+  {
+   "name": "PRINT_SPACE",
+   "flags": [],
+   "arg": "INT_EXPRESSION|SP_PRINT_SPACE"
+  },
+  {
+   "name": "INPUTMOUSEKEY",
+   "flags": [],
+   "arg": null
+  },
+  {
+   "name": "PLAYSOUND",
+   "flags": [],
+   "arg": "SP_HTML_PRINT"
+  },
+  {
+   "name": "STOPSOUND",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "PLAYBGM",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "STOPBGM",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "SETSOUNDVOLUME",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "SETBGMVOLUME",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "TRYCALLF",
+   "flags": [],
+   "arg": "SP_CALLFORMF|SP_CALLF"
+  },
+  {
+   "name": "TRYCALLFORMF",
+   "flags": [],
+   "arg": "SP_CALLFORMF|SP_CALLF"
+  },
+  {
+   "name": "UPDATECHECK",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "QUIT_AND_RESTART",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "FORCE_QUIT",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "FORCE_QUIT_AND_RESTART",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "FORCE_BEGIN",
+   "flags": [],
+   "arg": "STR"
+  },
+  {
+   "name": "INPUTANY",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "TOOLTIP_SETFONT",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "TOOLTIP_SETFONTSIZE",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "TOOLTIP_CUSTOM",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "TOOLTIP_FORMAT",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "TOOLTIP_IMG",
+   "flags": [],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "SKIPLOG",
+   "flags": [
+    "METHOD_SAFE",
+    "EXTENDED"
+   ],
+   "arg": "INT_EXPRESSION"
+  },
+  {
+   "name": "BINPUT",
+   "flags": [],
+   "arg": "SP_INPUT"
+  },
+  {
+   "name": "BINPUTS",
+   "flags": [],
+   "arg": "SP_INPUTS"
+  },
+  {
+   "name": "ONEBINPUT",
+   "flags": [],
+   "arg": "SP_INPUT"
+  },
+  {
+   "name": "ONEBINPUTS",
+   "flags": [],
+   "arg": "SP_INPUTS"
+  },
+  {
+   "name": "BREAKBUTTON",
+   "flags": [],
+   "arg": "EXPRESSION_NULLABLE"
+  },
+  {
+   "name": "DT_COLUMN_OPTIONS",
+   "flags": [],
+   "arg": "SP_DT_COLUMN_OPTIONS"
+  },
+  {
+   "name": "VARI",
+   "flags": [],
+   "arg": null
+  },
+  {
+   "name": "VARS",
+   "flags": [],
+   "arg": null
+  },
+  {
+   "name": "HTML_PRINT_ISLAND",
+   "flags": [],
+   "arg": "SP_HTML_PRINT"
+  },
+  {
+   "name": "HTML_PRINT_ISLAND_CLEAR",
+   "flags": [],
+   "arg": "VOID"
+  },
+  {
+   "name": "PRINTN",
+   "flags": [],
+   "arg": "STR_NULLABLE"
+  },
+  {
+   "name": "PRINTVN",
+   "flags": [],
+   "arg": "SP_PRINTV"
+  },
+  {
+   "name": "PRINTSN",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  },
+  {
+   "name": "PRINTFORMN",
+   "flags": [],
+   "arg": "FORM_STR_NULLABLE"
+  },
+  {
+   "name": "PRINTFORMSN",
+   "flags": [],
+   "arg": "STR_EXPRESSION"
+  }
+ ],
+ "functions": [
+  {
+   "name": "GETCHARA",
+   "impl": "GetcharaMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETSPCHARA",
+   "impl": "GetspcharaMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CSVNAME",
+   "impl": "CsvStrDataMethod",
+   "ctorArgs": "CharacterStrData.NAME"
+  },
+  {
+   "name": "CSVCALLNAME",
+   "impl": "CsvStrDataMethod",
+   "ctorArgs": "CharacterStrData.CALLNAME"
+  },
+  {
+   "name": "CSVNICKNAME",
+   "impl": "CsvStrDataMethod",
+   "ctorArgs": "CharacterStrData.NICKNAME"
+  },
+  {
+   "name": "CSVMASTERNAME",
+   "impl": "CsvStrDataMethod",
+   "ctorArgs": "CharacterStrData.MASTERNAME"
+  },
+  {
+   "name": "CSVCSTR",
+   "impl": "CsvcstrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CSVBASE",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.BASE"
+  },
+  {
+   "name": "CSVABL",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.ABL"
+  },
+  {
+   "name": "CSVMARK",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.MARK"
+  },
+  {
+   "name": "CSVEXP",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.EXP"
+  },
+  {
+   "name": "CSVRELATION",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.RELATION"
+  },
+  {
+   "name": "CSVTALENT",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.TALENT"
+  },
+  {
+   "name": "CSVCFLAG",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.CFLAG"
+  },
+  {
+   "name": "CSVEQUIP",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.EQUIP"
+  },
+  {
+   "name": "CSVJUEL",
+   "impl": "CsvDataMethod",
+   "ctorArgs": "CharacterIntData.JUEL"
+  },
+  {
+   "name": "FINDCHARA",
+   "impl": "FindcharaMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "FINDLASTCHARA",
+   "impl": "FindcharaMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "EXISTCSV",
+   "impl": "ExistCsvMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "VARSIZE",
+   "impl": "VarsizeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CHKFONT",
+   "impl": "CheckfontMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CHKDATA",
+   "impl": "CheckdataMethod",
+   "ctorArgs": "EraSaveFileType.Normal"
+  },
+  {
+   "name": "ISSKIP",
+   "impl": "IsSkipMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MOUSESKIP",
+   "impl": "MesSkipMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "MESSKIP",
+   "impl": "MesSkipMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "GETCOLOR",
+   "impl": "GetColorMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "GETDEFCOLOR",
+   "impl": "GetColorMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "GETFOCUSCOLOR",
+   "impl": "GetFocusColorMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETBGCOLOR",
+   "impl": "GetBGColorMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "GETDEFBGCOLOR",
+   "impl": "GetBGColorMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "GETSTYLE",
+   "impl": "GetStyleMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETFONT",
+   "impl": "GetFontMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "BARSTR",
+   "impl": "BarStringMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CURRENTALIGN",
+   "impl": "CurrentAlignMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CURRENTREDRAW",
+   "impl": "CurrentRedrawMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "COLOR_FROMNAME",
+   "impl": "ColorFromNameMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "COLOR_FROMRGB",
+   "impl": "ColorFromRGBMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CHKVARDATA",
+   "impl": "CheckdataStrMethod",
+   "ctorArgs": "EraSaveFileType.Var"
+  },
+  {
+   "name": "CHKCHARADATA",
+   "impl": "CheckdataStrMethod",
+   "ctorArgs": "EraSaveFileType.CharVar"
+  },
+  {
+   "name": "CHKGLOBALDATA",
+   "impl": "CheckdataMethod",
+   "ctorArgs": "EraSaveFileType.Global"
+  },
+  {
+   "name": "FIND_VARDATA",
+   "impl": "FindFilesMethod",
+   "ctorArgs": "EraSaveFileType.Var"
+  },
+  {
+   "name": "FIND_CHARADATA",
+   "impl": "FindFilesMethod",
+   "ctorArgs": "EraSaveFileType.CharVar"
+  },
+  {
+   "name": "MONEYSTR",
+   "impl": "MoneyStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "PRINTCPERLINE",
+   "impl": "GetPrintCPerLineMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "PRINTCLENGTH",
+   "impl": "PrintCLengthMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SAVENOS",
+   "impl": "GetSaveNosMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETTIME",
+   "impl": "GettimeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETTIMES",
+   "impl": "GettimesMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETMILLISECOND",
+   "impl": "GetmsMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETSECOND",
+   "impl": "GetSecondMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "RAND",
+   "impl": "RandMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MIN",
+   "impl": "MaxMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "MAX",
+   "impl": "MaxMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "ABS",
+   "impl": "AbsMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "POWER",
+   "impl": "PowerMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SQRT",
+   "impl": "SqrtMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBRT",
+   "impl": "CbrtMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "LOG",
+   "impl": "LogMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "LOG10",
+   "impl": "LogMethod",
+   "ctorArgs": "10.0d"
+  },
+  {
+   "name": "EXPONENT",
+   "impl": "ExpMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SIGN",
+   "impl": "SignMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "LIMIT",
+   "impl": "GetLimitMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SUMARRAY",
+   "impl": "SumArrayMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SUMCARRAY",
+   "impl": "SumArrayMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "MATCH",
+   "impl": "MatchMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CMATCH",
+   "impl": "MatchMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "GROUPMATCH",
+   "impl": "GroupMatchMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "NOSAMES",
+   "impl": "NosamesMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ALLSAMES",
+   "impl": "AllsamesMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MAXARRAY",
+   "impl": "MaxArrayMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MAXCARRAY",
+   "impl": "MaxArrayMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "MINARRAY",
+   "impl": "MaxArrayMethod",
+   "ctorArgs": "false, false"
+  },
+  {
+   "name": "MINCARRAY",
+   "impl": "MaxArrayMethod",
+   "ctorArgs": "true, false"
+  },
+  {
+   "name": "GETBIT",
+   "impl": "GetbitMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETNUM",
+   "impl": "GetnumMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETPALAMLV",
+   "impl": "GetPalamLVMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETEXPLV",
+   "impl": "GetExpLVMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "FINDELEMENT",
+   "impl": "FindElementMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "FINDLASTELEMENT",
+   "impl": "FindElementMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "INRANGE",
+   "impl": "InRangeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "INRANGEARRAY",
+   "impl": "InRangeArrayMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "INRANGECARRAY",
+   "impl": "InRangeArrayMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "GETNUMB",
+   "impl": "GetnumBMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ARRAYMSORT",
+   "impl": "ArrayMultiSortMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "STRLENS",
+   "impl": "StrlenMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "STRLENSU",
+   "impl": "StrlenuMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SUBSTRING",
+   "impl": "SubstringMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SUBSTRINGU",
+   "impl": "SubstringuMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "STRFIND",
+   "impl": "StrfindMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "STRFINDU",
+   "impl": "StrfindMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "STRCOUNT",
+   "impl": "StrCountMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "TOSTR",
+   "impl": "ToStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "TOINT",
+   "impl": "ToIntMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "TOUPPER",
+   "impl": "StrChangeStyleMethod",
+   "ctorArgs": "StrFormType.Upper"
+  },
+  {
+   "name": "TOLOWER",
+   "impl": "StrChangeStyleMethod",
+   "ctorArgs": "StrFormType.Lower"
+  },
+  {
+   "name": "TOHALF",
+   "impl": "StrChangeStyleMethod",
+   "ctorArgs": "StrFormType.Half"
+  },
+  {
+   "name": "TOFULL",
+   "impl": "StrChangeStyleMethod",
+   "ctorArgs": "StrFormType.Full"
+  },
+  {
+   "name": "LINEISEMPTY",
+   "impl": "LineIsEmptyMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "REPLACE",
+   "impl": "ReplaceMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "UNICODE",
+   "impl": "UnicodeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "UNICODEBYTE",
+   "impl": "UnicodeByteMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CONVERT",
+   "impl": "ConvertIntMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ISNUMERIC",
+   "impl": "IsNumericMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ESCAPE",
+   "impl": "EscapeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ENCODETOUNI",
+   "impl": "EncodeToUniMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CHARATU",
+   "impl": "CharAtMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETLINESTR",
+   "impl": "GetLineStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "STRFORM",
+   "impl": "StrFormMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "STRJOIN",
+   "impl": "JoinMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETCONFIG",
+   "impl": "GetConfigMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "GETCONFIGS",
+   "impl": "GetConfigMethod",
+   "ctorArgs": "false"
+  },
+  {
+   "name": "HTML_GETPRINTEDSTR",
+   "impl": "HtmlGetPrintedStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HTML_POPPRINTINGSTR",
+   "impl": "HtmlPopPrintingStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HTML_TOPLAINTEXT",
+   "impl": "HtmlToPlainTextMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HTML_ESCAPE",
+   "impl": "HtmlEscapeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITECREATED",
+   "impl": "SpriteStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEWIDTH",
+   "impl": "SpriteStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEHEIGHT",
+   "impl": "SpriteStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEMOVE",
+   "impl": "SpriteSetPosMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITESETPOS",
+   "impl": "SpriteSetPosMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEPOSX",
+   "impl": "SpriteStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEPOSY",
+   "impl": "SpriteStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CLIENTWIDTH",
+   "impl": "ClientSizeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CLIENTHEIGHT",
+   "impl": "ClientSizeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETKEY",
+   "impl": "GetKeyStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETKEYTRIGGERED",
+   "impl": "GetKeyStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MOUSEX",
+   "impl": "MousePosMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MOUSEY",
+   "impl": "MousePosMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MOUSEB",
+   "impl": "MouseButtonMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ISACTIVE",
+   "impl": "IsActiveMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SAVETEXT",
+   "impl": "SaveTextMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "LOADTEXT",
+   "impl": "LoadTextMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GCREATED",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GWIDTH",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GHEIGHT",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETCOLOR",
+   "impl": "GraphicsGetColorMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEGETCOLOR",
+   "impl": "SpriteGetColorMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GCREATE",
+   "impl": "GraphicsCreateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GCREATEFROMFILE",
+   "impl": "GraphicsCreateFromFileMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDISPOSE",
+   "impl": "GraphicsDisposeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GCLEAR",
+   "impl": "GraphicsClearMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GFILLRECTANGLE",
+   "impl": "GraphicsFillRectangleMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDRAWSPRITE",
+   "impl": "GraphicsDrawSpriteMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GSETCOLOR",
+   "impl": "GraphicsSetColorMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDRAWG",
+   "impl": "GraphicsDrawGMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDRAWGWITHMASK",
+   "impl": "GraphicsDrawGWithMaskMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GSETBRUSH",
+   "impl": "GraphicsSetBrushMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GSETFONT",
+   "impl": "GraphicsSetFontMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GSETPEN",
+   "impl": "GraphicsSetPenMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITECREATE",
+   "impl": "SpriteCreateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEDISPOSE",
+   "impl": "SpriteDisposeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGSETG",
+   "impl": "CBGSetGraphicsMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGSETSPRITE",
+   "impl": "CBGSetCIMGMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGCLEAR",
+   "impl": "CBGClearMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGCLEARBUTTON",
+   "impl": "CBGClearButtonMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGREMOVERANGE",
+   "impl": "CBGRemoveRangeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGREMOVEBMAP",
+   "impl": "CBGRemoveBMapMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGSETBMAPG",
+   "impl": "CBGSetBMapGMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CBGSETBUTTONSPRITE",
+   "impl": "CBGSETButtonSpriteMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GSAVE",
+   "impl": "GraphicsSaveMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GLOAD",
+   "impl": "GraphicsLoadMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEANIMECREATE",
+   "impl": "SpriteAnimeCreateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEANIMEADDFRAME",
+   "impl": "SpriteAnimeAddFrameMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SETANIMETIMER",
+   "impl": "SetAnimeTimerMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "OUTPUTLOG",
+   "impl": "OutputlogMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HTML_STRINGLEN",
+   "impl": "HtmlStringLenMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HTML_SUBSTRING",
+   "impl": "HtmlSubStringMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HTML_STRINGLINES",
+   "impl": "HtmlStringLinesMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "EXISTFILE",
+   "impl": "ExistFileMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "EXISTVAR",
+   "impl": "ExistVarMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ISDEFINED",
+   "impl": "IsDefinedMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ENUMFUNCBEGINSWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Function, EnumNameMethod.EAction.BeginsWith"
+  },
+  {
+   "name": "ENUMFUNCENDSWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Function, EnumNameMethod.EAction.EndsWith"
+  },
+  {
+   "name": "ENUMFUNCWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Function, EnumNameMethod.EAction.With"
+  },
+  {
+   "name": "ENUMVARBEGINSWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Variable, EnumNameMethod.EAction.BeginsWith"
+  },
+  {
+   "name": "ENUMVARENDSWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Variable, EnumNameMethod.EAction.EndsWith"
+  },
+  {
+   "name": "ENUMVARWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Variable, EnumNameMethod.EAction.With"
+  },
+  {
+   "name": "ENUMMACROBEGINSWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Macro, EnumNameMethod.EAction.BeginsWith"
+  },
+  {
+   "name": "ENUMMACROENDSWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Macro, EnumNameMethod.EAction.EndsWith"
+  },
+  {
+   "name": "ENUMMACROWITH",
+   "impl": "EnumNameMethod",
+   "ctorArgs": "EnumNameMethod.EType.Macro, EnumNameMethod.EAction.With"
+  },
+  {
+   "name": "ENUMFILES",
+   "impl": "EnumFilesMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETVAR",
+   "impl": "GetVarMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETVARS",
+   "impl": "GetVarsMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SETVAR",
+   "impl": "SetVarMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "VARSETEX",
+   "impl": "VarSetExMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ARRAYMSORTEX",
+   "impl": "ArrayMultiSortExMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "REGEXPMATCH",
+   "impl": "RegexpMatchMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "XML_DOCUMENT",
+   "impl": "XmlDocumentMethod",
+   "ctorArgs": "XmlDocumentMethod.Operation.Create"
+  },
+  {
+   "name": "XML_RELEASE",
+   "impl": "XmlDocumentMethod",
+   "ctorArgs": "XmlDocumentMethod.Operation.Release"
+  },
+  {
+   "name": "XML_GET",
+   "impl": "XmlGetMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "XML_GET_BYNAME",
+   "impl": "XmlGetMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "XML_SET",
+   "impl": "XmlSetMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "XML_SET_BYNAME",
+   "impl": "XmlSetMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "XML_EXIST",
+   "impl": "XmlDocumentMethod",
+   "ctorArgs": "XmlDocumentMethod.Operation.Check"
+  },
+  {
+   "name": "XML_TOSTR",
+   "impl": "XmlToStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "XML_ADDNODE",
+   "impl": "XmlAddNodeMethod",
+   "ctorArgs": "XmlAddNodeMethod.Operation.Node"
+  },
+  {
+   "name": "XML_ADDNODE_BYNAME",
+   "impl": "XmlAddNodeMethod",
+   "ctorArgs": "XmlAddNodeMethod.Operation.Node, true"
+  },
+  {
+   "name": "XML_REMOVENODE",
+   "impl": "XmlRemoveNodeMethod",
+   "ctorArgs": "XmlRemoveNodeMethod.Operation.Node"
+  },
+  {
+   "name": "XML_REMOVENODE_BYNAME",
+   "impl": "XmlRemoveNodeMethod",
+   "ctorArgs": "XmlRemoveNodeMethod.Operation.Node, true"
+  },
+  {
+   "name": "XML_REPLACE",
+   "impl": "XmlReplaceMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "XML_REPLACE_BYNAME",
+   "impl": "XmlReplaceMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "XML_ADDATTRIBUTE",
+   "impl": "XmlAddNodeMethod",
+   "ctorArgs": "XmlAddNodeMethod.Operation.Attribute"
+  },
+  {
+   "name": "XML_ADDATTRIBUTE_BYNAME",
+   "impl": "XmlAddNodeMethod",
+   "ctorArgs": "XmlAddNodeMethod.Operation.Attribute, true"
+  },
+  {
+   "name": "XML_REMOVEATTRIBUTE",
+   "impl": "XmlRemoveNodeMethod",
+   "ctorArgs": "XmlRemoveNodeMethod.Operation.Attribute"
+  },
+  {
+   "name": "XML_REMOVEATTRIBUTE_BYNAME",
+   "impl": "XmlRemoveNodeMethod",
+   "ctorArgs": "XmlRemoveNodeMethod.Operation.Attribute, true"
+  },
+  {
+   "name": "MAP_CREATE",
+   "impl": "MapManagementMethod",
+   "ctorArgs": "MapManagementMethod.Operation.Create"
+  },
+  {
+   "name": "MAP_EXIST",
+   "impl": "MapManagementMethod",
+   "ctorArgs": "MapManagementMethod.Operation.Check"
+  },
+  {
+   "name": "MAP_RELEASE",
+   "impl": "MapManagementMethod",
+   "ctorArgs": "MapManagementMethod.Operation.Release"
+  },
+  {
+   "name": "MAP_GET",
+   "impl": "MapGetStrMethod",
+   "ctorArgs": "MapGetStrMethod.Operation.Get"
+  },
+  {
+   "name": "MAP_CLEAR",
+   "impl": "MapDataOperationMethod",
+   "ctorArgs": "MapDataOperationMethod.Operation.Clear"
+  },
+  {
+   "name": "MAP_SIZE",
+   "impl": "MapDataOperationMethod",
+   "ctorArgs": "MapDataOperationMethod.Operation.Size"
+  },
+  {
+   "name": "MAP_HAS",
+   "impl": "MapDataOperationMethod",
+   "ctorArgs": "MapDataOperationMethod.Operation.Has"
+  },
+  {
+   "name": "MAP_SET",
+   "impl": "MapDataOperationMethod",
+   "ctorArgs": "MapDataOperationMethod.Operation.Set"
+  },
+  {
+   "name": "MAP_REMOVE",
+   "impl": "MapDataOperationMethod",
+   "ctorArgs": "MapDataOperationMethod.Operation.Remove"
+  },
+  {
+   "name": "MAP_GETKEYS",
+   "impl": "MapGetStrMethod",
+   "ctorArgs": "MapGetStrMethod.Operation.GetKeys"
+  },
+  {
+   "name": "MAP_TOXML",
+   "impl": "MapGetStrMethod",
+   "ctorArgs": "MapGetStrMethod.Operation.ToXml"
+  },
+  {
+   "name": "MAP_FROMXML",
+   "impl": "MapFromXmlMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "DT_CREATE",
+   "impl": "DataTableManagementMethod",
+   "ctorArgs": "DataTableManagementMethod.Operation.Create"
+  },
+  {
+   "name": "DT_EXIST",
+   "impl": "DataTableManagementMethod",
+   "ctorArgs": "DataTableManagementMethod.Operation.Check"
+  },
+  {
+   "name": "DT_RELEASE",
+   "impl": "DataTableManagementMethod",
+   "ctorArgs": "DataTableManagementMethod.Operation.Release"
+  },
+  {
+   "name": "DT_NOCASE",
+   "impl": "DataTableManagementMethod",
+   "ctorArgs": "DataTableManagementMethod.Operation.Case"
+  },
+  {
+   "name": "DT_CLEAR",
+   "impl": "DataTableManagementMethod",
+   "ctorArgs": "DataTableManagementMethod.Operation.Clear"
+  },
+  {
+   "name": "DT_COLUMN_ADD",
+   "impl": "DataTableColumnManagementMethod",
+   "ctorArgs": "DataTableColumnManagementMethod.Operation.Create"
+  },
+  {
+   "name": "DT_COLUMN_NAMES",
+   "impl": "DataTableColumnManagementMethod",
+   "ctorArgs": "DataTableColumnManagementMethod.Operation.Names"
+  },
+  {
+   "name": "DT_COLUMN_EXIST",
+   "impl": "DataTableColumnManagementMethod",
+   "ctorArgs": "DataTableColumnManagementMethod.Operation.Check"
+  },
+  {
+   "name": "DT_COLUMN_REMOVE",
+   "impl": "DataTableColumnManagementMethod",
+   "ctorArgs": "DataTableColumnManagementMethod.Operation.Remove"
+  },
+  {
+   "name": "DT_COLUMN_LENGTH",
+   "impl": "DataTableLengthMethod",
+   "ctorArgs": "DataTableLengthMethod.Operation.Column"
+  },
+  {
+   "name": "DT_ROW_ADD",
+   "impl": "DataTableRowSetMethod",
+   "ctorArgs": "DataTableRowSetMethod.Operation.Add"
+  },
+  {
+   "name": "DT_ROW_SET",
+   "impl": "DataTableRowSetMethod",
+   "ctorArgs": "DataTableRowSetMethod.Operation.Set"
+  },
+  {
+   "name": "DT_ROW_REMOVE",
+   "impl": "DataTableRowRemoveMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "DT_ROW_LENGTH",
+   "impl": "DataTableLengthMethod",
+   "ctorArgs": "DataTableLengthMethod.Operation.Row"
+  },
+  {
+   "name": "DT_CELL_GET",
+   "impl": "DataTableCellGetMethod",
+   "ctorArgs": "DataTableCellGetMethod.Operation.Get"
+  },
+  {
+   "name": "DT_CELL_ISNULL",
+   "impl": "DataTableCellGetMethod",
+   "ctorArgs": "DataTableCellGetMethod.Operation.IsNull"
+  },
+  {
+   "name": "DT_CELL_GETS",
+   "impl": "DataTableCellGetMethod",
+   "ctorArgs": "DataTableCellGetMethod.Operation.Gets"
+  },
+  {
+   "name": "DT_CELL_SET",
+   "impl": "DataTableCellSetMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "DT_SELECT",
+   "impl": "DataTableSelectMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "DT_TOXML",
+   "impl": "DataTableToXmlMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "DT_FROMXML",
+   "impl": "DataTableFromXmlMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "MOVETEXTBOX",
+   "impl": "MoveTextBoxMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "RESUMETEXTBOX",
+   "impl": "MoveTextBoxMethod",
+   "ctorArgs": "true"
+  },
+  {
+   "name": "EXISTSOUND",
+   "impl": "ExistSoundMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "EXISTFUNCTION",
+   "impl": "ExistFunctionMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GROTATE",
+   "impl": "GraphicsRotateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDRAWGWITHROTATE",
+   "impl": "GraphicsDrawGWithRotateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDRAWTEXT",
+   "impl": "GraphicsDrawStringMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETFONT",
+   "impl": "GraphicsStateStrMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETFONTSIZE",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETFONTSTYLE",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETTEXTSIZE",
+   "impl": "GraphicsGetTextSizeMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETBRUSH",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETPEN",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GGETPENWIDTH",
+   "impl": "GraphicsStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETMEMORYUSAGE",
+   "impl": "GetUsingMemoryMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "CLEARMEMORY",
+   "impl": "ClearMemoryMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETTEXTBOX",
+   "impl": "GetTextBoxMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SETTEXTBOX",
+   "impl": "ChangeTextBoxMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "ERDNAME",
+   "impl": "ErdNameMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "SPRITEDISPOSEALL",
+   "impl": "SpriteDisposeAllMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDRAWLINE",
+   "impl": "GraphicsDrawLineMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETDISPLAYLINE",
+   "impl": "GetDisplayLineMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GDASHSTYLE",
+   "impl": "GraphicsSetDashStyleMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETDOINGFUNCTION",
+   "impl": "GetDoingFunctionMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "FLOWINPUT",
+   "impl": "FlowInputMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "FLOWINPUTS",
+   "impl": "FlowInputsMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETMETH",
+   "impl": "GetMethMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "GETMETHS",
+   "impl": "GetMethsMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "EXISTMETH",
+   "impl": "ExistMethMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "BITMAP_CACHE_ENABLE",
+   "impl": "BitmapCacheEnableMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HOTKEY_STATE",
+   "impl": "HotkeyStateMethod",
+   "ctorArgs": null
+  },
+  {
+   "name": "HOTKEY_STATE_INIT",
+   "impl": "HotkeyStateInitMethod",
+   "ctorArgs": null
+  }
+ ],
+ "variables": [
+  {
+   "name": "DAY",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "MONEY",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "ITEM",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "FLAG",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TFLAG",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "UP",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "PALAMLV",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "EXPLV",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "EJAC",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DOWN",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "RESULT",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "COUNT",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TARGET",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "ASSI",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "MASTER",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NOITEM",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "LOSEBASE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "SELECTCOM",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "ASSIPLAY",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "PREVCOM",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NOTUSE_14",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NOTUSE_15",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TIME",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "ITEMSALES",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "PLAYER",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NEXTCOM",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "PBAND",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "BOUGHT",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NOTUSE_1C",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "NOTUSE_1D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "A",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "B",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "C",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "E",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "F",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "G",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "H",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "I",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "J",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "K",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "L",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "M",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "N",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "O",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "P",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "Q",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "R",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "S",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "T",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "U",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "V",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "W",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "X",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "Y",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "Z",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NOTUSE_38",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "NOTUSE_39",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "NOTUSE_3A",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "NOTUSE_3B",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "ITEMPRICE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "LOCAL",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "EXTENDED",
+    "LOCAL",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "ARG",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "EXTENDED",
+    "LOCAL",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "GLOBAL",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "EXTENDED",
+    "GLOBAL",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "RANDDATA",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "EXTENDED",
+    "SAVE_EXTENDED"
+   ]
+  },
+  {
+   "name": "SAVESTR",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "STR",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "RESULTS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D"
+   ]
+  },
+  {
+   "name": "LOCALS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "EXTENDED",
+    "LOCAL",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "ARGS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "EXTENDED",
+    "LOCAL",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "GLOBALS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "EXTENDED",
+    "GLOBAL",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TSTR",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "SAVEDATA_TEXT",
+   "flags": [
+    "STRING",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "ISASSI",
+   "flags": [
+    "INTEGER",
+    "CHARACTER_DATA"
+   ]
+  },
+  {
+   "name": "NO",
+   "flags": [
+    "INTEGER",
+    "CHARACTER_DATA"
+   ]
+  },
+  {
+   "name": "BASE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "MAXBASE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "ABL",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TALENT",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "EXP",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "MARK",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "PALAM",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "SOURCE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "EX",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CFLAG",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "JUEL",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "RELATION",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "EQUIP",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TEQUIP",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "STAIN",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA"
+   ]
+  },
+  {
+   "name": "GOTJUEL",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NOWEX",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DOWNBASE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CUP",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CDOWN",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TCVAR",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "NAME",
+   "flags": [
+    "STRING",
+    "CHARACTER_DATA"
+   ]
+  },
+  {
+   "name": "CALLNAME",
+   "flags": [
+    "STRING",
+    "CHARACTER_DATA"
+   ]
+  },
+  {
+   "name": "NICKNAME",
+   "flags": [
+    "STRING",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED"
+   ]
+  },
+  {
+   "name": "MASTERNAME",
+   "flags": [
+    "STRING",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED"
+   ]
+  },
+  {
+   "name": "CSTR",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CDFLAG",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "CHARACTER_DATA",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DITEMTYPE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DA",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DB",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DC",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DD",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DE",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TA",
+   "flags": [
+    "INTEGER",
+    "ARRAY_3D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TB",
+   "flags": [
+    "INTEGER",
+    "ARRAY_3D",
+    "EXTENDED",
+    "SAVE_EXTENDED",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "RAND",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CALC"
+   ]
+  },
+  {
+   "name": "CHARANUM",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC"
+   ]
+  },
+  {
+   "name": "ABLNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "EXPNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TALENTNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "PALAMNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TRAINNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "MARKNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "ITEMNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "BASENAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "SOURCENAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "EXNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "EQUIPNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TEQUIPNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "FLAGNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TFLAGNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CFLAGNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TCVARNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CSTRNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "STAINNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CDFLAGNAME1",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "CDFLAGNAME2",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "STRNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TSTRNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "SAVESTRNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "GLOBALNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "GLOBALSNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "DAYNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "TIMENAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "MONEYNAME",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "UNCHANGEABLE",
+    "EXTENDED",
+    "CONSTANT",
+    "CAN_FORBID"
+   ]
+  },
+  {
+   "name": "GAMEBASE_AUTHER",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_AUTHOR",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_INFO",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_YEAR",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_TITLE",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_URL",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_VERSIONNAME",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "WINDOW_TITLE",
+   "flags": [
+    "STRING",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "__FILE__",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "__FUNCTION__",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "MONEYLABEL",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "DRAWLINESTR",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "EMUERA_VERSION",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "LASTLOAD_TEXT",
+   "flags": [
+    "STRING",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_GAMECODE",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_VERSION",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_ALLOWVERSION",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_DEFAULTCHARA",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "GAMEBASE_NOITEM",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "LASTLOAD_VERSION",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "LASTLOAD_NO",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "__LINE__",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "LINECOUNT",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "ISTIMEOUT",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "__INT_MAX__",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "__INT_MIN__",
+   "flags": [
+    "INTEGER",
+    "UNCHANGEABLE",
+    "CALC",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "CVAR",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "CVARS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "CHARACTER_DATA",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "CVAR2D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "CHARACTER_DATA",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "CVARS2D",
+   "flags": [
+    "STRING",
+    "ARRAY_2D",
+    "CHARACTER_DATA",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "REF",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "REFS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "REF2D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "REFS2D",
+   "flags": [
+    "STRING",
+    "ARRAY_2D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "REF3D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_3D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "REFS3D",
+   "flags": [
+    "STRING",
+    "ARRAY_3D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "VAR",
+   "flags": [
+    "INTEGER",
+    "ARRAY_1D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "VARS",
+   "flags": [
+    "STRING",
+    "ARRAY_1D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "VAR2D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_2D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "VARS2D",
+   "flags": [
+    "STRING",
+    "ARRAY_2D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "VAR3D",
+   "flags": [
+    "INTEGER",
+    "ARRAY_3D",
+    "EXTENDED"
+   ]
+  },
+  {
+   "name": "VARS3D",
+   "flags": [
+    "STRING",
+    "ARRAY_3D",
+    "EXTENDED"
+   ]
+  }
+ ]
+}

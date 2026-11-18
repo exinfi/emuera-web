@@ -1,0 +1,360 @@
+/** Game zip reader (host-web tier). Takes a File/Blob (not a path); no DOM access. */
+import JSZip from 'jszip';
+import { decodeText } from '../../engine/textdecode';
+
+export interface GameFiles {
+  erb: Record<string, string>;
+  csv: Record<string, string>;
+  rescsv: Record<string, string>;
+  texts: Record<string, string>;
+  images: Record<string, ArrayBuffer>;
+  /** lower-cased path under sound/ -> blob */
+  sounds: Map<string, Blob>;
+  /** .ttf and .otf files under font/ (Emuera EM+EE loads these into its private font collection) */
+  fonts: { path: string; data: ArrayBuffer }[];
+  /** paths of files in the zip that were not loaded (outside the folders and types the loader takes, dev folders left out); the engine names them when a game asks for one */
+  unloaded?: string[];
+  /** the base game's own erb and csv, before any pack was merged: card identity is computed from these (the same objects as erb/csv when no pack is loaded) */
+  base: { erb: Record<string, string | number>; csv: Record<string, string> };
+  /** low memory loader only (`GameLoader` option `erbBytes`): ERB/ERH as raw file bytes instead of decoded strings (`erb` is then empty); the worker decodes them one file at a time */
+  erbBytes?: Record<string, ArrayBuffer>;
+}
+
+export const SND_EXT = /\.(wav|ogg|oga|mp3|flac|m4a|aac|opus|wma|mid)$/i;
+export const IMG_EXT = /\.(webp|png|jpe?g|gif|bmp)$/i;
+
+export { decodeText };
+
+/**
+ * Zip entry names: UTF-8 when the flag is set (JSZip does that itself); a name without the flag is read as UTF-8 if the bytes are valid UTF-8,
+ * else as Shift_JIS (zips made on Japanese Windows with older tools). Used for the game zip and for packs.
+ */
+export const decodeZipName = (b: Uint8Array): string => {
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(b);
+  } catch {
+    return new TextDecoder('shift_jis').decode(b);
+  }
+};
+/** every path is kept in composed form (NFC): a zip made on macOS stores Japanese names decomposed, and the game builds its folder names composed */
+export const nfc = (s: string): string => s.normalize('NFC');
+
+/** a single wrapper folder around erb/csv/resources is stripped (kept for callers that handle one path at a time; readGameZip uses detectRoot) */
+export const stripWrapper = (name: string): string =>
+  name.replace(/^[^/]+\/(?=(erb|csv|resources|dat|sound|font)\/)/i, '');
+
+// ------------------------------------------------------------------ root detection
+const GAME_MARKERS = ['erb', 'csv'];
+export const PACK_MARKERS = ['erb', 'csv', 'resources', 'sound', 'font', 'dat'];
+/** shown when a pack has none of the folders above: a pack has to be laid out like the game folder */
+export const PACK_STRUCTURE_HELP =
+  'A pack is laid out like the game folder: put the files in folders named erb/, csv/, resources/ (images), sound/, font/ or dat/, and zip it again.';
+export interface RootResult {
+  root: string | null;
+  note: string;
+  folders: string[];
+}
+/**
+ * Find the folder that holds the game: the shortest prefix with one of the marker folders directly under it (case-insensitive).
+ * Equal depth: the prefix with the most .erb files under it; still equal: the first by name. `root` is '' for a zip whose top level is the game.
+ * Names with backslashes are treated as slashes. Directory entries are ignored.
+ */
+export function detectRoot(names: string[], markers: string[] = GAME_MARKERS): RootResult {
+  const found = new Map<string, { depth: number; erb: number }>();
+  const tops = new Set<string>();
+  for (const raw of names) {
+    const parts = raw
+      .replace(/\\/g, '/')
+      .split('/')
+      .filter((s) => s !== '');
+    if (parts.length < 2) continue;
+    if (tops.size < 6) tops.add(parts[0]);
+    for (let i = 0; i < parts.length - 1; i++) {
+      if (!markers.includes(parts[i].toLowerCase())) continue;
+      const prefix = parts.slice(0, i).join('/');
+      const e = found.get(prefix) ?? { depth: i, erb: 0 };
+      if (parts[i].toLowerCase() === 'erb' && /\.erb$/i.test(parts[parts.length - 1])) e.erb++;
+      found.set(prefix, e);
+      break;
+    }
+  }
+  const folders = [...tops];
+  if (!found.size) return { root: null, note: '', folders };
+  const all = [...found.entries()].sort(
+    (a, b) => a[1].depth - b[1].depth || b[1].erb - a[1].erb || (a[0] < b[0] ? -1 : 1),
+  );
+  const best = all[0],
+    tie = all.filter((x) => x[1].depth === best[1].depth);
+  const note =
+    tie.length > 1
+      ? `Several game folders found at the same depth (${tie.map((x) => x[0] || '(top)').join(', ')}); using "${best[0] || '(top)'}" (most ERB files).`
+      : '';
+  return { root: best[0], note, folders };
+}
+/** path relative to the root, or null when the path is outside it */
+export function relativeTo(root: string, name: string): string | null {
+  const n = name.replace(/\\/g, '/');
+  if (!root) return n;
+  return n.startsWith(root + '/') ? n.slice(root.length + 1) : null;
+}
+
+// ------------------------------------------------------------------ classification (also used by the pack list)
+export type FileKind = 'code' | 'data' | 'image' | 'audio' | 'font' | 'text' | 'ignored';
+/** what the loader does with a path relative to the game root */
+export function classify(rel: string): FileKind {
+  if (/^erb\//i.test(rel) && /\.(erb|erh)$/i.test(rel)) return 'code';
+  if ((/^csv\//i.test(rel) && /\.(csv|erd|config)$/i.test(rel)) || /\.erd$/i.test(rel)) return 'data';
+  if (/^resources\//i.test(rel) && /\.csv$/i.test(rel)) return 'data';
+  if (/^emuera\.config$/i.test(rel)) return 'data'; // the user config next to the exe: read between _default.config and _fixed.config (ConfigData.LoadConfig)
+  if (/^setting\.json$/i.test(rel)) return 'data'; // Emuera.NET game config (selects the engine profile)
+  if (/^font\//i.test(rel) && /\.(ttf|otf)$/i.test(rel)) return 'font';
+  if (/^sound\//i.test(rel) && SND_EXT.test(rel)) return 'audio';
+  if (/^resources\//i.test(rel) && IMG_EXT.test(rel)) return 'image';
+  if (/^(dat|erb|csv|resources)\//i.test(rel) && /\.txt$/i.test(rel)) return 'text';
+  // LOADTEXT reads any file whose extension the game's config lists (LOADTEXTとSAVETEXTで使える拡張子); the config is not known here, so the usual
+  // data extensions under dat/ are kept. AnonTW loads its dat/schema.xml + dat/bbas_dataset.xml through LOADTEXT + DT_FROMXML.
+  if (/^dat\//i.test(rel) && /\.(xml|json|ini|tsv|csv|html?)$/i.test(rel)) return 'text';
+  return 'ignored';
+}
+
+/** one zip in the load order: the game itself first, then packs top to bottom */
+export type Bytes = Blob | Uint8Array;
+const sizeOf = (b: Bytes) => ('size' in b ? b.size : b.byteLength);
+export interface Source {
+  name: string;
+  blob: Bytes;
+  markers?: string[];
+}
+
+export class NoGameError extends Error {}
+
+const CAP = 200;
+/** extra files a game can read at run time: text-like (LOADTEXT) or images; executables, archives, documents are never taken */
+const EXTRA_EXT = /\.(txt|xml|json|ini|tsv|csv|html?|webp|png|jpe?g|gif|bmp)$/i;
+/** top-level folders that are developer material, not game data, even when a literal happens to mention them */
+const EXTRA_DENY = /^(\.|#|docs?$|backups?$|bak$|old$|src$|source$|tools?$|patch(es)?$)/i;
+/** budget for those extra files (bytes read) */
+const EXTRA_CAP = 20 * 1024 * 1024;
+/** most skipped names kept for the note */
+const SKIPPED_CAP = 20000;
+/** a string literal that starts with a folder name: `"Folder/file.ext"`, `@"Folder/%X%.webp"` or `"Folder/"` */
+const REF_RE = /["']([^"'\\/%{}\s,;:()<>]{1,40})[\\/](?:["']|[^"'\n]{0,120}?\.[A-Za-z0-9]{2,5}["'])/g;
+/**
+ * Builds one file set from the game zip and then packs. Sources apply in the order they are added and a later source overwrites an
+ * earlier one on any path clash (paths compare case-insensitively). `log` receives the source list and every clash (first CAP).
+ * The first source added is the game: its erb/csv are snapshotted as `files.base` (card identity), so packs can be chosen per game after the game is read.
+ */
+export class GameLoader {
+  readonly files: GameFiles = {
+    erb: {},
+    csv: {},
+    rescsv: {},
+    texts: {},
+    images: {},
+    sounds: new Map(),
+    fonts: [],
+    base: { erb: {}, csv: {} },
+  };
+  private owner = new Map<string, string>(); // lower-cased "<table>:<path>" -> source that supplied the winning copy
+  private clashes = 0;
+  private n = 0;
+  /** low memory loader: keep ERB/ERH as bytes (see GameFiles.erbBytes); each file is decoded once here only to learn its string length, which card identity needs */
+  private readonly bytesMode: boolean;
+  private erbLen: Record<string, number> = {};
+  /** files `classify` ignored but whose extension a game can read at run time (text-like or image), by lower-cased path; the entry is kept, not read */
+  private pending = new Map<string, { rel: string; f: JSZip.JSZipObject; src: string }>();
+  /** lower-cased first folder names that string literals in the game's code point into (`"dat/x.xml"`, `@"Folder/%N%.webp"`, `"Folder/"`) */
+  private refs = new Set<string>();
+  private extraBytes = 0;
+  /** every skipped file outside developer folders, by lower-cased path (capped), for the engine's "asked for a file that was not loaded" note */
+  private skipped = new Map<string, string>();
+  /** option `xrefs` (default off): scan the game's code for folder names and load the files in them that the fixed folders do not cover; when off those files are only listed so a miss can be explained */
+  private readonly scanReferences: boolean;
+  constructor(
+    private log?: (line: string) => void,
+    opts: { erbBytes?: boolean; scanReferences?: boolean } = {},
+  ) {
+    this.bytesMode = !!opts.erbBytes;
+    this.scanReferences = !!opts.scanReferences;
+    if (this.bytesMode) this.files.erbBytes = {};
+  }
+
+  async add(src: Source, onProgress?: (done: number, total: number) => void): Promise<void> {
+    const out = this.files,
+      si = this.n++;
+    const z = await JSZip.loadAsync(src.blob, { decodeFileName: decodeZipName });
+    const entries = Object.entries(z.files).filter(([, f]) => !f.dir);
+    const r = detectRoot(
+      entries.map(([n]) => n),
+      src.markers ?? (si === 0 ? GAME_MARKERS : PACK_MARKERS),
+    );
+    if (r.root === null) {
+      const seen = r.folders.length ? ` Top-level folders found: ${r.folders.join(', ')}.` : '';
+      throw new NoGameError(
+        si === 0
+          ? `No game found in "${src.name}": expected an ERB/ or CSV/ folder at the top level or inside a folder.${seen}`
+          : `Pack "${src.name}" has none of erb/, csv/, resources/, sound/, font/ or dat/ at the top level or inside a folder.${seen} ${PACK_STRUCTURE_HELP}`,
+      );
+    }
+    if (r.note) this.log?.(`${src.name}: ${r.note}`);
+    this.log?.(
+      `source ${si}: ${src.name} (${(sizeOf(src.blob) / 1048576).toFixed(1)} MB, ${entries.length} files, root "${r.root || '/'}")`,
+    );
+    let i = 0;
+    for (const [name, f] of entries) {
+      if (++i % 400 === 0) {
+        onProgress?.(i, entries.length);
+        await new Promise((res) => setTimeout(res));
+      }
+      const rr = relativeTo(r.root, name);
+      if (rr === null) continue;
+      const rel = nfc(rr);
+      const kind = classify(rel);
+      if (kind === 'ignored') {
+        const top = rel.indexOf('/') > 0 ? rel.slice(0, rel.indexOf('/')).toLowerCase() : '';
+        if (!EXTRA_DENY.test(top) && this.skipped.size < SKIPPED_CAP)
+          this.skipped.set(rel.toLowerCase().replace(/\\/g, '/'), rel);
+        if (top && EXTRA_EXT.test(rel) && !EXTRA_DENY.test(top))
+          this.pending.set(rel.toLowerCase(), { rel, f, src: src.name });
+        continue;
+      }
+      const lc = rel.toLowerCase();
+      const table =
+        kind === 'audio'
+          ? 'a'
+          : kind === 'font'
+            ? 'f'
+            : kind === 'image'
+              ? 'i'
+              : kind === 'text'
+                ? 't'
+                : kind === 'code'
+                  ? 'e'
+                  : /^resources\//i.test(rel)
+                    ? 'r'
+                    : 'c';
+      const k = table + ':' + lc;
+      const prev = this.owner.get(k);
+      if (prev !== undefined) {
+        this.clashes++;
+        if (this.clashes <= CAP) this.log?.(`${rel}: overridden ${prev} -> ${src.name}`);
+        dropEarlier(out, table, lc); // the earlier copy may differ only in case
+        if (table === 'e') for (const p of Object.keys(this.erbLen)) if (p.toLowerCase() === lc) delete this.erbLen[p];
+      }
+      this.owner.set(k, src.name);
+      if (table === 'e' && this.bytesMode) {
+        const ab = await f.async('arraybuffer');
+        const t = decodeText(new Uint8Array(ab));
+        this.erbLen[rel] = t.length;
+        this.scanRefs(t);
+        out.erbBytes![rel] = ab;
+      } else if (table === 'e') {
+        const t = decodeText(await f.async('uint8array'));
+        this.scanRefs(t);
+        out.erb[rel] = t;
+      } else if (table === 'r') out.rescsv[rel] = decodeText(await f.async('uint8array'));
+      else if (table === 'c') out.csv[rel] = decodeText(await f.async('uint8array'));
+      else if (table === 'f') out.fonts.push({ path: rel, data: await f.async('arraybuffer') });
+      else if (table === 'a')
+        out.sounds.set(rel.slice(6).replace(/\\/g, '/').toLowerCase(), new Blob([await f.async('arraybuffer')]));
+      else if (table === 'i') out.images[rel] = await f.async('arraybuffer');
+      else out.texts[rel.replace(/\\/g, '/')] = decodeText(await f.async('uint8array'));
+    }
+    await this.loadReferenced();
+    if (si === 0) out.base = { erb: this.bytesMode ? { ...this.erbLen } : { ...out.erb }, csv: { ...out.csv } };
+  }
+  /** note the folders string literals in this code name; only folders that also exist in a zip matter, which removes the noise of dialogue that merely contains a slash */
+  private scanRefs(code: string): void {
+    if (!this.scanReferences) return;
+    for (const m of code.matchAll(REF_RE)) this.refs.add(nfc(m[1]).toLowerCase());
+  }
+  /**
+   * Files outside the fixed folders that the game's own code points at (a LOADTEXT / image path literal naming that top-level folder) are
+   * loaded too: text-like files into `texts`, images into `images`. Reads stop at EXTRA_CAP bytes, and the log says what was taken and
+   * what was left. Folders never named by the code (docs/, patch archives, tools) stay unread. Paths a game builds entirely at run time
+   * cannot be seen here; those are the misses to handle per game.
+   */
+  private async loadReferenced(): Promise<void> {
+    if (!this.scanReferences || !this.pending.size) return;
+    const out = this.files,
+      taken = new Map<string, number>();
+    let skippedCap = 0,
+      left = 0;
+    for (const [lc, e] of [...this.pending]) {
+      const top = nfc(e.rel.slice(0, e.rel.indexOf('/'))).toLowerCase();
+      if (!this.refs.has(top)) {
+        left++;
+        continue;
+      }
+      const size = (e.f as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize ?? 0;
+      if (this.extraBytes + size > EXTRA_CAP) {
+        skippedCap++;
+        continue;
+      }
+      const isImg = IMG_EXT.test(e.rel);
+      const rel = nfc(e.rel),
+        table = isImg ? 'i' : 't',
+        k = table + ':' + lc;
+      const prev = this.owner.get(k);
+      if (prev !== undefined) dropEarlier(out, table, lc);
+      this.owner.set(k, e.src);
+      if (isImg) {
+        const ab = await e.f.async('arraybuffer');
+        this.extraBytes += ab.byteLength;
+        out.images[rel] = ab;
+      } else {
+        const u = await e.f.async('uint8array');
+        this.extraBytes += u.byteLength;
+        out.texts[rel.replace(/\\/g, '/')] = decodeText(u);
+      }
+      this.pending.delete(lc);
+      this.skipped.delete(lc.replace(/\\/g, '/'));
+      taken.set(top, (taken.get(top) ?? 0) + 1);
+    }
+    if (taken.size)
+      this.log?.(
+        `referenced files outside the usual folders: ${[...taken].map(([f, n]) => `${f}/ (${n})`).join(', ')}, ${(this.extraBytes / 1024).toFixed(0)} KB${skippedCap ? `; ${skippedCap} more skipped at the ${EXTRA_CAP >> 20} MB limit` : ''}`,
+      );
+    else if (skippedCap) this.log?.(`${skippedCap} referenced file(s) skipped at the ${EXTRA_CAP >> 20} MB limit`);
+    if (left) this.log?.(`${left} readable file(s) in folders the game's code never names were not loaded`);
+  }
+  /** closes the log with the override total; call once after the last source */
+  finish(): GameFiles {
+    if (this.clashes > CAP)
+      this.log?.(`... ${this.clashes - CAP} more overrides not listed (${this.clashes} in total)`);
+    else if (this.clashes) this.log?.(`${this.clashes} override(s) in total`);
+    else if (this.n > 1) this.log?.('no path was provided by more than one source');
+    this.files.unloaded = [...this.skipped.keys()];
+    return this.files;
+  }
+}
+
+/** game zip plus optional packs in one call */
+export async function readGameZip(
+  file: Bytes,
+  onProgress?: (done: number, total: number) => void,
+  packs: Source[] = [],
+  log?: (line: string) => void,
+  gameName = 'game',
+): Promise<GameFiles> {
+  const l = new GameLoader(log);
+  await l.add({ name: gameName, blob: file }, onProgress);
+  for (const p of packs) await l.add(p, onProgress);
+  return l.finish();
+}
+
+/** a path supplied again by a later source: delete the earlier entry from whichever table holds it */
+function dropEarlier(out: GameFiles, table: string, lc: string) {
+  const kill = (t: Record<string, unknown>) => {
+    for (const p of Object.keys(t)) if (p.toLowerCase() === lc) delete t[p];
+  };
+  if (table === 'e') {
+    kill(out.erb);
+    if (out.erbBytes) kill(out.erbBytes);
+  } else if (table === 'c') kill(out.csv);
+  else if (table === 'r') kill(out.rescsv);
+  else if (table === 't') kill(out.texts);
+  else if (table === 'i') kill(out.images);
+  else if (table === 'a') out.sounds.delete(lc.slice(6).replace(/\\/g, '/'));
+  else if (table === 'f') out.fonts = out.fonts.filter((f) => f.path.toLowerCase() !== lc);
+}

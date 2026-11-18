@@ -1,0 +1,102 @@
+<div id="dropov" hidden><div>Drop files to open<br><small>a game zip, a memory card, saves (.sav), pack zips, fonts</small></div></div>
+<div id="app">
+<header id="top">
+  <button id="mode" class="tb" data-mode="left" title="Tap mode: left click / right click / hover (long press does the other click)"><b>L</b></button>
+  <div id="quick" aria-label="Quick inputs"></div>
+  <div id="tools">
+    <button id="bdbg" class="tb" title="Debug and input log"><span>dbg</span></button>
+    <button id="hzout" class="tb desk" title="Zoom out"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 12h14" stroke="currentColor" stroke-width="2.4"/></svg></button>
+    <button id="hzin" class="tb desk" title="Zoom in"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="2.4"/></svg></button>
+    <button id="hzfit" class="tb desk" title="Fit the window width; again: actual size (100%)"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 5v14M21 5v14M7 12h10M7 12l3-3M7 12l3 3M17 12l-3-3M17 12l-3 3" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+    <button id="bdpad" class="tb" title="Show or hide the direction pad" hidden><svg viewBox="0 0 24 24" width="22" height="22"><path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></button>
+    <button id="btl" class="tb" title="Translation panel" hidden><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12.87 15.07l-2.54-2.51.03-.03A17.52 17.52 0 0014.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/></svg></button>
+    <button id="bfs" class="tb" title="Fullscreen"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
+    <button id="bpanel" class="tb on" title="Control panel"><svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2"/></svg></button>
+    <button id="binp" class="tb" title="Input window"><svg viewBox="0 0 24 24" width="22" height="22"><rect x="2.5" y="6.5" width="19" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M6 11h1M10 11h1M14 11h1M18 11h0M7 14.5h10" stroke="currentColor" stroke-width="2"/></svg></button>
+    <button id="bhide" class="tb" title="Hide the top bar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4"><path class="up" d="M6 15l6-6 6 6"/><path class="dn" d="M6 9l6 6 6-6"/></svg></button>
+  </div>
+</header>
+<div id="mainrow">
+<main id="main">
+  <div id="vp"><div id="pan"><div id="stage"></div></div></div>
+  <div id="dpad" hidden aria-label="Direction pad"><div id="dpadgrip" hidden title="Drag to resize">&#8689;</div><span id="dpadx" title="Remove the direction cross">&#10005;</span><button type="button" data-k="8" data-d="up" aria-label="Up (8)">&#9650;</button><button type="button" data-k="4" data-d="left" aria-label="Left (4)">&#9664;</button><button type="button" data-k="5" data-d="mid" aria-label="Examine (5)">&#9679;</button><button type="button" data-k="6" data-d="right" aria-label="Right (6)">&#9654;</button><button type="button" data-k="2" data-d="down" aria-label="Down (2)">&#9660;</button></div>
+  <div id="padscrim" hidden></div>
+  <div id="dpadbar" hidden role="dialog" aria-label="Customize buttons">
+    <div class="small">Drag a button to move it. Hold a button to set its text/key.</div>
+    <div class="row"><button type="button" id="padadd">Add button</button><button type="button" id="dpadreset" title="Put the direction cross back to its default place, size and keys">Reset cross</button><button type="button" id="dpaddone">Done</button></div>
+  </div>
+  <div id="padedit" hidden role="dialog" aria-label="Button text">
+    <label>Text/key this button sends<br><input id="padeditv" type="text" maxlength="40" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    <div class="small">Empty = Enter.</div>
+    <div class="row"><button type="button" id="padeditok">OK</button><button type="button" id="padeditdel">Delete</button><button type="button" id="padeditcancel">Cancel</button></div>
+  </div>
+  <div id="xpad" hidden aria-label="Custom buttons"></div>
+  <i id="busy" hidden title="the game is processing"></i>
+  <section id="panel" class="sheet">
+    <h3>Game</h3>
+    <div class="row"><button type="button" class="pick" data-for="file">Load game zip…</button><input class="fpick" tabindex="-1" type="file" id="file" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream"><button id="bundled" hidden>Load bundled game</button><button id="reload" type="button" disabled title="Start the loaded game again from the beginning (tap twice)">Reload Game</button></div>
+    <div id="status">Pick a game zip.</div>
+    <h3>Options</h3>
+    <div class="small">Launcher options. Default settings will work for most games. If your game has a non-standard file directory you may need to enable extra file check.</div>
+    <div class="opts">%%OPTIONS%%</div>
+    <div class="row"><button id="optreset" type="button" hidden>Reset to default</button></div>
+    <h3>Memory card</h3>
+    <div class="small">emuera-web uses its own save format. Please export your saves to prevent losing progress. Please note that native emuera save import/export is currently experimental.</div>
+    <div class="row"><select id="cardsel" disabled></select></div>
+    <div class="row"><button id="cnew" disabled>New</button><button id="cren" disabled>Rename</button><button id="cdel" disabled class="danger">Delete</button></div>
+    <div class="small subh">Backup</div>
+    <div class="row"><button type="button" class="pick" data-for="cimp">Import saves…</button><input class="fpick" tabindex="-1" type="file" id="cimp" multiple accept=".zip,.sav,application/zip,application/x-zip-compressed,application/octet-stream"><button id="cexp" disabled>Export saves</button></div>
+    <div class="small subh">Emuera native file conversion (experimental)</div>
+    <div class="row"><button type="button" class="pick" data-for="cnatimp" title="Experimental: a zip of native Emuera .sav files (or a single .sav) is converted into the current card; needs a game open">Import sav folder zip…</button><input class="fpick" tabindex="-1" type="file" id="cnatimp" multiple accept=".zip,.sav,application/zip,application/x-zip-compressed,application/octet-stream"><button id="cnat" disabled title="Experimental: converts this card's saves to Emuera .sav files and downloads the sav folder as a zip">Export sav folder zip</button></div>
+    <div class="row" id="cextra" hidden><button id="cbundled" hidden disabled>Load bundled cards</button><button id="cdir" hidden disabled>Mount folder…</button></div>
+    <div id="cardwarn"></div>
+    <h3>Resource packs</h3>
+    <div class="row"><button type="button" class="pick" data-for="padd">Add pack zip…</button><input class="fpick" tabindex="-1" type="file" id="padd" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream" multiple><button id="pbundled" hidden>Load bundled packs</button><button id="papply" disabled title="Reload the open game so the pack list takes effect">Apply: reload game</button></div>
+    <div class="small">Later packs override earlier ones. Applies on the next game load.</div>
+    <div id="packlist" class="small"></div>
+    <h3>Widgets</h3>
+    <div class="opts"><label><input type="checkbox" id="wdpad"> enable direction pad</label></div>
+    <div class="row"><button id="dpadedit" type="button">Customize direction pad…</button></div>
+    <div class="opts"><label><input type="checkbox" id="wrec" checked> recordable input button (the + in the quick bar)</label></div>
+    <div class="row"><button id="userfree" type="button" disabled>No Set Value</button></div>
+    <div id="wnote" class="small"></div>
+    <h3>Font</h3>
+    <div class="row"><select id="fontsel"></select><button type="button" class="pick" data-for="fadd">Add font…</button><input class="fpick" tabindex="-1" type="file" id="fadd" accept=".ttf,.otf,.woff,font/*,application/octet-stream" multiple><button id="frm" hidden>Remove imported</button></div>
+    <div id="fwarn" class="small"></div>
+    <h3>Translation</h3>
+    <div class="opts"><label><input type="checkbox" id="tlon" disabled> Enable translation</label></div>
+    <div class="small">Small offline model. Rough translation.</div>
+    <div class="opts mobonly"><label><input type="checkbox" id="tldock"> Side-by-side panel</label></div>
+    <div class="small mobonly">Shows the panel next to the game instead of over it. Needs a wide screen.</div>
+    <div class="opts"><label><input type="checkbox" id="tlcopy"> Enable copy to clipboard</label></div>
+    <div class="small">Tap a line to copy it. Hold to copy from that line to the latest. Hold the latest line to copy the last 50.</div>
+    <div class="row"><button type="button" class="pick" data-for="tladd">Add translation zip…</button><input class="fpick" tabindex="-1" type="file" id="tladd" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream"><button id="tlbundled" hidden>Load bundled translation files</button><button id="tlrm" disabled>Remove</button><button id="tlclearmem" disabled title="Delete the translated lines kept for this game, so they are translated again">Clear cached lines</button></div>
+    <div id="tlmodelrow" class="opts" hidden><label>Model <select id="tlmodel"></select></label></div>
+    <div id="tlinfo" class="small" style="white-space:pre-line"></div>
+    <h3>View</h3>
+    <div class="opts"><label><input type="checkbox" id="assist" checked> nearest-button assist</label><label><input type="checkbox" id="bbtn"> mobile buttons</label><label><input type="checkbox" id="autoclose" checked> close this panel when the game starts</label><label class="desk" title="On a desktop the text ends flush with the bottom edge; this adds the room below the last line that a phone has"><input type="checkbox" id="mbot"> extra space below the last line (as on a phone)</label><label class="desk"><input type="checkbox" id="tsel"> enable text selection (mouse; the game itself does not allow it)</label><label><input type="checkbox" id="mtap"> override mouse with tap settings (a mouse then acts like a finger)</label></div>
+    <button id="patchopen" type="button">List…</button><div id="patchpanel" hidden></div>
+    <div class="row"><label>Window width <input type="number" id="winw" min="200" max="4000" inputmode="numeric" placeholder="game default" style="width:7em"></label><button id="winwreset" hidden>Reset</button></div><div id="winwhint" class="small"></div>
+    <div class="row"><label>History log lines <input type="number" id="logcap" min="500" max="1000000" inputmode="numeric" style="width:7em"></label><button id="logcapreset" hidden>Reset</button></div><div id="logcaphint" class="small"></div>
+    <div class="row"><button id="zauto" title="Phones: fit the width (at least 50%). Desktop: 100%">Auto</button><button id="zfit">Fit width</button><button id="z100">100%</button><button id="z150">150%</button><button id="ztop">Top</button><button id="zend">End</button></div>
+    <div id="build" class="small" style="margin-top:10px">%%BUILD%%</div>
+  </section>
+  <section id="dbg" class="sheet" hidden>
+    <div class="row stabs"><button type="button" id="tabd" class="on">Debug</button><button type="button" id="tabi">Inputs</button></div>
+    <div id="dstat" class="small"></div>
+    <div id="bootsum" class="small"></div>
+    <div id="dlist"></div>
+    <div class="row" id="dacts"><button id="dcopy">Copy report</button><button id="dclear">Clear</button></div>
+    <fieldset id="xgroup"><legend>What went wrong?</legend><input id="xnote" placeholder="what looks wrong? (optional, written at the top of the log)">
+      <div class="row"><button id="xlog" title="Download a text file about what is happening right now: engine and game info, what the game is waiting for, the recent inputs, the last lines of screen text, the recent ERB calls, and the load errors and warnings. Attach it to a bug report; the note above goes at its top.">export debug log</button><label title="Longer lists in the log: every load error, graphics warning and debug line, the first 50 and last 50 inputs of the session, 200 lines of screen text and the last 200 ERB calls. The file is bigger; use it when the normal log did not show the problem."><input type="checkbox" id="xverbose"> verbose</label></div></fieldset>
+    <div class="row"><button id="xsnap" title="Download a JSON copy of every game variable that differs from its default: all characters, flags, tables, maps and XML. It lets someone restore your exact game state to reproduce a problem. It holds no screen, call stack or files, and it is only exact while the game waits for input.">export game snapshot</button><button id="dsnap" hidden title="The game state captured at the moment of the last crash">crash snapshot</button></div>
+  </section>
+  <section id="ilog" class="sheet" hidden>
+    <div class="row stabs"><button type="button" id="tabd2">Debug</button><button type="button" id="tabi2" class="on">Inputs</button></div>
+    <div id="ilist" class="small"></div>
+    <div class="row"><button id="icopy">Copy</button></div>
+  </section>
+</main>
+</div>
+<form id="inbar" hidden><input id="inp" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="send" placeholder="input"><button id="send" type="submit">Send</button></form>
+</div>

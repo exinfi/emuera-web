@@ -1,0 +1,245 @@
+{
+  "_doc": "Ledger of everything not fully implemented. tests/status.test.ts fails if a builtin is missing from the engine and not listed here as 'missing', or if a 'missing' entry has since been implemented (move it out).",
+  "entries": [
+    {
+      "name": "SETTEXTBOX",
+      "kind": "stub",
+      "note": "text box: host hooks only, no web UI (GETTEXTBOX returns empty)"
+    },
+    {
+      "name": "OUTPUTLOG",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "SETANIMETIMER",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "ISSKIP",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "CLEARMEMORY",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "HOTKEY_STATE",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "HOTKEY_STATE_INIT",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "BITMAP_CACHE_ENABLE",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "BREAKBUTTON",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "AWAIT",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "MOUSESKIP",
+      "kind": "stub",
+      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+    },
+    {
+      "name": "RANDOMIZE",
+      "kind": "stub",
+      "note": "accepted, no effect: the original ignores them when UseNewRandom is on; our RAND is not seedable the Emuera way"
+    },
+    {
+      "name": "INITRAND",
+      "kind": "stub",
+      "note": "accepted, no effect: the original ignores them when UseNewRandom is on; our RAND is not seedable the Emuera way"
+    },
+    {
+      "name": "DUMPRAND",
+      "kind": "stub",
+      "note": "accepted, no effect: the original ignores them when UseNewRandom is on; our RAND is not seedable the Emuera way"
+    },
+    {
+      "name": "DEBUGPRINT",
+      "kind": "stub",
+      "note": "no game-screen output, as in the original (debug console only; outside debug mode the original does nothing). Our page records the text and lists it in the playtest log's Diagnostics section."
+    },
+    {
+      "name": "DEBUGPRINTL",
+      "kind": "stub",
+      "note": "no game-screen output, as in the original (debug console only; outside debug mode the original does nothing). Our page records the text and lists it in the playtest log's Diagnostics section."
+    },
+    {
+      "name": "DEBUGPRINTFORM",
+      "kind": "stub",
+      "note": "no game-screen output, as in the original (debug console only; outside debug mode the original does nothing). Our page records the text and lists it in the playtest log's Diagnostics section."
+    },
+    {
+      "name": "DEBUGPRINTFORML",
+      "kind": "stub",
+      "note": "no game-screen output, as in the original (debug console only; outside debug mode the original does nothing). Our page records the text and lists it in the playtest log's Diagnostics section."
+    },
+    {
+      "name": "DEBUGCLEAR",
+      "kind": "stub",
+      "note": "DEBUG_FUNC in the original: debug console only (and ASSERT is skipped outside debug mode), so no-op is correct for release"
+    },
+    {
+      "name": "ASSERT",
+      "kind": "stub",
+      "note": "DEBUG_FUNC in the original: debug console only (and ASSERT is skipped outside debug mode), so no-op is correct for release"
+    },
+    {
+      "name": "UPDATECHECK",
+      "kind": "stub",
+      "note": "INTENTIONAL, do not implement: always RESULT 4 (update check forbidden). Project rule: this interpreter never contacts an outside server."
+    },
+    {
+      "name": "CALLSHARP",
+      "kind": "stub",
+      "note": "stub: does nothing and is recorded as unimplemented (the web build has no plugin methods); the game carries on"
+    },
+    {
+      "name": "HTML_SUBSTRING",
+      "kind": "approx",
+      "note": "width measured as half/full-width cells, the original measures with real font metrics"
+    },
+    {
+      "name": "GETMETH",
+      "kind": "approx",
+      "note": "user #FUNCTION(S) only, built-in methods are not reachable"
+    },
+    {
+      "name": "GETMETHS",
+      "kind": "approx",
+      "note": "user #FUNCTION(S) only, built-in methods are not reachable"
+    },
+    {
+      "name": "EXISTMETH",
+      "kind": "approx",
+      "note": "user #FUNCTION(S) only, built-in methods are not reachable"
+    },
+    {
+      "name": "GETKEY",
+      "kind": "approx",
+      "note": "fed by browser key/pointer events, not the Windows API"
+    },
+    {
+      "name": "GETKEYTRIGGERED",
+      "kind": "approx",
+      "note": "fed by browser key/pointer events, not the Windows API"
+    },
+    {
+      "name": "MOUSEB",
+      "kind": "approx",
+      "note": "fed by browser key/pointer events, not the Windows API"
+    },
+    {
+      "name": "ISACTIVE",
+      "kind": "approx",
+      "note": "fed by browser key/pointer events, not the Windows API"
+    },
+    {
+      "name": "TONEINPUT",
+      "kind": "approx",
+      "note": "the Remaining: line is printed once, it does not tick"
+    },
+    {
+      "name": "TONEINPUTS",
+      "kind": "approx",
+      "note": "the Remaining: line is printed once, it does not tick"
+    },
+    {
+      "name": "DT_TOXML",
+      "kind": "approx",
+      "note": "XML is .NET-style but not byte-identical; round-trips with itself only"
+    },
+    {
+      "name": "DT_FROMXML",
+      "kind": "approx",
+      "note": "XML is .NET-style but not byte-identical; round-trips with itself only"
+    },
+    {
+      "name": "GETMEMORYUSAGE",
+      "kind": "approx",
+      "note": "JS heap size, not the process working set"
+    },
+    {
+      "name": "getlinestr-host",
+      "kind": "todo",
+      "note": "GETLINESTR/PRINTSINGLE host support (renderer fallback only)"
+    },
+    {
+      "name": "GROTATE",
+      "kind": "stub",
+      "note": "throws: commented out of the original function table (Creator.cs), so unknown there too"
+    },
+    {
+      "name": "SPRITEMOVE",
+      "kind": "approx",
+      "note": "base position is applied to GDRAWSPRITE exactly, but for printed/CBG sprites it only shifts inside the sprite's own canvas (the original draws shifted without clipping)"
+    },
+    {
+      "name": "XML-save-clearing",
+      "kind": "todo",
+      "note": "when XML_* documents exist: store them in vm and remove x.xmls[group] in VM.clearExt (RemoveEMSaveData/Global/Static); save/load of XML docs in slots"
+    },
+    {
+      "name": "omitted-arg-audit",
+      "kind": "todo",
+      "note": "Function arity is validated at parse time from a table derived from FunctionMethod.CheckArgumentTypeEx (reference/function-arity.json; erablue has zero violations); mismatches surface as warnings. Audited against C# for functions with optional arguments (array/range/string/CSV, ENUM*, HTML_*, DT_*, MAP_*, ARRAY*, VARSET/CVARSET, STRJOIN ranges, VARSIZE dimension config). Subscript-count rules (VariableParser): bare 2D/3D names, missing/extra subscripts are errors on read/write; reference uses (VARSET, ARRAYCOPY, REF args) still accept bare names; tools/subscript-scan.mts reports 0 violations in erablue. By-name builtins (GETVAR/GETVARS/SETVAR/EXISTVAR/GETNUM/GETNUMB/ERDNAME/ARRAYCOPY) verified against C#. Config audit: SortWithFilename (load order) and VarsizeDimConfig now honored. Statement argument counts come from the ArgumentBuilder classes (reference/stmt-arity.json, 82 statements with plain count rules): too few arguments or a hole makes an error line that throws when executed, too many is a warning (RETURN takes any number of values); VOID instructions ignore stray arguments. Not covered: statements with custom builders (PRINT*, CALL*, INPUT*, REF, PRINT_IMG, HTML_PRINT, SORTCHARA, TIMES), argument types (static operand types are not tracked), dynamic-class forms are a union, string sorts (ARRAYSORT/ARRAYMSORT/ARRAYMSORTEX/SORTCHARA) use root collation like the original's invariant-culture CompareTo (src/engine/runtime/compare.ts); ties in ARRAYMSORT/ARRAYMSORTEX are stable here while the original's List.Sort is unstable above 16 items (port .NET introsort if a playtest shows a tie-order difference). AllowFunctionOverloading=NO is enforced for system functions and reserved words (function refused, body skipped; erablue has no such names); name clashes with system variables/instructions are level-1 warnings; refused labels no longer let their body lines attach to the previous function. XML_* absent."
+    },
+    {
+      "name": "tooltip-format",
+      "kind": "todo",
+      "note": "tooltips are drawn by the web page (delay, duration, colors, font, font size, TOOLTIP_IMG graphics, <button>/<nonbutton title>, CBG button tooltips). TOOLTIP_FORMAT applies horizontal alignment, SingleLine, RightToLeft, the & prefix flags (HidePrefix, PrefixOnly, NoPrefix) and the padding flags; the other WinForms TextFormatFlags (word break, clipping, ellipsis, vertical alignment) have no effect because the box is sized to the text. ExpandTabs and ExternalLeading line spacing are not reproduced. Title character references follow HtmlManager.Unescape, including its errors"
+    },
+    {
+      "name": "maxlog-dummy-lines",
+      "kind": "todo",
+      "note": "履歴ログの行数 (MaxLog) is applied: the oldest display line is dropped when the list exceeds it, LINECOUNT stays the logical count, CLEARLINE keeps removing the requested number of logical lines. Not ported: when CLEARLINE shrinks a full log the original inserts blank dummy lines at the top (EmueraConsole.Print.cs deleteLine) and trims one more at the end; here the list just gets shorter. This only changes scrollback length and GETDISPLAYLINE indexes after such a CLEARLINE (erablue does not use GETDISPLAYLINE)"
+    },
+    {
+      "name": "maxlog-display-cap",
+      "kind": "todo",
+      "note": "Deliberate deviation: a game's 履歴ログの行数 is lowered to the host's log cap (StartMsg.logCap; page default 2000, mobile 500, never below 500, never raised above the game's value) because eraMegaten asks for 50000 and a browser cannot redraw that on every step. A debug note says when the cap applies; the page shows the game's own value and lets the player change the cap. Scrollback is shorter than the original's; LINECOUNT and CLEARLINE behave as for any trimmed log."
+    },
+    {
+      "name": "html-div-layout",
+      "kind": "todo",
+      "note": "play build renders <div> (rect/size/width/height/xpos/ypos, border/padding/margin/radius, color, bcolor, depth) as clipped boxes relative to the line; content wraps at the box's inner width (a part that does not fit moves to the next row, plain text splits per character) and rows step one LineHeight, as ConsoleDivPart does; display='absolute' (anchored to the window bottom) is treated as relative and nested <div> is not rejected as in the original"
+    },
+    {
+      "name": "PLAYSOUND",
+      "kind": "approx",
+      "note": "implemented (10 sound channels + 1 looping bgm, first idle channel else 0, volume 0..100, missing file = silent no-op; engine src/engine/runtime/sound.ts, player in src/host/web/audio.ts via HTMLAudioElement; the first-gesture unlock listens on pointerdown, a pointerup unlock for touch is deferred by the owner). Differences: playback needs a first click/key (browser autoplay policy), formats are whatever the browser decodes (no .wma/.mid), an undecodable file shows a status note instead of the original CodeEE, and the audio path is only covered by a headless-browser smoke, not by ear"
+    },
+    {
+      "name": "ISDEFINED",
+      "kind": "approx",
+      "note": "#DEFINE macros implemented (src/engine/compiler/macro.ts; ERH only, plain-text macros, nested expansion with the original's 100-expansion limit, [IF]/[ELSEIF] tests, ISDEFINED, ENUMMACRO*). Differences from the original: a macro name that clashes with a builtin function/command/variable is not rejected (the original errors); macros inside @\"...\" strings of a #DEFINE body and in the few raw-variable-argument commands (SP_VAR arg builders) are not expanded; text splicing stands in for the original's token lists (equivalent except for exotic tokenisation such as a macro that ends in the middle of a number)"
+    },
+    {
+      "name": "ENUMFILES",
+      "kind": "approx",
+      "note": "implemented over the virtual game folder (the zip's erb/csv/resources/dat/sound entries plus SAVETEXT files; src/engine/runtime/filefuncs.ts). Names under sound/ come back lower-cased and files the loader skips (e.g. the .agents docs) are not listed"
+    },
+    {
+      "name": "TINPUT",
+      "kind": "approx",
+      "note": "the \"Remaining: x.x\" line now ticks every 100 ms in the play build (worker timer, replaces the last line like changeLastLine); the headless test engine still prints it once. Timer starts when the prompt is shown, not after the first redraw as in the original"
+    }
+  ]
+}
