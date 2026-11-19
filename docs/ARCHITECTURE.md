@@ -126,7 +126,7 @@ The rules are:
 
 ## The shell
 
-`src/mobile/mobile.ts` is the page's main module and is large; the other files in `src/mobile/` hold the parts that stand alone (`viewport.ts` pan and zoom, `assist.ts` nearest-button selection, `memory.ts` card UI, `packs.ts` pack list UI, `patches.ts`, `tlpanel.ts`, `drop.ts`). The page's HTML is `src/mobile/shell.html`, with the launcher options generated from `OPTION_DEFS` in `protocol.ts` (the single table of option defaults). Within `mobile.ts`, the main sections are: debug and issue list, tap handling, the quick bar, widgets (direction pad and custom buttons), font UI, the game loader, bundled and auto-loaded files, and translation wiring. The section headings in the file are the quickest guide.
+`src/mobile/mobile.ts` is the page's main module and is large; the other files in `src/mobile/` hold the parts that stand alone (`viewport.ts` pan and zoom, `assist.ts` nearest-button selection, `rules.ts` the pure rules (direction pad shape, the pad's default, quick-value parsing; tested in `tests/host/shellrules.test.ts`), `memory.ts` card UI, `packs.ts` pack list UI, `patches.ts`, `tlpanel.ts`, `drop.ts`). The page's HTML is `src/mobile/shell.html`, with the launcher options generated from `OPTION_DEFS` in `protocol.ts` (the single table of option defaults). Within `mobile.ts`, the main sections are: debug and issue list, tap handling, the quick access buttons (off by default; the repeat button and the values the player adds), widgets (direction pad and custom buttons; the pad's layout and buttons are saved per game), font UI, the game loader, bundled and auto-loaded files, and translation wiring. The section headings in the file are the quickest guide.
 
 The debug list (the dbg sheet) holds issues (warnings and errors, counted on the button) and load facts, which are not counted: the page's line (zip read, image sizes pass) and the engine's line (`info` message from the worker: parse, sprite tables, first screen, image sizes still read from the file, image reads, time screens waited for images). Each fact is one entry, updated in place.
 
@@ -154,7 +154,7 @@ All storage access is guarded: the page keeps working with storage blocked, it j
 
 ## Build and test
 
-- `npm run build:mobile` runs `tools/build-mobile.mts`: esbuild bundles the worker and the shell, the worker is inlined as a string, the bundled fonts are inlined, the page HTML is filled in, and the result is `dist-play/play.html`. The header of the page carries the font licenses and the build line (release number and time).
+- `npm run build:mobile` runs `tools/build-mobile.mts`: esbuild bundles the worker and the shell, the worker is inlined as a string, the bundled fonts are inlined (the game fonts, and the shell's own text face, which is loaded outside the game's font list), the page HTML is filled in, and the result is `dist-play/play.html`. The header of the page carries the font licenses and the build line (release number and time).
 - `npm run build:site` runs the above and writes `site/`: the page as `index.html` plus any files found in `bundled-assets/` (`tools/lib/bundle.ts` finds them by name; a manifest `bundled/bundle.json` lists them because a static host cannot list a folder).
 - `npm run typecheck`, `npm test` (see `tests/README.md` for running one area, one topic, or only what a change touched).
 - `tools/make-translation-pack.mts` builds translation zips (see its header).

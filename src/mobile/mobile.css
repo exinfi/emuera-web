@@ -10,15 +10,15 @@ button:active,label.btn:active{background:#3a3a48}button:disabled{opacity:.4}
 #mode b{font-size:17px}#mode[data-mode=left]{background:#25405f;border-color:#5c9be0}#mode[data-mode=right]{background:#5a2a2a;border-color:#e06c6c}#mode[data-mode=hover]{background:#2a4a30;border-color:#6cc27a}
 #bdbg.warn{background:#6b3a0a;border-color:#ff9a2e;color:#ffd9a8}#bdbg.err{background:#7a2a0a;border-color:#ff7a2e;color:#fff}
 #quick{flex:1;min-width:0;display:flex;gap:4px;overflow-x:auto;scrollbar-width:none}#quick::-webkit-scrollbar{display:none}
-#quick button{flex:none;height:38px;padding:0 10px;white-space:nowrap}#quick button.rec{background:#7a2020;border-color:#e06c6c}#quick button.run{background:#5a4a14;border-color:#e0c35c}
+#quick button{flex:none;height:38px;padding:0 10px;white-space:nowrap}#quick button.run{background:#5a4a14;border-color:#e0c35c}
 #bhide .dn{display:none}body.hdrc #bhide .up{display:none}body.hdrc #bhide .dn{display:inline}
 /* the top bar hidden: the bar itself (background, height, quick inputs and the other buttons) goes; the tap mode button stays top left and the control panel, input window and show buttons stay at the right end, same place and size; the game gets the bar's height */
 body.hdrc #top{position:absolute;top:env(safe-area-inset-top);left:env(safe-area-inset-left);right:env(safe-area-inset-right);z-index:30;background:none;border:0;min-height:0;pointer-events:none}
-body.hdrc #top .tb{pointer-events:auto}body.hdrc #quick{display:none}body.hdrc #tools{margin-left:auto}
+body.hdrc #top .tb{pointer-events:auto}body.hdrc #quick button{pointer-events:auto}
 body.hdrc #tools>.tb:not(#bpanel):not(#binp):not(#bhide):not(#btl):not(#bdpad){display:none}
 body.hdrc.tlover #top{z-index:18}   /* phone overlay only (a desktop is always docked, so never here): the panel covers the buttons and closes by its tab, the sliver or Esc */
 body.hdrc .sheet{padding-top:54px}body.hdrc #tlpanel.dock{padding-top:54px;box-sizing:border-box}   /* sheets and the docked panel start below the buttons */
-#tools{flex:none;display:flex;gap:4px}#mode{min-width:48px}.stabs button.on{background:#2d3f5c;border-color:#5c82c4}
+#tools{flex:none;display:flex;gap:4px;margin-left:auto}#quick[hidden]{display:none}#quick{margin-left:calc(8px*var(--sp,1))}#mode{min-width:48px}.stabs button.on{background:#2d3f5c;border-color:#5c82c4}
 #mainrow{flex:1;min-height:0;display:flex}
 #main{flex:1;min-width:0;min-height:0;position:relative}
 #vp{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#000}
@@ -37,7 +37,7 @@ body.tsel:not(.mtap) #vp{user-select:text;-webkit-user-select:text}
 #stage>canvas.emu-bg,#stage>.emu-cbgbtn{transform:translateY(var(--cbgy,0px))}
 /* fixed-image layer and fade veil (eraSumireTeru only) are the game window too: the view draws them over the whole root, which here is as tall as the log */
 .emu-fix,.emu-fixveil{top:var(--cbgy,0px)!important;bottom:auto!important;height:var(--cfgh,100%)!important}
-.flash{position:absolute;pointer-events:none;border-radius:3px;z-index:20;outline:2px solid #6cf;background:#6cf4;animation:fl .35s forwards}.flash.r{outline-color:#f77;background:#f774}.flash.h{outline-color:#7e8;background:#7e84}
+.flash{position:absolute;pointer-events:none;border-radius:3px;z-index:20;outline:2px solid var(--accent,#6cf);background:color-mix(in srgb,var(--accent,#6cf) 27%,transparent);animation:fl .35s forwards}.flash.r{outline-color:var(--alt,#f77);background:color-mix(in srgb,var(--alt,#f77) 27%,transparent)}.flash.h{outline-color:var(--ok,#7e8);background:color-mix(in srgb,var(--ok,#7e8) 27%,transparent)}
 @keyframes fl{to{opacity:0}}
 #busy{position:absolute;right:10px;bottom:10px;width:22px;height:22px;border:3px solid #667a;border-top-color:#7cf;border-radius:50%;animation:spin .8s linear infinite;pointer-events:none;z-index:30;background:#0008}#busy[hidden]{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -104,3 +104,117 @@ body.bbtn .emu-screen a.btn:active{background:#3a3a48}
 
 #xgroup{margin:6px 0;padding:4px 8px 6px;border:1px solid #444;border-radius:3px}#xgroup legend{font-size:12px;color:#c9c;padding:0 4px}#xgroup #xnote{width:100%;box-sizing:border-box}#xgroup label{margin-left:8px}
 #dsnap[hidden]{display:none}
+
+
+/* ===== UI refresh (release 40): theme layer =====
+   The rules above are the layout and the original look; this block is the new look on top of them: colors, borders, corners, type and spacing only. Sizes, tap targets and structure are unchanged.
+   Every color is a token below (hsv in the comments); change a token and the whole shell follows. Designed in browser previews; the translation panel's part lives in tlpanel.ts (same tokens). */
+:root{
+--bg:#0a0a0a;   /* hsv(0,0%,4%)  page / game backdrop */
+--bar:#050505;   /* hsv(0,0%,2%)  top bar, input bar */
+--sheet:#0d0d0d;   /* hsv(0,0%,5%)  panels, sheets */
+--btn:#1c1c1c;   /* hsv(0,0%,11%)  button fill */
+--btnon:#2b2b2b;   /* hsv(0,0%,17%)  button pressed */
+--line:#2b2b2b;   /* hsv(0,0%,17%)  hairlines */
+--line2:#4a4a4a;   /* hsv(0,0%,29%)  button / card borders */
+--text:#e8e8e8;   /* hsv(0,0%,91%)  text */
+--dim:#c4c2c2;   /* hsv(0,1%,77%)  secondary text */
+--head:#e8e8e8;   /* hsv(0,0%,91%)  section headings */
+--accent:#8544cf;   /* hsv(268,67%,81%)  accent */
+--atext:#7b58a8;   /* hsv(266,48%,66%)  accent used as text */
+--aink:#f2efe6;   /* hsv(45,5%,95%)  text on accent */
+--accentbg:#20162c;   /* hsv(267,50%,17%)  accent tint */
+--alt:#b52f2f;   /* hsv(0,74%,71%)  second accent: R tap, record button */
+--altbg:#281212;   /* hsv(0,55%,16%)  second accent tint */
+--busy:#7ad0f0;   /* hsv(196,49%,94%)  busy indicator */
+--ok:#4cad47;   /* hsv(117,59%,68%)  ok */
+--okbg:#162315;   /* hsv(116,40%,14%)  ok tint */
+--warn:#e0992f;   /* hsv(36,79%,88%)  warn */
+--warnbg:#2f2312;   /* hsv(35,62%,18%)  warn tint */
+--err:#d14141;   /* hsv(0,69%,82%)  err */
+--errbg:#301616;   /* hsv(0,54%,19%)  err tint */
+/* derived */
+--ntr:#c4c4c4;   /* neutral grey, same brightness as --dim */
+--errtx:#e0aeae;--warntx:#e6d0b0;--oktx:#b9d6b8;   /* text tinted toward err / warn / ok (debug lines) */
+--bg0:rgba(10,10,10,0);--ringbg:rgba(196,194,194,.55);
+--tabbg:rgba(5,5,5,.35);--tabbg2:rgba(5,5,5,.92);--tabline:rgba(74,74,74,.45);--tabline2:#8544cf;   /* translation tab: bar color at its resting / open opacity */
+/* shape, type, spacing */
+--ui:'BIZ UDPGothic','Yu Gothic UI','Meiryo UI','Noto Sans JP',system-ui,sans-serif;   /* shell chrome; the game log keeps its own fonts */
+--mono:ui-monospace,'Cascadia Mono',Consolas,'BIZ UDGothic','Noto Sans Mono CJK JP',monospace;   /* translation panel text */
+--fs:14px;--ls:0em;--r:0px;--rt:0px;--bw:1px;--sp:1.2;   /* --sp scales gaps and padding (1 = the original); tap targets keep their size */
+--h3s:16px;--h3w:700;--h3ls:.06em;   /* section headings */
+--fadeh:28px;   /* fade of scrolled text under the top bar */
+}
+html,body{background:var(--bg);color:var(--text);font-family:var(--ui);font-size:var(--fs);letter-spacing:var(--ls)}
+button,label.btn,select,input[type=text],input[type=number]{font-family:inherit;font-size:inherit;letter-spacing:inherit;color:var(--text);background:var(--btn);border:var(--bw) solid var(--line2);border-radius:var(--r)}
+select,input[type=text],input[type=number]{background:var(--bg)}
+button:active,label.btn:active{background:var(--btnon)}
+#top{background:var(--bar);border-bottom:1px solid var(--line);padding:calc(3px*var(--sp)) calc(6px*var(--sp));gap:calc(4px*var(--sp))}
+body.hdrc #top{background:none;border:0}
+#tools{gap:calc(4px*var(--sp))}#quick{gap:calc(4px*var(--sp))}
+/* on / selected: a dark accent fill with an accent border */
+.tb.on,.stabs button.on,#bdpad.on{background:var(--accentbg);border-color:var(--accent);color:var(--atext)}
+/* tap mode: solid fills so the mode shows in the corner of the eye */
+#mode[data-mode=left]{background:var(--accent);border-color:var(--accent)}#mode[data-mode=left] b{color:var(--aink)}
+#mode[data-mode=right]{background:var(--alt);border-color:var(--alt)}#mode[data-mode=right] b{color:var(--aink)}
+#mode[data-mode=hover]{background:var(--ok);border-color:var(--ok)}#mode[data-mode=hover] b{color:var(--aink)}
+#bdbg.warn{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}#bdbg.err{background:var(--errbg);border-color:var(--err);color:var(--err)}
+#quick button.run{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}
+#vp{background:var(--bg)}
+#dropov{background:var(--bg);border-color:var(--accent)}#dropov small{color:var(--dim)}
+/* scrolled text fades out under the bar's lower edge (not at the very top of the log; View > "fade text under the top bar") */
+#main::before{content:"";position:absolute;left:0;right:0;top:0;height:var(--fadeh);z-index:5;pointer-events:none;background:linear-gradient(to bottom,var(--bg),var(--bg0));opacity:0;transition:opacity .15s}
+#main.scrolled::before{opacity:1}body.nofade #main::before{display:none}
+.sheet{line-height:1.5;background:var(--sheet);border-bottom:var(--bw) solid var(--line2);padding:calc(4px*var(--sp)) calc(12px*var(--sp)) calc(12px*var(--sp))}
+.sheet h3{margin:calc(22px*var(--sp)) 0 calc(8px*var(--sp));font-size:var(--h3s);color:var(--head);text-transform:none;letter-spacing:var(--h3ls);font-weight:var(--h3w);line-height:1.25;border-bottom:1px solid var(--line);padding-bottom:6px}
+.sheet>h3:first-child,.sheet>.stabs+h3{margin-top:calc(12px*var(--sp))}
+.row{gap:calc(8px*var(--sp));margin:calc(8px*var(--sp)) 0}
+.opts{gap:calc(6px*var(--sp));margin:calc(8px*var(--sp)) 0}.opts label{min-height:28px}
+.sheet .small{margin:calc(6px*var(--sp)) 0}
+#status{margin:calc(8px*var(--sp)) 0}
+#panel .subh{color:var(--dim);margin-top:calc(16px*var(--sp));margin-bottom:0;letter-spacing:.04em}#cdel{color:var(--err);border-color:var(--err)}#cdel:disabled{color:var(--dim);border-color:var(--line2)}
+#status{color:var(--ok)}#fwarn,#cardwarn{color:var(--warn)}
+.small{color:var(--dim)}
+.dent{border-left:3px solid var(--line2)}.dent.error{border-left-color:var(--err);color:var(--errtx)}.dent.warn{border-left-color:var(--warn);color:var(--warntx)}.dent.info{border-left-color:var(--ok);color:var(--oktx)}.dent time{color:var(--dim)}
+#bootsum{color:var(--ntr)}
+#inbar{background:var(--bar);border-top:1px solid var(--line);gap:calc(6px*var(--sp))}
+#inp{background:var(--bg);color:var(--text)}
+#send{border-color:var(--accent);color:var(--atext)}
+body.bbtn .emu-screen a.btn{font:inherit;color:var(--text);background:var(--btn);border:var(--bw) solid var(--line2);border-radius:var(--r)}
+body.bbtn .emu-screen a.btn:active{background:var(--btnon)}
+.pack,.pinfo .pdesc,.patchlist,#patchpanel,#xgroup{border-color:var(--line2);border-radius:var(--r)}
+.pack{margin:calc(6px*var(--sp)) 0}
+#xgroup legend{color:var(--atext)}
+#dpad button[data-d],.xb{background:var(--btn);border-color:var(--line2);border-radius:var(--r)}
+#dpad button[data-d]:active,#dpad button.held,.xb:active,.xb.held{background:var(--accentbg);border-color:var(--accent)}
+#dpad button[data-val]::after{color:var(--atext)}
+#dpad.editing{outline-color:var(--accent)}.xb.sel{outline-color:var(--accent)}
+#dpadgrip,.xb .xg{background:var(--accentbg);border-color:var(--accent)}
+#dpadx,.xb .xd{background:var(--errbg);border-color:var(--err)}
+#dpadbar,#padedit{background:var(--sheet);border:var(--bw) solid var(--accent);border-radius:var(--r)}
+/* busy indicator: a square whose lit side walks top, right, bottom, left */
+#busy{border-radius:0;border:3px solid var(--line2);animation:walk .8s step-end infinite}
+@keyframes walk{0%{border-top-color:var(--busy)}25%{border-top-color:var(--line2);border-right-color:var(--busy)}50%{border-right-color:var(--line2);border-bottom-color:var(--busy)}75%{border-bottom-color:var(--line2);border-left-color:var(--busy)}100%{border-left-color:var(--line2);border-top-color:var(--busy)}}
+
+/* direction pad: one cross of four wedges and a small diamond (shapes are drawn and clipped in paintPad, mobile.ts) */
+#dpad{display:block;width:var(--W,184px);height:var(--W,184px);gap:0}
+#dpad button[data-d]{position:absolute;left:0;top:0;width:var(--W,184px);height:var(--W,184px);padding:0;border:0;border-radius:0;background:none;opacity:1;min-height:0;font-size:0}
+#dpad [data-d=up],#dpad [data-d=left],#dpad [data-d=mid],#dpad [data-d=right],#dpad [data-d=down]{grid-column:auto;grid-row:auto}
+#dpad [data-d=mid]{z-index:2}
+#dpad button[data-d] svg.pb{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+#dpad button[data-d] polygon{fill:color-mix(in srgb,var(--btn) 86%,transparent);stroke:var(--line2);stroke-width:2}
+#dpad button[data-d]:active polygon,#dpad button[data-d].held polygon{fill:var(--accentbg);stroke:var(--accent)}
+#dpad button[data-d]:active,#dpad button[data-d].held{background:none;border:0}
+#dpad .pg{position:absolute;display:flex;align-items:center;justify-content:center;color:var(--dim);pointer-events:none}
+#dpad .pg svg{width:100%;height:100%;overflow:visible}
+#dpad .pk{position:absolute;font:10px/1 var(--mono);color:var(--dim);opacity:.5;pointer-events:none}
+#dpad .pk.ch{color:var(--atext);opacity:1}
+#dpad .pk.mid{transform:translate(-50%,-50%)}
+#dpad button[data-val]::after{content:none}
+#dpad.editing{outline:0}
+#dpad .tk{display:none;position:absolute;width:10px;height:10px;border:0 solid var(--accent);pointer-events:none}
+#dpad.editing .tk{display:block}
+#dpad .tk.a{left:-9px;top:-9px;border-left-width:1px;border-top-width:1px}#dpad .tk.b{right:-9px;top:-9px;border-right-width:1px;border-top-width:1px}#dpad .tk.c{left:-9px;bottom:-9px;border-left-width:1px;border-bottom-width:1px}#dpad .tk.d{right:-9px;bottom:-9px;border-right-width:1px;border-bottom-width:1px}
+#dpadgrip{left:0;top:0;width:24px;height:24px;border-radius:0;background:transparent;color:var(--aink);font-size:14px}
+#dpadx{right:0;top:0;width:24px;height:24px;border-radius:0;background:transparent;color:var(--aink)}
+.xb{background:color-mix(in srgb,var(--btn) 86%,transparent);opacity:1}.xb.off{opacity:.3}

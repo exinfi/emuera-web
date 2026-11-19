@@ -19,7 +19,7 @@
 <div id="mainrow">
 <main id="main">
   <div id="vp"><div id="pan"><div id="stage"></div></div></div>
-  <div id="dpad" hidden aria-label="Direction pad"><div id="dpadgrip" hidden title="Drag to resize">&#8689;</div><span id="dpadx" title="Remove the direction cross">&#10005;</span><button type="button" data-k="8" data-d="up" aria-label="Up (8)">&#9650;</button><button type="button" data-k="4" data-d="left" aria-label="Left (4)">&#9664;</button><button type="button" data-k="5" data-d="mid" aria-label="Examine (5)">&#9679;</button><button type="button" data-k="6" data-d="right" aria-label="Right (6)">&#9654;</button><button type="button" data-k="2" data-d="down" aria-label="Down (2)">&#9660;</button></div>
+  <div id="dpad" hidden aria-label="Direction pad"><i class="tk a"></i><i class="tk b"></i><i class="tk c"></i><i class="tk d"></i><div id="dpadgrip" hidden title="Drag to resize">&#8689;</div><span id="dpadx" title="Remove the direction cross">&#10005;</span><button type="button" data-k="8" data-d="up" aria-label="Up (8)"></button><button type="button" data-k="4" data-d="left" aria-label="Left (4)"></button><button type="button" data-k="5" data-d="mid" aria-label="Examine (5)"></button><button type="button" data-k="6" data-d="right" aria-label="Right (6)"></button><button type="button" data-k="2" data-d="down" aria-label="Down (2)"></button></div>
   <div id="padscrim" hidden></div>
   <div id="dpadbar" hidden role="dialog" aria-label="Customize buttons">
     <div class="small">Drag a button to move it. Hold a button to set its text/key.</div>
@@ -57,8 +57,11 @@
     <h3>Widgets</h3>
     <div class="opts"><label><input type="checkbox" id="wdpad"> enable direction pad</label></div>
     <div class="row"><button id="dpadedit" type="button">Customize direction pad…</button></div>
-    <div class="opts"><label><input type="checkbox" id="wrec" checked> recordable input button (the + in the quick bar)</label></div>
-    <div class="row"><button id="userfree" type="button" disabled>No Set Value</button></div>
+    <div class="opts"><label><input type="checkbox" id="wquick"> enable quick access button</label></div>
+    <div id="qcfg" hidden>
+      <div id="qlist"></div>
+      <div class="row"><input id="qnew" type="text" maxlength="40" placeholder="value to send (empty = Enter)" autocomplete="off" autocapitalize="off" spellcheck="false"><button id="qadd" type="button">Add button</button></div>
+    </div>
     <div id="wnote" class="small"></div>
     <h3>Font</h3>
     <div class="row"><select id="fontsel"></select><button type="button" class="pick" data-for="fadd">Add font…</button><input class="fpick" tabindex="-1" type="file" id="fadd" accept=".ttf,.otf,.woff,font/*,application/octet-stream" multiple><button id="frm" hidden>Remove imported</button></div>
@@ -74,7 +77,7 @@
     <div id="tlmodelrow" class="opts" hidden><label>Model <select id="tlmodel"></select></label></div>
     <div id="tlinfo" class="small" style="white-space:pre-line"></div>
     <h3>View</h3>
-    <div class="opts"><label><input type="checkbox" id="assist" checked> nearest-button assist</label><label><input type="checkbox" id="bbtn"> mobile buttons</label><label><input type="checkbox" id="autoclose" checked> close this panel when the game starts</label><label class="desk" title="On a desktop the text ends flush with the bottom edge; this adds the room below the last line that a phone has"><input type="checkbox" id="mbot"> extra space below the last line (as on a phone)</label><label class="desk"><input type="checkbox" id="tsel"> enable text selection (mouse; the game itself does not allow it)</label><label><input type="checkbox" id="mtap"> override mouse with tap settings (a mouse then acts like a finger)</label></div>
+    <div class="opts"><label><input type="checkbox" id="assist" checked> nearest-button assist</label><label><input type="checkbox" id="bbtn"> mobile buttons</label><label><input type="checkbox" id="autoclose" checked> close this panel when the game starts</label><label title="Scrolled text dims out under the top bar instead of being cut off"><input type="checkbox" id="edgefade" checked> fade text under the top bar</label><label class="desk"><input type="checkbox" id="mbot"> extra space below last line</label><label class="desk"><input type="checkbox" id="tsel"> enable text selection</label><label><input type="checkbox" id="mtap"> override mouse with tap settings</label></div>
     <button id="patchopen" type="button">List…</button><div id="patchpanel" hidden></div>
     <div class="row"><label>Window width <input type="number" id="winw" min="200" max="4000" inputmode="numeric" placeholder="game default" style="width:7em"></label><button id="winwreset" hidden>Reset</button></div><div id="winwhint" class="small"></div>
     <div class="row"><label>History log lines <input type="number" id="logcap" min="500" max="1000000" inputmode="numeric" style="width:7em"></label><button id="logcapreset" hidden>Reset</button></div><div id="logcaphint" class="small"></div>

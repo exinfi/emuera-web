@@ -13,6 +13,7 @@
       "src/host/web/zipindex.ts",
       "src/host/web/packs.ts",
       "src/mobile/drop.ts",
+      "src/mobile/rules.ts",
       "src/play/"
     ]
   },

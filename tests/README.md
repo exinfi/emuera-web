@@ -5,7 +5,7 @@ Tests are grouped by area so a change can be checked by running only the tests t
 | Area | Folder | Covers | Source paths |
 |---|---|---|---|
 | engine | `tests/engine/` | the interpreter core: language, parsing, saves | `src/engine/` |
-| host | `tests/host/` | the DOM-free page layer: protocol and launcher options, client input rules, zip and pack loading, drop recognition | `src/host/`, `src/play/`, `src/mobile/drop.ts` |
+| host | `tests/host/` | the DOM-free page layer: protocol and launcher options, client input rules, zip and pack loading, drop recognition, the shell's pure rules (direction pad shape, settings defaults) | `src/host/`, `src/play/`, `src/mobile/drop.ts`, `src/mobile/rules.ts` |
 | data | `tests/data/` | reference tables the code relies on | `reference/`, arity tables |
 
 `tests/areas.json` lists each area and the source paths it covers. Add a new area by creating the folder and adding it there (the runner refuses a folder that is not listed).

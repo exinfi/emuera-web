@@ -18,12 +18,30 @@ import { attachDrop } from './drop';
 import { FontRegistry, type FontEntry } from '../host/web/fonts';
 import { FontStore } from '../host/web/fontstore';
 import { familyKey } from '../host/screen';
+import { padShapes, dpadDefault, parseQuickVals, type Pt } from './rules';
 // @ts-ignore injected by the build script
 declare const WORKER_SRC: string;
 // @ts-ignore injected by the build script: bundled OFL fonts as base64
 declare const BUNDLED_FONTS: { file: string; b64: string }[];
+// @ts-ignore injected by the build script: the shell's own text face (BIZ UDPGothic subsets), for the chrome only
+declare const UI_FONTS: { family: string; weight: string; b64: string }[];
 
 const $ = (id: string) => document.getElementById(id)!;
+// the shell's text face: plain FontFaces, not part of the game's font list; chrome text swaps to it when it has loaded (a missing FontFace API just keeps the fallback stack)
+try {
+  for (const f of UI_FONTS) {
+    const face = new FontFace(f.family, Uint8Array.from(atob(f.b64), (c) => c.charCodeAt(0)).buffer, {
+      weight: f.weight,
+      display: 'swap',
+    });
+    void face.load().then(
+      () => document.fonts.add(face),
+      () => {},
+    );
+  }
+} catch {
+  /* keep the fallback stack */
+}
 const lsGet = (k: string) => {
   try {
     return localStorage.getItem(k);
@@ -158,7 +176,7 @@ function applyHeader() {
   document.body.classList.toggle('hdrc', hdrCollapsed);
   hdrBtn.title = hdrCollapsed
     ? 'Show the top bar'
-    : 'Hide the top bar (the tap mode, control panel and input buttons stay)';
+    : 'Hide the top bar (the tap mode, quick buttons, control panel and input buttons stay)';
 }
 hdrBtn.onclick = () => {
   hdrCollapsed = !hdrCollapsed;
@@ -175,7 +193,7 @@ $('bfs').onclick = () => {
 // ---------------------------------------------------------------- viewport + view + client
 const stage = $('stage'),
   vp = $('vp');
-const V = new Viewport(vp, $('pan'), stage);
+const V = new Viewport(vp, $('pan'), stage, () => $('main').classList.toggle('scrolled', V.ty < -2)); // the fade under the top bar shows once the log has moved (mobile.css)
 const fonts = new FontRegistry();
 fonts.aliasMsGothic = false; // the stack names MS Gothic first (an installed copy is used), bundled BIZ UDGothic follows as the fallback
 let configFont = '';
@@ -382,11 +400,10 @@ const inp = $('inp') as HTMLInputElement;
 inp.oninput = () => client.setInputText(inp.value);
 ($('inbar') as HTMLFormElement).onsubmit = (e) => {
   e.preventDefault();
-  if (!captureForUser(inp.value)) send(inp.value);
+  send(inp.value);
 };
 const BUSY_HINT = 'working...';
 function refreshInput() {
-  if (arming) return; // the user button is waiting for its value: keep that prompt
   if (busyNow) {
     inp.placeholder = BUSY_HINT;
     return;
@@ -439,6 +456,14 @@ btnChk.onchange = () => {
 };
 document.body.classList.toggle('bbtn', btnChk.checked);
 document.fonts?.addEventListener('loadingdone', () => V.layoutChanged());
+const fadeChk = $('edgefade') as HTMLInputElement;
+fadeChk.checked = lsGet('emu.edgefade') !== '0';
+const applyFade = () => document.body.classList.toggle('nofade', !fadeChk.checked);
+fadeChk.onchange = () => {
+  lsSet('emu.edgefade', fadeChk.checked ? '1' : '0');
+  applyFade();
+};
+applyFade();
 const autoChk = $('autoclose') as HTMLInputElement;
 autoChk.checked = lsGet('emu.autoclose') !== '0';
 autoChk.onchange = () => lsSet('emu.autoclose', autoChk.checked ? '1' : '0');
@@ -608,12 +633,14 @@ $('z150').onclick = () => V.setScale(1.5);
 $('ztop').onclick = () => V.toTop();
 $('zend').onclick = () => V.toBottom();
 
-// ---------------------------------------------------------------- quick inputs: last input, 999, one user-set input
-// The user button: tap it while empty and the input window takes one input; that input is kept on the button instead of being sent.
-// Tap a filled button to send its value; long press frees it. Not saved: it lasts until cleared or the page is closed.
-let userInput: string | null = null;
-let arming: { reopen: boolean } | null = null; // waiting for the one input; `reopen` = the input window was hidden and is hidden again afterwards
+// ---------------------------------------------------------------- quick access buttons (Control panel > Widgets, off by default)
+// First the repeat button (sends the last input again), then the values the player added in the control panel. They follow the tap mode like a tap on the game:
+// right click (or a tap in R mode, or a long press in L mode) sends the value and skips, as a right click on a game button does. Kept per browser.
+const QMAX = 8;
 const quick = $('quick');
+const quickOn = () => lsGet('emu.w.quick') === '1';
+let quickVals: string[] = parseQuickVals(lsGet('emu.q.vals'), QMAX);
+const saveQuick = () => lsSet('emu.q.vals', JSON.stringify(quickVals));
 const showVal = (v: string) => (v === '' ? '\u23ce' : v.length > 8 ? v.slice(0, 8) + '\u2026' : v);
 function mkBtn(label: string, onclick: () => void, cls = '') {
   const b = document.createElement('button');
@@ -622,44 +649,68 @@ function mkBtn(label: string, onclick: () => void, cls = '') {
   b.onclick = onclick;
   return b;
 }
-function renderQuick() {
-  quick.textContent = '';
-  const u = mkBtn('', () => {});
-  u.id = 'quser';
-  // long press frees the button; the click that follows a long press must not send
+/** send a quick value as a left press, or as a right press: the same path as a right click on a game button (sends, then skips to the next real input) */
+function quickDo(v: string, act: 'left' | 'right') {
+  if (busyNow) return;
+  if (act === 'left') {
+    send(v);
+    return;
+  }
+  client.pointerDown({
+    button: 2,
+    x: 0,
+    y: 0,
+    inside: false,
+    onChrome: true,
+    onControl: false,
+    pressButton: () => void send(v),
+  });
+}
+/** make a quick button act per the player's click type: a real mouse clicks left/right; a finger (or a mouse with the tap settings on) taps as the tap mode says, and a long press does the other click */
+function bindQuick(b: HTMLButtonElement, value: () => string | null) {
   let t = 0,
-    long = false;
-  u.onpointerdown = () => {
+    long = false,
+    ptype = 'touch';
+  const nativeMouse = () => ptype === 'mouse' && !mtapChk.checked;
+  const fire = (act: 'left' | 'right') => {
+    const v = value();
+    if (v !== null && !b.disabled) quickDo(v, act);
+  };
+  b.onpointerdown = (e) => {
+    ptype = e.pointerType;
     long = false;
     clearTimeout(t);
+    if (nativeMouse() || e.button !== 0) return;
     t = window.setTimeout(() => {
       long = true;
-      clearUser();
-    }, 500);
+      fire(mode === 'left' ? 'right' : 'left'); // as a long press on the game: the other click (in H mode, a click)
+    }, 450);
   };
-  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) u.addEventListener(ev, () => clearTimeout(t));
-  u.onclick = () => {
+  for (const ev of ['pointerup', 'pointerleave', 'pointercancel']) b.addEventListener(ev, () => clearTimeout(t));
+  b.onclick = (e) => {
     if (long) {
       long = false;
       return;
     }
-    userTap();
+    fire(e.detail === 0 || nativeMouse() ? 'left' : mode === 'right' ? 'right' : 'left'); // keyboard and mouse: left; a tap in H mode has no hover here, so it clicks
   };
-  u.oncontextmenu = (e) => e.preventDefault();
-  quick.append(
-    Object.assign(
-      mkBtn('', () => {
-        const l = lastAction();
-        if (l) quickSend(l.value);
-      }),
-      { id: 'qlast', title: 'Send the last input again' },
-    ),
-    Object.assign(
-      mkBtn('999', () => quickSend('999')),
-      { id: 'q999', title: 'Send 999 (the usual exit input)' },
-    ),
-    u,
-  );
+  b.oncontextmenu = (e) => {
+    e.preventDefault();
+    if (nativeMouse()) fire('right');
+  };
+}
+function renderQuick() {
+  quick.textContent = '';
+  const rep = Object.assign(mkBtn('', () => {}), { id: 'qlast', title: 'Send the last input again. Right click: send it and skip.' });
+  bindQuick(rep, () => lastAction()?.value ?? null);
+  quick.append(rep);
+  quickVals.forEach((v, i) => {
+    const b = mkBtn(showVal(v), () => {}, 'qv');
+    b.dataset.i = String(i);
+    b.title = `Send ${v === '' ? 'Enter' : v}. Right click: send it and skip.`;
+    bindQuick(b, () => quickVals[i] ?? null);
+    quick.append(b);
+  });
   refreshQuick();
   applyWidgets();
 }
@@ -676,41 +727,72 @@ function refreshQuick() {
   const c = promptClass(client.kind),
     prompt = (c === 'number' || c === 'text' || c === 'any') && !busyNow;
   const last = lastAction();
-  const set = (id: string, text: string, disabled: boolean, title?: string) => {
-    const b = document.getElementById(id) as HTMLButtonElement | null;
-    if (!b) return;
-    if (b.textContent !== text) b.textContent = text;
-    b.disabled = disabled;
-    if (title) b.title = title;
-    b.classList.toggle('rec', id === 'quser' && arming !== null);
-  };
-  set('qlast', '\u21ba ' + (last ? showVal(last.value) : 'last'), !prompt || !last);
-  set('q999', '999', !prompt);
-  {
-    const uf = $('userfree') as HTMLButtonElement;
-    uf.textContent = arming
-      ? 'Waiting for an input… (tap to cancel)'
-      : userInput === null
-        ? 'No Set Value'
-        : `Free Set Value: ${userInput === '' ? '<enter>' : userInput}`;
-    uf.disabled = userInput === null && !arming;
+  const rep = document.getElementById('qlast') as HTMLButtonElement | null;
+  if (rep) {
+    const t = '\u21ba ' + (last ? showVal(last.value) : 'last');
+    if (rep.textContent !== t) rep.textContent = t;
+    rep.disabled = !prompt || !last;
   }
-  if (arming) set('quser', '\u2026', false, 'Type one input in the input window; tap again to cancel');
-  else if (userInput === null)
-    set(
-      'quser',
-      '+',
-      false,
-      'Tap, then enter one input in the input window to keep it on this button. Long press frees it.',
-    );
-  else
-    set('quser', showVal(userInput), !prompt, 'Send ' + (userInput || 'Enter') + '. Long press to free this button.');
+  quick.querySelectorAll<HTMLButtonElement>('.qv').forEach((b) => (b.disabled = !prompt));
 }
-function quickSend(v: string) {
-  send(v);
+// control panel side: the on/off switch and the list of added values (set, remove)
+const wquick = $('wquick') as HTMLInputElement,
+  qcfg = $('qcfg'),
+  qlist = $('qlist'),
+  qnew = $('qnew') as HTMLInputElement,
+  qadd = $('qadd') as HTMLButtonElement;
+function renderQuickUi() {
+  qlist.textContent = '';
+  quickVals.forEach((v, i) => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    const inp = document.createElement('input');
+    inp.type = 'text';
+    inp.maxLength = 40;
+    inp.value = v;
+    inp.placeholder = 'Enter';
+    inp.setAttribute('autocomplete', 'off');
+    inp.setAttribute('autocapitalize', 'off');
+    inp.setAttribute('spellcheck', 'false');
+    inp.onchange = () => {
+      quickVals[i] = inp.value;
+      saveQuick();
+      renderQuick();
+    };
+    const rm = mkBtn('Remove', () => {
+      quickVals.splice(i, 1);
+      saveQuick();
+      renderQuickUi();
+      renderQuick();
+    });
+    row.append(inp, rm);
+    qlist.append(row);
+  });
+  qadd.disabled = quickVals.length >= QMAX;
+  qnew.disabled = quickVals.length >= QMAX;
 }
+function addQuick() {
+  if (quickVals.length >= QMAX) return;
+  quickVals.push(qnew.value);
+  qnew.value = '';
+  saveQuick();
+  renderQuickUi();
+  renderQuick();
+}
+qadd.onclick = addQuick;
+qnew.onkeydown = (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addQuick();
+  }
+};
+wquick.onchange = () => {
+  lsSet('emu.w.quick', wquick.checked ? '1' : '0');
+  applyWidgets();
+};
+renderQuickUi();
 
-// ---------------------------------------------------------------- widgets: direction pad + recordable input button (Control panel > Widgets)
+// ---------------------------------------------------------------- widgets: direction pad + quick access buttons (Control panel > Widgets)
 // history log cap: per browser; empty = the device class default (2000 on a desktop, 500 on a phone, as elsewhere). Applies when a game is loaded.
 const logcap = $('logcap') as HTMLInputElement,
   logcaphint = $('logcaphint'),
@@ -739,8 +821,7 @@ renderLogCapUi();
 const xpad = $('xpad'),
   dpad = $('dpad'),
   bdpad = $('bdpad'),
-  wdpad = $('wdpad') as HTMLInputElement,
-  wrec = $('wrec') as HTMLInputElement;
+  wdpad = $('wdpad') as HTMLInputElement;
 interface XBtn {
   id: string;
   r: number;
@@ -752,32 +833,42 @@ let xCfg: XBtn[] = [],
   selX = ''; // custom buttons of the open game (below)
 let netGame = false; // an Emuera.NET game (setting.json next to ERB/CSV), e.g. eraMegaten: its exploration is a 2D map moved with 8/4/6/2
 const dpadEnabled = () => {
-  const v = lsGet('emu.w.dpad');
-  return v === null ? netGame : v === '1';
+  return dpadDefault(lsGet('emu.w.dpad'), netGame, V.desktop); // the automatic default is for touch devices only; the player's own choice always wins
 };
 function applyWidgets() {
-  const on = dpadEnabled();
-  wdpad.checked = on;
+  const on = dpadEnabled() && !!gameId; // the pad belongs to a game: nothing to show or press before one is open
+  wdpad.checked = dpadEnabled();
+  wdpad.disabled = !gameId;
+  wdpad.title = gameId ? '' : 'Open a game first: the direction pad belongs to a game';
   bdpad.hidden = !on;
   if (!on) {
     dpad.hidden = true;
     bdpad.classList.remove('on');
   }
-  wrec.checked = lsGet('emu.w.rec') !== '0';
-  const u = document.getElementById('quser');
-  if (u) u.hidden = !wrec.checked;
-  $('wnote').textContent = netGame
-    ? 'Emuera.NET game detected (eraMegaten style): the direction pad is on unless you turn it off here. The header button shows or hides it (hidden at first).'
-    : '';
+  const de = $('dpadedit') as HTMLButtonElement;
+  de.disabled = !gameId;
+  de.title = gameId ? '' : 'Open a game first: custom buttons belong to a game';
+  wquick.checked = quickOn();
+  quick.hidden = !wquick.checked;
+  qcfg.hidden = !wquick.checked;
+  $('wnote').textContent = !netGame
+    ? ''
+    : V.desktop
+      ? 'Emuera.NET game detected (eraMegaten style): the direction pad is off on a desktop unless you turn it on here. The header button shows or hides it.'
+      : 'Emuera.NET game detected (eraMegaten style): the direction pad is on and shown at the start unless you turn it off here. The header button shows or hides it.';
+  refreshPad();
+}
+/** show the pad now (what the header button does when it is off) */
+function showPad() {
+  if (!gameId || bdpad.hidden) return;
+  dpad.hidden = false;
+  bdpad.classList.add('on');
   refreshPad();
 }
 wdpad.onchange = () => {
   lsSet('emu.w.dpad', wdpad.checked ? '1' : '0');
   applyWidgets();
-};
-wrec.onchange = () => {
-  lsSet('emu.w.rec', wrec.checked ? '1' : '0');
-  applyWidgets();
+  if (wdpad.checked) showPad(); // turning it on is expected to show it
 };
 let bdLong = false,
   bdT = 0; // long press on the toggle opens the customize mode
@@ -812,7 +903,7 @@ const PAD_RESET = (): PadCfg => ({ r: 10, b: 10, s: 54, keys: { ...PAD_DEFAULT }
 function loadPad(): PadCfg {
   const d = PAD_RESET();
   try {
-    const j = JSON.parse(lsGet('emu.dpad') ?? 'null');
+    const j = JSON.parse((gameId ? lsGet('emu.dpad:' + gameId) : null) ?? lsGet('emu.dpad') ?? 'null'); // this game's layout, else the old shared one as the starting point
     if (j && typeof j === 'object') {
       for (const k of ['r', 'b', 's'] as const) if (typeof j[k] === 'number' && isFinite(j[k])) d[k] = j[k];
       for (const k of Object.keys(PAD_DEFAULT)) if (typeof j.keys?.[k] === 'string') d.keys[k] = j.keys[k].slice(0, 1);
@@ -823,13 +914,15 @@ function loadPad(): PadCfg {
   return d;
 }
 let padCfg = loadPad();
-const savePad = () => lsSet('emu.dpad', JSON.stringify(padCfg));
+const savePad = () => {
+  if (gameId) lsSet('emu.dpad:' + gameId, JSON.stringify(padCfg)); // per game, like the custom buttons
+};
 const clampPad = () => {
   padCfg.s = Math.min(120, Math.max(36, padCfg.s));
 };
 /** where the pad is drawn: the saved offsets kept on screen. Never written back by drawing, so a rotation or the input box (a smaller area) moves it only while the area is small */
 const effPad = () => {
-  const w = padCfg.s * 3 + 8,
+  const w = padSize(),
     main = $('main');
   return {
     r: Math.min(Math.max(0, padCfg.r), Math.max(0, main.clientWidth - w)),
@@ -842,11 +935,47 @@ function applyPad() {
   dpad.style.right = ep.r + 'px';
   dpad.style.bottom = ep.b + 'px';
   dpad.style.setProperty('--pd', padCfg.s + 'px');
-  dpad.querySelectorAll<HTMLButtonElement>('button[data-d]').forEach((b) => {
-    const v = padCfg.keys[b.dataset.d!];
-    if (v === PAD_DEFAULT[b.dataset.d!]) delete b.dataset.val;
-    else b.dataset.val = v === '' ? '⏎' : v;
-  });
+  paintPad();
+}
+const padSize = () => padShapes(padCfg.s).size;
+const px1 = (n: number) => n.toFixed(1);
+const polyPts = (q: Pt[]) => q.map((p) => px1(p[0]) + ',' + px1(p[1])).join(' ');
+const clipOf = (q: Pt[]) => 'polygon(' + q.map((p) => px1(p[0]) + 'px ' + px1(p[1]) + 'px').join(',') + ')';
+/** draws the pad: the shapes come from `padShapes` (rules.ts); each button is a full-size layer clipped to its wedge, so a touch lands on the shape it is in */
+function paintPad() {
+  const pd = padCfg.s,
+    sh = padShapes(pd),
+    W = sh.size,
+    gs = pd * 0.38;
+  const turn: Record<string, number> = { up: 0, right: 90, down: 180, left: 270 };
+  dpad.style.setProperty('--W', px1(W) + 'px');
+  const label = (d: string, v: string, x: number, y: number, mid = false) => {
+    const e = document.createElement('b');
+    e.className = 'pk' + (v !== PAD_DEFAULT[d] ? ' ch' : '') + (mid ? ' mid' : '');
+    e.textContent = v === '' ? '⏎' : v;
+    e.style.left = px1(x) + 'px';
+    e.style.top = px1(y) + 'px';
+    return e;
+  };
+  for (const d of ['up', 'right', 'down', 'left'] as const) {
+    const b = dpad.querySelector<HTMLButtonElement>(`button[data-d=${d}]`)!,
+      w = sh.wedges[d];
+    b.style.clipPath = clipOf(w.poly);
+    b.textContent = '';
+    b.insertAdjacentHTML(
+      'beforeend',
+      `<svg class="pb" viewBox="0 0 ${px1(W)} ${px1(W)}"><polygon points="${polyPts(w.poly)}"/></svg>` +
+        `<i class="pg" style="left:${px1(w.glyph[0] - gs / 2)}px;top:${px1(w.glyph[1] - gs / 2)}px;width:${px1(gs)}px;height:${px1(gs)}px"><svg viewBox="0 0 24 24" style="transform:rotate(${turn[d]}deg)"><polyline points="5,15 12,8 19,15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"/></svg></i>`,
+    );
+    b.append(label(d, padCfg.keys[d], w.arm[0] + 6, w.arm[1] + 4));
+  }
+  const m = dpad.querySelector<HTMLButtonElement>('button[data-d=mid]')!,
+    dia = sh.diamond,
+    cc = sh.middle[0];
+  m.style.clipPath = clipOf(dia);
+  m.textContent = '';
+  m.insertAdjacentHTML('beforeend', `<svg class="pb" viewBox="0 0 ${px1(W)} ${px1(W)}"><polygon points="${polyPts(dia)}"/></svg>`);
+  if (padCfg.keys.mid !== PAD_DEFAULT.mid) m.append(label('mid', padCfg.keys.mid, cc, cc, true)); // the middle shows its key only when it was changed
 }
 /** key code of a single character, for an INPUTMOUSEKEY wait (digits as the numpad: peek reads 104/100/98/102 and 101; letters as their key; Enter for empty) */
 const keyCodeOf = (v: string) =>
@@ -1077,11 +1206,14 @@ $('dpadreset').onclick = () => {
   dpad.addEventListener('pointercancel', finish);
 }
 
+// ---- the cross layout (position, size, keys), whether it is removed, and the custom buttons are all per game
 // ---- custom buttons (per game): any text, placed and sized by the user while customizing; shown and hidden with the cross
 const X_MAX = 12;
 
 const xKey = () => 'emu.pad.btns:' + gameId;
 function loadX() {
+  padCfg = loadPad();
+  applyPad();
   xCfg = [];
   crossGone = !!gameId && lsGet(crossKey()) === '1';
   try {
@@ -1339,54 +1471,6 @@ $('padscrim').addEventListener('pointerdown', (e) => {
   }).observe($('main'));
 }
 applyPad();
-function userTap() {
-  if (arming) {
-    endArm();
-    return;
-  }
-  if (userInput !== null) {
-    if (userInput !== null) send(userInput);
-    return;
-  }
-  const bar = $('inbar') as HTMLFormElement;
-  const reopen = !!bar.hidden;
-  if (reopen) {
-    bar.hidden = false;
-    $('binp').classList.add('on');
-  }
-  arming = { reopen };
-  inp.value = '';
-  client.setInputText('');
-  refreshQuick();
-  inp.placeholder = 'type the input to save, then Send';
-  inp.focus(); // an explicit request for text: the one place the field is focused
-}
-function endArm() {
-  const a = arming;
-  arming = null;
-  if (a?.reopen) {
-    ($('inbar') as HTMLFormElement).hidden = true;
-    $('binp').classList.remove('on');
-  }
-  refreshInput();
-  refreshQuick();
-}
-$('userfree').onclick = () => clearUser();
-function clearUser() {
-  userInput = null;
-  if (arming) endArm();
-  renderQuick();
-}
-/** called with the input window's text on Send: true when it was kept for the user button instead of being sent */
-function captureForUser(v: string): boolean {
-  if (!arming) return false;
-  userInput = v;
-  inp.value = '';
-  client.setInputText('');
-  inp.blur();
-  endArm();
-  return true;
-}
 
 // ---------------------------------------------------------------- input log + debug controls
 function condensed(log: readonly string[]) {
@@ -1467,13 +1551,33 @@ function renderFontUi() {
   };
   add('', configFont ? `Game default (${configFont})` : 'Game default');
   for (const f of fonts.families()) add(f, f);
-  if (cur && !fonts.families().includes(cur)) add(cur, cur);
+  // MS Gothic cannot be bundled: offer it whenever the device has it, whatever the game's default is
+  if (msGothicInstalled() && !fonts.families().some((f) => familyKey(f) === familyKey('MS Gothic'))) add('MS Gothic', 'MS Gothic (installed)');
+  if (cur && ![...fonts.families(), 'MS Gothic'].includes(cur)) add(cur, cur);
+  else if (cur === 'MS Gothic' && !msGothicInstalled()) add(cur, cur);
   fontsel.value = cur;
   const eff = fonts.override ?? configFont,
     mine = fonts.list().filter((e: FontEntry) => familyKey(e.family) === familyKey(eff));
   const bad = mine.find((e: FontEntry) => e.ratio !== null && e.ratio !== 0.5);
   $('fwarn').textContent = bad ? `"${bad.family}" is not half-width 0.5 em: columns and rules may misalign.` : '';
   ($('frm') as HTMLButtonElement).hidden = !mine.some((e: FontEntry) => e.source === 'user');
+}
+let msGothicSeen: boolean | null = null;
+/** true when the device itself has MS Gothic: text in it measures differently from the same text in a generic family it would otherwise fall back to */
+function msGothicInstalled(): boolean {
+  if (msGothicSeen !== null) return msGothicSeen;
+  try {
+    const c = document.createElement('canvas').getContext('2d');
+    const t = 'abcWMi01あ漢ｱ';
+    const w = (f: string) => {
+      c!.font = `40px ${f}`;
+      return c!.measureText(t).width;
+    };
+    msGothicSeen = ['"MS Gothic"', '"ＭＳ ゴシック"'].some((n) => w(`${n}, monospace`) !== w('monospace') || w(`${n}, serif`) !== w('serif'));
+  } catch {
+    msGothicSeen = false;
+  }
+  return msGothicSeen;
 }
 function applyFonts() {
   view.refreshFonts();
@@ -1621,7 +1725,8 @@ async function load(blob: Blob, name: string) {
     netGame = Object.keys(g.csv).some((p) => /(^|\/)setting\.json$/i.test(p));
     dpad.hidden = true;
     bdpad.classList.remove('on');
-    applyWidgets(); // the pad starts hidden on every game
+    applyWidgets(); // the pad starts hidden on every game, unless the game is detected as one that needs it (Emuera.NET)
+    if (netGame && dpadEnabled()) showPad();
     fonts.override = lsGet('emu.font:' + gameId) || null;
     applyFonts();
     const xfer: Transferable[] = [...Object.values(g.images), ...Object.values(g.erbBytes ?? {})];

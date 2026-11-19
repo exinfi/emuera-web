@@ -108,8 +108,7 @@ For more information on in-game translation and how to build your own pack see t
 On-screen controls to help play without a keyboard and can be configured under **Widgets** in the control panel.
 
 - **Direction pad:** a cross of buttons that sends 8, 4, 5, 6 and 2. It can be dragged and resized, and each key can be changed. **Reset cross** restores it to its original state.
-- **Custom buttons:** Attached to the direction pad settings. Add your own buttons that send a user set value.
-- **Quick Input:** at the top, are buttons to send the last input again, 999, and a **+** button you can set. Tap **+** to record a custom value.
+- **Quick access button:** Header buttons to help with repetitive inputs. When enabled, a 'last action' button is enabled by default with the ability to add more buttons with your own user set value.
 
 ## Issues
 
@@ -135,7 +134,7 @@ The debug tools are in the **dbg** button in the top bar (your top bar must not 
 - **Export game snapshot** downloads a JSON copy of every game variable that differs from its default (characters, flags, tables, maps). It lets someone restore your exact game state to reproduce a problem. It holds no screen, call stack or files, at the time of export.
 - **Crash snapshot** appears after a crash and holds the game state at that moment.
 
-The log and snapshot contain text from the game and the inputs you typed, and the snapshot contains your game state. Look through them before you post them publicly. Your save files and the game itself are not included.
+The log and snapshot contain text from the game and the inputs you typed, and the snapshot contains your game state. Look through them before you post them publicly. Your saved files and the game itself are not included.
 
 ## Attribution
 
@@ -170,14 +169,15 @@ Games you load are the work of their own authors and are under their own terms. 
 
 ### Components included in the page
 
-| Component                            | Used for                      | License                                                      | Copyright                                                                             |
-| ------------------------------------ | ----------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| JSZip 3.10.1                         | reading and writing zip files | MIT (the project is dual-licensed MIT or GPLv3; MIT is used) | (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso      |
-| pako (part of JSZip)                 | zip compression               | MIT                                                          | (C) 2014-2017 Vitaly Puzrin and Andrei Tuputcyn                                       |
-| BIZ UDGothic (Regular, Bold; subset) | default text font             | SIL Open Font License 1.1                                    | 2022 The BIZ UDGothic Project Authors                                                 |
-| DotGothic16 (subset)                 | optional pixel-style font     | SIL Open Font License 1.1                                    | 2020 The DotGothic16 Project Authors, https://github.com/fontworks-fonts/DotGothic16/ |
+| Component                             | Used for                       | License                                                      | Copyright                                                                             |
+| ------------------------------------- | ------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| JSZip 3.10.1                          | reading and writing zip files  | MIT (the project is dual-licensed MIT or GPLv3; MIT is used) | (c) 2009-2016 Stuart Knightley, David Duponchel, Franz Buchinger, António Afonso      |
+| pako (part of JSZip)                  | zip compression                | MIT                                                          | (C) 2014-2017 Vitaly Puzrin and Andrei Tuputcyn                                       |
+| BIZ UDGothic | default text font              | SIL Open Font License 1.1                                    | 2022 The BIZ UDGothic Project Authors                                                 |
+| BIZ UDPGothic | page font | SIL Open Font License 1.1                                    | 2022 The BIZ UDPGothic Project Authors                                                |
+| DotGothic16                  | optional pixel-style font      | SIL Open Font License 1.1                                    | 2020 The DotGothic16 Project Authors, https://github.com/fontworks-fonts/DotGothic16/ |
 
-The two font files are reduced copies (subsets) of the original fonts, which the Open Font License permits. The OFL texts are in `public/assets/font/`.
+The OFL texts are in `public/assets/font/`.
 
 ### Optional translation components
 
