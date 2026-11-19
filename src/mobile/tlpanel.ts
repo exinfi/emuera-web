@@ -14,7 +14,7 @@ const MAX_ENTRIES = 300,
   SLIVER = 28;
 const CSS = `
 #tlpanel{position:absolute;top:0;bottom:0;left:0;width:calc(100% - ${SLIVER}px);z-index:20;background:var(--bg,#14161c);color:var(--text,#dde);border-right:1px solid var(--line2,#556);transform:translateX(-100%);transition:transform .18s ease;display:flex;flex-direction:column;font-family:var(--mono,monospace);font-size:13px;line-height:1.45}
-#tlpanel.open{transform:none}#tlpanel.drag,#tltab.drag{transition:none}
+#tlpanel.open{transform:none}#tlpanel:not(.open):not(.drag){visibility:hidden;transition:transform .18s ease,visibility 0s .18s}   /* shut: hidden once it has slid out, or it shows in the left safe-area strip of a notched phone in landscape */#tlpanel.drag,#tltab.drag{transition:none}
 #tlhead{display:flex;gap:6px;align-items:center;padding:4px 8px;background:var(--sheet,#14161c);border-bottom:1px solid var(--line,#445);font-family:var(--ui,inherit);font-size:12px;color:var(--dim,#9ab);min-height:44px}#tlhead .sp{flex:1}
 #tlhead b{color:var(--head,#dde);font-size:var(--h3s,12px);font-weight:var(--h3w,700);letter-spacing:var(--h3ls,0);white-space:nowrap}#tlhead b::after{content:"_";color:var(--accent,#5c82c4);margin-left:2px}
 #tlstat{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
