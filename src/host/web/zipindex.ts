@@ -66,7 +66,7 @@ const slice = async (b: Bytes, start: number, end: number, win = true): Promise<
 };
 
 /** one entry's compressed bytes. `win` = read through the read-ahead window (a pass over entries in file order); otherwise one exact slice for header and data together (each slice of a file-backed Blob has a fixed cost) */
-async function readRaw(src: Bytes, r: EntryRef, name: string, win: boolean): Promise<Uint8Array> {
+async function readRaw(src: Bytes, r: EntryRef, name: string, win: boolean, want = r.csize): Promise<Uint8Array> {
   if (win) {
     const lh = await slice(src, r.offset, r.offset + 30);
     const lv = new DataView(lh.buffer, lh.byteOffset, lh.byteLength);
@@ -74,19 +74,26 @@ async function readRaw(src: Bytes, r: EntryRef, name: string, win: boolean): Pro
     const start = r.offset + 30 + lv.getUint16(26, true) + lv.getUint16(28, true);
     return slice(src, start, start + r.csize);
   }
-  const first = await slice(src, r.offset, r.offset + 30 + r.nameLen + 256 + r.csize, false);
+  const first = await slice(src, r.offset, r.offset + 30 + r.nameLen + 256 + want, false);
   const fv = new DataView(first.buffer, first.byteOffset, first.byteLength);
   if (first.length < 30 || fv.getUint32(0, true) !== 0x04034b50) throw new ZipError(`"${name}": bad local header`);
   const ds = 30 + fv.getUint16(26, true) + fv.getUint16(28, true);
-  return ds + r.csize <= first.length
-    ? first.subarray(ds, ds + r.csize)
-    : slice(src, r.offset + ds, r.offset + ds + r.csize, false);
+  return ds + want <= first.length
+    ? first.subarray(ds, ds + want)
+    : slice(src, r.offset + ds, r.offset + ds + want, false);
 }
 /** an entry's content as an ArrayBuffer, read from its zip (one exact slice; for reads in no particular order). Used by the worker to fetch a resource image on first use. */
 export async function readEntryRef(src: Bytes, r: EntryRef, name = 'entry'): Promise<ArrayBuffer> {
   if (r.method !== 0 && r.method !== 8) throw new ZipError(`"${name}": unsupported compression method ${r.method}`);
   const raw = await readRaw(src, r, name, false);
   return exact(r.method === 0 ? raw : (pako.inflateRaw(raw) as Uint8Array));
+}
+
+/** the first `n` bytes of an entry's content, read from its zip (the async twin of `readHeadSync`: only the bytes needed for a header are read, never the whole file). Used by the loader to learn the size of the images the sprite tables name. */
+export async function readHeadRef(src: Bytes, r: EntryRef, n: number, name = 'entry'): Promise<Uint8Array> {
+  if (r.method !== 0 && r.method !== 8) throw new ZipError(`"${name}": unsupported compression method ${r.method}`);
+  const raw = await readRaw(src, r, name, false, Math.min(r.csize, r.method === 0 ? n : Math.max(4 * n, 8192)));
+  return r.method === 0 ? raw.slice(0, n) : inflatePrefix(raw, n);
 }
 
 /** the first `n` bytes a deflate stream's prefix inflates to (the prefix may be cut anywhere; whatever inflates before the cut is returned) */

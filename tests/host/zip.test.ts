@@ -351,6 +351,106 @@ describe('lazy images in the game loader', () => {
   });
 });
 
+describe('sizes of the images the resource tables name', () => {
+  const sheet = 'SPRA,a.png\nsprb,B.PNG,0,0,5,5\n;a comment\nWALK,ANIME,16,16\n\nbroken line\nGONE,missing.png\n';
+  const game = () =>
+    build([
+      { name: 'ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' },
+      { name: 'CSV/GameBase.csv', data: 'コード,1' },
+      { name: 'resources/sprites.csv', data: sheet },
+      { name: 'resources/a.png', data: png(48, 96) },
+      { name: 'resources/b.png', data: png(7, 9), deflate: true },
+      { name: 'resources/c.png', data: png(3, 3) }, // in no table
+    ]);
+
+  test('only the images a table names get a size at load; the others stay unread', async () => {
+    const l = new GameLoader(undefined, { lazyImages: true });
+    await l.add({ name: 'game.zip', blob: new Blob([game()]) });
+    await l.readSpriteSizes();
+    const f = l.finish();
+    assert.deepEqual(f.imageRefs!['resources/a.png'].dim, { w: 48, h: 96 });
+    assert.deepEqual(f.imageRefs!['resources/b.png'].dim, { w: 7, h: 9 }); // named as B.PNG: the match ignores case
+    assert.equal(f.imageRefs!['resources/c.png'].dim, undefined);
+  });
+
+  test('a pack image that replaces the game image gives its own size, and the table may come from another zip', async () => {
+    const pack = build([{ name: 'resources/a.png', data: png(10, 20) }]);
+    const l = new GameLoader(undefined, { lazyImages: true });
+    await l.add({ name: 'game.zip', blob: new Blob([game()]) });
+    await l.add({ name: 'pack.zip', blob: new Blob([pack]) });
+    await l.readSpriteSizes();
+    const f = l.finish();
+    assert.deepEqual(f.imageRefs!['resources/a.png'].dim, { w: 10, h: 20 });
+    assert.deepEqual(f.imageRefs!['resources/b.png'].dim, { w: 7, h: 9 });
+  });
+
+  test('a table row whose path is not found falls back to the first image of that file name under resources/, as the engine does for such games', async () => {
+    const z = build([
+      { name: 'ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' },
+      { name: 'CSV/GameBase.csv', data: 'コード,1' },
+      { name: 'resources/tables/sprites.csv', data: 'ONE,Spr.PNG\nTWO,old\\folder\\two.png\n' },
+      { name: 'resources/z/spr.png', data: png(8, 8) }, // sorts after the next one
+      { name: 'resources/a/spr.png', data: png(5, 6) },
+      { name: 'resources/b/two.png', data: png(2, 4) },
+      { name: 'resources/b/other.png', data: png(9, 9) },
+    ]);
+    const l = new GameLoader(undefined, { lazyImages: true });
+    await l.add({ name: 'game.zip', blob: new Blob([z]) });
+    await l.readSpriteSizes();
+    const f = l.finish();
+    assert.deepEqual(f.imageRefs!['resources/a/spr.png'].dim, { w: 5, h: 6 }); // first in sorted order
+    assert.equal(f.imageRefs!['resources/z/spr.png'].dim, undefined);
+    assert.deepEqual(f.imageRefs!['resources/b/two.png'].dim, { w: 2, h: 4 }); // a backslash path, matched by its last part
+    assert.equal(f.imageRefs!['resources/b/other.png'].dim, undefined);
+  });
+
+  test('without lazyImages there is nothing to do, and nothing breaks', async () => {
+    const l = new GameLoader(undefined, {});
+    await l.add({ name: 'game.zip', blob: new Blob([game()]) });
+    await l.readSpriteSizes();
+    assert.equal(l.finish().imageRefs, undefined);
+  });
+
+  /** a Blob whose first `fails` reads throw, as a file that cannot be read for the moment does */
+  class FlakyBlob extends Blob {
+    fails = 0;
+    slice(start?: number, end?: number, type?: string): Blob {
+      if (this.fails > 0) {
+        this.fails--;
+        throw new Error('NotReadableError');
+      }
+      return super.slice(start, end, type);
+    }
+  }
+  const flaky = async (fails: number, log: string[]) => {
+    const zip = game();
+    const l = new GameLoader((x) => log.push(x), { lazyImages: true });
+    await l.add({ name: 'game.zip', blob: new Blob([zip]) });
+    const f = l.finish();
+    const fb = new FlakyBlob([zip]);
+    fb.fails = fails;
+    f.imageSources![0] = fb; // the zip was read once; from here the file misbehaves
+    await l.readSpriteSizes();
+    return f;
+  };
+
+  test('a read that fails once is tried again and the size is still found', async () => {
+    const log: string[] = [];
+    const f = await flaky(1, log);
+    assert.deepEqual(f.imageRefs!['resources/a.png'].dim, { w: 48, h: 96 });
+    assert.deepEqual(f.imageRefs!['resources/b.png'].dim, { w: 7, h: 9 });
+    assert.deepEqual(log.filter((x) => /could not be read/.test(x)), []); // recovered: nothing to report
+  });
+
+  test('a file that cannot be read at all does not stop the load: the size stays unknown and one line says so', async () => {
+    const log: string[] = [];
+    const f = await flaky(Infinity, log);
+    assert.equal(f.imageRefs!['resources/a.png'].dim, undefined);
+    assert.equal(log.filter((x) => /could not be read at load/.test(x)).length, 1);
+    assert.match(log.join('\n'), /2 image size\(s\)/);
+  });
+});
+
 describe('a file supplied again by a later zip', () => {
   const base = () =>
     build([

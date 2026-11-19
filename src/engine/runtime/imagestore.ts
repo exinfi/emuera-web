@@ -66,13 +66,21 @@ export class ImageStore {
   budget = 256 * 1024 * 1024;
   private encoded = new Map<
     string,
-    { bytes?: ArrayBuffer; ext: string; load?: () => Promise<ArrayBuffer>; size: number; sniff?: () => Size | undefined }
+    {
+      bytes?: ArrayBuffer;
+      ext: string;
+      load?: () => Promise<ArrayBuffer>;
+      size: number;
+      sniff?: () => Size | undefined;
+      /** failed `sniff` calls so far */
+      sniffFails?: number;
+    }
   >(); // insertion order = LRU order of the resident ones
   /** budget in bytes for encoded images that are resident AND can be read again (registered with `addRef`); eagerly added images are never dropped */
   encodedBudget = Infinity;
   private encodedUsed = 0;
   /** counters for tests and the debug log */
-  stats = { loads: 0, loadBytes: 0, loadMs: 0, evictions: 0 };
+  stats = { loads: 0, loadBytes: 0, loadMs: 0, evictions: 0, sizeErrors: 0 };
   private dims = new Map<string, Size>();
   private cache = new Map<string, any>(); // insertion order = LRU order (oldest first)
   private inflight = new Map<string, Promise<void>>();
@@ -119,16 +127,18 @@ export class ImageStore {
     if (d) return d;
     const e = this.encoded.get(path);
     if (e?.sniff) {
-      const f = e.sniff;
-      e.sniff = undefined; // asked once, whatever the answer
       try {
-        const s = f();
+        const s = e.sniff();
+        e.sniff = undefined; // answered (a size, or none because the header holds none): not asked again
         if (s) {
           this.dims.set(path, s);
           return s;
         }
       } catch {
-        /* unreadable header: the size stays unknown, as for an image whose header holds none */
+        // the read itself failed (a file that cannot be read right now): counted, and asked again the next time, up to 3 tries in all
+        this.stats.sizeErrors++;
+        e.sniffFails = (e.sniffFails ?? 0) + 1;
+        if (e.sniffFails >= 3) e.sniff = undefined;
       }
     }
     return undefined;

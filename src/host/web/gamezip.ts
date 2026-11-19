@@ -2,7 +2,9 @@
 import JSZip from 'jszip';
 import { decodeText } from '../../engine/textdecode';
 import type { ImageRef } from '../protocol';
-import { loadThin } from './zipindex';
+import { loadThin, readEntryRef, readHeadRef } from './zipindex';
+import { sniffSize } from '../../engine/runtime/imagestore';
+import { splitLines } from '../../engine/util/lines';
 
 /**
  * The zip reader. `true` (the default) uses the thin reader in zipindex.ts: it reads the central directory only, inflates one entry at a
@@ -351,6 +353,75 @@ export class GameLoader {
     else if (skippedCap) this.log?.(`${skippedCap} referenced file(s) skipped at the ${EXTRA_CAP >> 20} MB limit`);
     if (left) this.log?.(`${left} readable file(s) in folders the game's code never names were not loaded`);
   }
+  /**
+   * For images left in their zips (`lazyImages`): reads the width and height of the images the resource tables (the CSVs under resources/) name, from the first bytes of each file,
+   * so the engine's size questions at boot are answered without any read. Call once after the last source, before `finish()`. Only the images the tables name are read (a few dozen
+   * in most games); every other image keeps its size unknown until the game first asks. A read that fails is tried once more, then left for the worker to try when it is asked.
+   */
+  async readSpriteSizes(onProgress?: (done: number, total: number) => void): Promise<void> {
+    const refs = this.files.imageRefs,
+      srcs = this.files.imageSources;
+    if (!refs || !srcs) return;
+    const byLower = new Map<string, string>();
+    for (const k of Object.keys(refs)) byLower.set(k.toLowerCase(), k);
+    // a game on the PuchiEmuera profile finds a resource image by its file name alone (see Gfx.findByName: the first path, in sorted order, under resources/ with that name); the same rule here
+    let byName: Map<string, string> | undefined;
+    const findByName = (file: string): string | undefined => {
+      if (!byName) {
+        byName = new Map();
+        for (const p of [...byLower.keys()].sort()) {
+          if (!p.startsWith('resources/')) continue;
+          const b = p.slice(p.lastIndexOf('/') + 1);
+          if (!byName.has(b)) byName.set(b, p);
+        }
+      }
+      const f = file.replace(/\\/g, '/').toLowerCase();
+      return byName.get(f.slice(f.lastIndexOf('/') + 1));
+    };
+    const todo = new Set<string>();
+    for (const [p, text] of Object.entries(this.files.rescsv)) {
+      const dir = p.slice(0, p.lastIndexOf('/') + 1);
+      for (const raw of splitLines(text)) {
+        const line = raw.trim();
+        if (!line || line.startsWith(';')) continue;
+        const t = line.split(',');
+        if (t.length < 2) continue;
+        const name = t[0].trim(),
+          a2 = t[1].trim();
+        if (!name || !a2 || a2.toUpperCase() === 'ANIME') continue;
+        const direct = (dir + a2).toLowerCase();
+        const k = byLower.get(direct) ?? byLower.get(findByName(a2) ?? '');
+        if (k !== undefined && !refs[k].dim) todo.add(k);
+      }
+    }
+    const keys = [...todo];
+    let done = 0,
+      failed = 0,
+      next = 0;
+    const one = async (k: string) => {
+      const r = refs[k],
+        src = srcs[r.src];
+      for (let attempt = 0; attempt < 2; attempt++) {
+        try {
+          let dim = sniffSize(await readHeadRef(src, r, 16384, k));
+          if (!dim && r.size > 16384) dim = sniffSize(new Uint8Array(await readEntryRef(src, r, k)));
+          if (dim) r.dim = dim;
+          return;
+        } catch {
+          /* tried again once; then the worker asks when the game does */
+        }
+      }
+      failed++;
+    };
+    const worker = async () => {
+      while (next < keys.length) {
+        await one(keys[next++]);
+        onProgress?.(++done, keys.length);
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(6, keys.length) }, worker));
+    if (failed) this.log?.(`${failed} image size(s) named by the resource tables could not be read at load (read again when the game asks)`);
+  }
   /** closes the log with the override total; call once after the last source */
   finish(): GameFiles {
     if (this.clashes > CAP)
@@ -373,6 +444,7 @@ export async function readGameZip(
   const l = new GameLoader(log);
   await l.add({ name: gameName, blob: file }, onProgress);
   for (const p of packs) await l.add(p, onProgress);
+  await l.readSpriteSizes();
   return l.finish();
 }
 
