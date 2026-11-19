@@ -1,17 +1,17 @@
 # emuera-web
 
-**Try it:** [GitHub Pages link goes here]
+**[0]** https://exinfi.github.io/emuera-web/
 
-## What is This?
+## What is this?
 
-emuera-web is a browser-based Emuera interpreter that aims to run era text games on a computer or a phone. Once the page has loaded, it runs entirely on your local device and needs no network connection.
+emuera-web is a browser-based Emuera interpreter that aims to run era text games on a computer or a phone on a single webpage. Once the page has loaded, it runs entirely on your local device.
 
-The interpreter is an independent browser port of Emuera. It is not an official Emuera release: it aims to run the same games in a faithful manner, but it is a separate program. It was not made by the authors of Emuera or its branches. Issues you run into may be caused by this implementation rather than by the game or by Emuera. Please do not contact the game authors, or of Emuera or its branches, about them.
+This is an independent project. It is unaffiliated with Emuera, its branches or any game. If there is an issue, the cause may be this program, so please report it here and not to those authors.
 
 
-emuera-web は、eraゲームをパソコンやスマートフォンで動作させることを目指した、ブラウザベースのEmueraインタープリターです。ページの読み込みが完了した後は、すべてお使いの端末上で動作し、ネットワーク接続は必要ありません。
+emuera-web は、eraゲームをパソコンやスマートフォンで動作させることを目指した、ブラウザベースのEmueraインタープリターです。ページの読み込みが完了した後は、すべてお使いの端末上で動作します。
 
-本インタープリターは、Emueraの独立したブラウザ移植版です。Emueraの公式リリースではなく、同じゲームを忠実に動作させることを目指してはいますが、Emueraとは別のプログラムです。Emueraおよびその派生版の作者によって作られたものではありません。本実装が原因で発生する問題がある可能性がありますので、そのような問題について、ゲームの作者の方やEmuera（およびその派生版）の作者の方にお問い合わせになることはお控えください。
+これは独立したプロジェクトであり、Emuera、その派生版、およびいかなるゲームとも提携・関係していません。問題が発生した場合、原因は本プログラムにある可能性がありますので、Emuera（およびその派生版）やゲームの作者の方ではなく、こちらにご報告ください。
 
 ## How to Build
 
@@ -26,14 +26,19 @@ This writes `site/`, a site you can host on any static host, such as GitHub Page
 
 `npm run build:mobile` builds just that single-file player, to `dist-play/play.html`, without making `site/`.
 
-To check your changes: `npm run typecheck` and `npm test`. Tests are grouped by area (`npm run test:engine`, `test:host`, `test:data`), and `npm run test:changed` runs only the areas touched by your changes. See `tests/README.md`.
+If you are changing the code, there is a test suite to check your work. Run `npm run typecheck` and `npm test`; see `tests/README.md` for more details.
+
+---
+
+**I Just Want to Play Games:** Go to dist-play/play.html and drag that file on your browser. All features may not work.
 
 ## How to Use
 
 ### Quickstart
 1. Open the page and press the menu button (the three bars) to show the control panel.
 2. Under **Game**, press **Load game zip…** and pick your game's zip file. **You can also drop the zip on the page if your device supports it.**
-    - Most supported files (game, memory card, resource packs, translation packs) can be easily dropped in, otherwise use the respective load button.
+    - A game zip is all the game files (ERB/ CSV/...) zipped together. If you got your game from a repo, that zip will (probably) work.
+    - Most supported files (game, memory card, resource packs, language packs) can be drag and dropped in, otherwise use the respective load button.
 3. The game supports both mouse input on desktop and tap input on mobile devices.
     - The keyboard icon can be used to show/hide the text input box.
     - If on mobile, the **L / R / H** button at the top left sets what a tap does: left click, right click, or hover (a long press does the other click).
@@ -43,8 +48,10 @@ The default options work for most games. If a game keeps its files in an unusual
 
 
 1. ページを開き、メニューボタン（三本線のアイコン）を押してコントロールパネルを表示します。
-2. **Game** の **Load game zip…** を押して、ゲームのzipファイルを選びます。zipファイルをページにドラッグ＆ドロップしても読み込めます。
-3. デスクトップではマウス操作、モバイル端末ではタップ操作で遊べます。
+2. **Game** の **Load game zip…** を押して、ゲームのzipファイルを選びます。お使いの端末が対応していれば、zipファイルをページにドラッグ＆ドロップしても読み込めます。
+    - ゲームのzipファイルとは、ゲームのファイル一式（ERB/ CSV/ など）をまとめてzip圧縮したものです。リポジトリから入手したゲームであれば、そのzipがおそらくそのまま使えます。
+    - 対応しているファイル（ゲーム、メモリーカード、リソースパック、言語パック）の多くはドラッグ＆ドロップで読み込めます。できない場合は、それぞれの読み込みボタンを使ってください。
+3. デスクトップではマウス操作、モバイル端末ではタップ操作の両方に対応しています。
     - キーボードのアイコンで、テキスト入力欄の表示／非表示を切り替えられます。
     - モバイルでは、左上の **L / R / H** ボタンでタップの動作（左クリック、右クリック、ホバー）を切り替えます（長押しでもう一方のクリックになります）。
 4. **Reload Game** を押すと、読み込み済みのゲームを最初からやり直します。
@@ -72,31 +79,33 @@ Use **Export saves** (under **Memory card**) to download a backup zip, and **Imp
 
 A resource pack is an extra zip whose files are laid over the game's own files when the game loads, for example image packs, CSV data, or ERB code.
 
-- Add packs under **Resource packs** with **Add pack zip…**. They are stored in your browser and are not tied to one game. the enabled list is applied to whatever game you load next.
-- Packs apply in list order, and a later pack wins when two packs contain the same file. You can reorder, disable or remove a pack. Each entry shows its size and indicates if it carries code (ERB) or data (CSV).
-- A pack can include a `pack.txt` at its root (name, author, version, game, url, description). It is only displayed in the list and is never loaded into the game.
+- Add packs under **Resource packs** with **Add pack zip…**. Once enabled, they will apply to any game you load next.
+- Packs apply in list order. A later pack's file will override an earlier one. You can reorder, disable or remove a pack. Each entry shows its size and indicates if it carries code (ERB) or data (CSV).
+- A pack can include a `pack.txt` at its root (name, author, version, game, url, description). This file is not loaded into the game.
 - Changes take effect on the next load. Press **Apply: reload game** to reload the open game with the current pack list.
 
-More info on resource packs: [wiki page, link to be added].
+For more info on resource packs see the [wiki page.](https://github.com/exinfi/emuera-web/wiki/Resource-Packs)
 
 
 ### Translation
 
-An optional, offline machine translation module for games. It is off by default. When enabled, text from the game is translated in your browser, on your device, and shown in a side panel; nothing is sent to any server, and the game itself is never altered. Results are rough and intended for getting general gist only.
+An optional, offline machine translation module for games. When enabled, text from the game is translated in your browser, and shown in a side panel. Translations are local and the game itself is not altered. Results are rough and intended for getting the general idea only.
 
-- Translation needs two things, both added as zip files under **Translation** with **Add translation zip…**: the translation engine, and a language model (for example Japanese to English).
-- The engine and the Japanese, Korean and Simplified Chinese to English models are in `other/translationpacks/`. The hosted page also offers **Load bundled translation files**, which adds the engine and the Japanese model for you. Builds you make yourself do not include this button unless you add the files to `bundled-assets/` (see `tools/build-site.mts`).
-- Once loaded in your page, tick **Enable translation**. Translated lines appear in a panel.
+- Translation needs two things, both added as zip files under **Translation** with **Add translation zip…**:
+    - the translation engine,
+    - and a language model (for example Japanese to English).
+- The engine and the Japanese, Korean and Simplified Chinese to English models are in `other/translationpacks/`. The hosted github page also offers **Load bundled translation files**, which adds the engine and the Japanese model for you. Builds you make yourself do not include this button unless you add the files to `bundled-assets/` (see `tools/build-site.mts`).
+
+- Once loaded in your page, tick **Enable translation**. Translated lines will appear in a panel.
     - If on mobile, the translation panel will take the form of an overlay panel, opened by clicking/swiping on the translation tab present on the left side of the main game display.
     - Otherwise, if your screen is wide enough you can enable it to be docked side-by-side like desktop.
-- Translated lines are remembered per game so they are not translated twice. **Clear cached lines** deletes them.
 - **Enable copy to clipboard** lets you tap a line in the panel to copy it, hold to copy from that line to the latest, or hold the latest line to copy the last 50.
 
-How to build your own translation pack: [wiki page, link to be added].
+For more information on in-game translation and how to build your own pack see the [wiki page.](https://github.com/exinfi/emuera-web/wiki/Translation)
 
 ### Widgets
 
-On-screen controls to help play without a keyboard. All are optional and are configured under **Widgets** in the control panel.
+On-screen controls to help play without a keyboard and can be configured under **Widgets** in the control panel.
 
 - **Direction pad:** a cross of buttons that sends 8, 4, 5, 6 and 2. It can be dragged and resized, and each key can be changed. **Reset cross** restores it to its original state.
 - **Custom buttons:** Attached to the direction pad settings. Add your own buttons that send a user set value.
@@ -112,7 +121,7 @@ On-screen controls to help play without a keyboard. All are optional and are con
 
 ### Reporting a problem
 
-Open an issue on this repository and include:
+Open an issue on this repository and include as necessary:
 
 - the game's name and version, and which build of emuera-web you are using (shown at the bottom of the control panel);
 - what you did, what you expected, and what happened instead;
@@ -130,7 +139,7 @@ The log and snapshot contain text from the game and the inputs you typed, and th
 
 ## Attribution
 
-The interpreter's own code is licensed under the MIT License, Copyright (c) 2026 The emuera-web contributors. The license text is in the `LICENSE` file. Parts of the code that follow Emuera's structure also carry Emuera's license, given below.
+The interpreter's own code is licensed under the MIT License, Copyright (c) 2026.
 
 
 ### Emuera
@@ -172,17 +181,9 @@ The two font files are reduced copies (subsets) of the original fonts, which the
 
 ### Optional translation components
 
-All files in this section are included **unmodified**, as released by their authors, and are licensed under the Mozilla Public License 2.0. The source form of every MPL-licensed file is available from the addresses below.
+All files in this section are included **unmodified**, as released by their authors, and are licensed under the Mozilla Public License 2.0. 
 
-| File                     | What it is                                                                                                                                                                                                                | Source                                                                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `translation.engine.zip` | the Bergamot translation engine (WebAssembly and its JavaScript wrapper), npm package @browsermt/bergamot-translator 0.4.9 (the three files are the package's `worker/` files), whose code reports build `v0.4.5+4917c11` | https://www.npmjs.com/package/@browsermt/bergamot-translator and https://github.com/browsermt/bergamot-translator |
-| `translation.ja-en.zip`  | Japanese to English model, vocabulary and shortlist from Mozilla Firefox Translations                                                                                                                                     | https://mozilla.github.io/translations/firefox-models/                                                                                           |
-| `translation.ko-en.zip` | Korean to English model, vocabulary and shortlist from Mozilla Firefox Translations | https://mozilla.github.io/translations/firefox-models/ |
-| `translation.zh-Hans-en.zip` | Simplified Chinese to English model, vocabulary and shortlist from Mozilla Firefox Translations | https://mozilla.github.io/translations/firefox-models/ |
+- `translation.engine.zip` is the Bergamot translation engine (WebAssembly and its JavaScript wrapper): the three `worker/` files of the npm package [@browsermt/bergamot-translator](https://www.npmjs.com/package/@browsermt/bergamot-translator) 0.4.9 (source: [browsermt/bergamot-translator](https://github.com/browsermt/bergamot-translator)).
+- `translation.ja-en.zip`, `translation.ko-en.zip` and `translation.zh-Hans-en.zip` are the Japanese, Korean and Simplified Chinese to English models, with their vocabulary and shortlist files, from [Mozilla Firefox Translations](https://mozilla.github.io/translations/firefox-models/).
 
-
-Mozilla, Firefox and Bergamot are the names of their respective owners. This project is not affiliated with or endorsed by them.
-
-...\
-eramakerを作ってくださった方、Emueraを育て受け継いでこられた方々、そしてゲームを作り、遊び、支え続けているすべての皆さまへ。長年のものづくりに、心から感謝します。
+Mozilla, Firefox and Bergamot are trademarks or names of their respective owners. This project is not affiliated with or endorsed by them.

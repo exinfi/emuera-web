@@ -24,6 +24,8 @@ export interface StartOptions {
   opt: boolean;
   /** low memory loader (additive, optional, read by the page's loader, not by the engine; default on): ERB/ERH travel to the worker as bytes and are decoded and parsed one file at a time */
   xloader?: boolean;
+  /** read resource images from the zip when first drawn instead of holding them all in memory (additive, optional, read by the page's loader, default on) */
+  ximages?: boolean;
   /** scan the game's code for folder names and load the extra files in them (additive, optional, read by the page's loader, default off) */
   xrefs?: boolean;
 }
@@ -76,6 +78,7 @@ export const OPTION_DEFS: readonly OptionDef[] = [
     default: false,
     label: 'decode all images up front',
     title: 'Debug: decode every image at boot (uses a lot of memory).',
+    hidden: true, // retired from the page (no checkbox); the worker still honors it when a host sends `eager`. Remove this line to bring the checkbox back.
   },
   {
     id: 'xloader',
@@ -84,6 +87,14 @@ export const OPTION_DEFS: readonly OptionDef[] = [
     label: 'low memory loader',
     title:
       "ERB files go to the engine as bytes and are decoded and parsed one at a time instead of as two copies of the whole source text. Much lower memory for large games (phones). The parsed program is identical to the original loader's (checked on four games). The engine error report's source excerpt comes from the parsed text and is missing for the few functions with # lines. Untick for the original loader; applies the next time a game loads.",
+  },
+  {
+    id: 'ximages',
+    key: 'ximages',
+    default: true,
+    label: 'read images on demand',
+    title:
+      'Resource images stay in the zip and are read when the game first draws them (a few ms each), instead of all being held in memory. Much lower memory for games with thousands of images. Needs the zip file to stay available (it does while the page is open). Untick to load every image up front (uses more memory); applies the next time a game loads.',
   },
   {
     id: 'xrefs',
@@ -99,6 +110,17 @@ export const DEFAULT_OPTIONS: StartOptions = Object.fromEntries(
 ) as unknown as StartOptions;
 
 // ---------------------------------------------------------------- shared payload shapes
+/** a resource image left in its zip (option `ximages`): where its data is (`src` indexes `StartMsg.imageSources`), its size in bytes, and its width and height when the host knows them (otherwise the worker reads them from the file header when the game first asks) */
+export interface ImageRef {
+  src: number;
+  offset: number;
+  csize: number;
+  method: number;
+  nameLen: number;
+  ext: string;
+  size: number;
+  dim?: { w: number; h: number };
+}
 export interface SavedSlot {
   info: string;
   data: string;
@@ -223,6 +245,11 @@ export interface StartMsg extends StartOptions {
   rescsv: Record<string, string>;
   texts: Record<string, string>;
   images: Record<string, ArrayBuffer>;
+  /** optional (additive, option `ximages`): resource images left in their zips; read by the worker on first use. `imageSources` are the zips (Blobs are posted as handles, not copied). */
+  imageRefs?: Record<string, ImageRef>;
+  imageSources?: (Blob | Uint8Array)[];
+  /** optional (additive): cap in MB on image files held in memory after being read on demand (default 128); least recently used are dropped and read again */
+  imageCacheMB?: number;
   /** optional (additive): paths in the game zip the loader did not load; the engine notes it when the game asks for one of them */
   unloaded?: string[];
   sounds: string[];

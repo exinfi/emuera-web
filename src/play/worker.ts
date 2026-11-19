@@ -32,6 +32,8 @@ import type {
 } from '../host/protocol';
 import { ExprParser } from '../engine/compiler/expr';
 import { OPTION_DEFS } from '../host/protocol';
+import { readEntryRef, readEntrySync, readHeadSync } from '../host/web/zipindex';
+import { sniffSize } from '../engine/runtime/imagestore';
 import { splitLines } from '../engine/util/lines';
 import {
   fromNative,
@@ -1414,7 +1416,9 @@ async function start(m: StartMsg) {
   const alignPatch =
     !!m.patches && !patchOff.includes('rancek-html-align') && patchesFor(csv).some((p) => p.id === 'rancek-html-align');
   if (alignPatch) r.htmlFollowsAlign = true;
-  const aliased = formPatch ? addFormFolderAliases(m.images) : [];
+  const aliased = formPatch
+    ? [...addFormFolderAliases(m.images), ...(m.imageRefs ? addFormFolderAliases(m.imageRefs) : [])]
+    : [];
   if (aliased.length) status(`Game patches active: image folder aliases ${aliased.join(', ')}`);
   activePatches = [
     ...(patched.length ? ['erablue-load'] : []),
@@ -1470,6 +1474,7 @@ async function start(m: StartMsg) {
     ...Object.keys(m.csv),
     ...Object.keys(m.rescsv),
     ...Object.keys(m.images),
+    ...Object.keys(m.imageRefs ?? {}),
     ...Object.keys(m.texts),
     ...(m.sounds ?? []).map((n) => 'sound/' + n),
   ];
@@ -1497,11 +1502,32 @@ async function start(m: StartMsg) {
   };
   for (const [p, bytes] of Object.entries(m.images))
     gfx.images.add(p.toLowerCase(), bytes, p.split('.').pop()!.toLowerCase());
+  // option `ximages`: the bytes stay in their zip and are read when the image is first drawn
+  for (const [p, r] of Object.entries(m.imageRefs ?? {})) {
+    const zipSrc = m.imageSources?.[r.src];
+    if (zipSrc)
+      gfx.images.addRef(
+        p.toLowerCase(),
+        r.ext,
+        r.size,
+        r.dim,
+        () => readEntryRef(zipSrc, r, p),
+        () => {
+          // the size comes from the first bytes of the file, read when the game first asks (a whole-file read only if the header does not hold it)
+          const head = readHeadSync(zipSrc, r, 16384, p);
+          const dim = head && sniffSize(head);
+          if (dim || r.size <= 16384) return dim || undefined;
+          const all = readEntrySync(zipSrc, r, p);
+          return all ? sniffSize(all) : undefined;
+        },
+      );
+  }
+  gfx.images.encodedBudget = (m.imageCacheMB && m.imageCacheMB > 0 ? m.imageCacheMB : 128) * 1048576;
   if (m.imageBudgetMB && m.imageBudgetMB > 0) gfx.images.budget = m.imageBudgetMB * 1048576; // low-memory hosts: keep fewer decoded images around
   if (m.eager) {
     gfx.images.budget = Infinity;
     status(`Decoding all ${gfx.images.size} images (debug)…`);
-    await gfx.images.ensure(Object.keys(m.images).map((k) => k.toLowerCase()));
+    await gfx.images.ensure([...Object.keys(m.images), ...Object.keys(m.imageRefs ?? {})].map((k) => k.toLowerCase()));
   }
   if (compilerCfg.profile === 'puchi') {
     gfx.fixedEnabled = true; // FIXED rows of the resource CSV

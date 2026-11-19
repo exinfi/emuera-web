@@ -10,6 +10,7 @@
       "src/host/client.ts",
       "src/host/screen.ts",
       "src/host/web/gamezip.ts",
+      "src/host/web/zipindex.ts",
       "src/host/web/packs.ts",
       "src/mobile/drop.ts",
       "src/play/"

@@ -1,6 +1,19 @@
 /** Game zip reader (host-web tier). Takes a File/Blob (not a path); no DOM access. */
 import JSZip from 'jszip';
 import { decodeText } from '../../engine/textdecode';
+import type { ImageRef } from '../protocol';
+import { loadThin } from './zipindex';
+
+/**
+ * The zip reader. `true` (the default) uses the thin reader in zipindex.ts: it reads the central directory only, inflates one entry at a
+ * time and holds no copy of the archive. `false` goes back to JSZip (same results, slower and heavier on a large game; lazy images need the thin reader and are ignored).
+ */
+export const THIN_ZIP = true;
+type ZObj = any;
+const openZip = async (blob: Bytes): Promise<{ files: Record<string, ZObj> }> =>
+  THIN_ZIP
+    ? loadThin(blob, { decodeFileName: decodeZipName })
+    : ((await JSZip.loadAsync(blob, { decodeFileName: decodeZipName })) as unknown as { files: Record<string, ZObj> });
 
 export interface GameFiles {
   erb: Record<string, string>;
@@ -8,6 +21,9 @@ export interface GameFiles {
   rescsv: Record<string, string>;
   texts: Record<string, string>;
   images: Record<string, ArrayBuffer>;
+  /** option `lazyImages`: images by reference (no image bytes are read at load; the worker reads a header for the size when first asked, and the bytes on first use). Then `images` holds none of them; `imageSources[ref.src]` is the zip each one lives in */
+  imageRefs?: Record<string, ImageRef>;
+  imageSources?: Bytes[];
   /** lower-cased path under sound/ -> blob */
   sounds: Map<string, Blob>;
   /** .ttf and .otf files under font/ (Emuera EM+EE loads these into its private font collection) */
@@ -157,12 +173,19 @@ export class GameLoader {
   };
   private owner = new Map<string, string>(); // lower-cased "<table>:<path>" -> source that supplied the winning copy
   private clashes = 0;
+  /** the exact key each loaded file is stored under, by `table:lower-cased path`: an override removes the earlier copy with one lookup instead of a walk over the table */
+  private keyOf = new Map<string, string>();
   private n = 0;
   /** low memory loader: keep ERB/ERH as bytes (see GameFiles.erbBytes); each file is decoded once here only to learn its string length, which card identity needs */
   private readonly bytesMode: boolean;
+  private readonly lazyImages: boolean;
+  /** where an image's data is, from the central directory alone: no image bytes are read at load (the worker reads a header when the game first asks the size) */
+  private makeRef(f: ZObj, ext: string, srcIndex: number): ImageRef {
+    return { src: srcIndex, ...f.ref, ext, size: f._data.uncompressedSize };
+  }
   private erbLen: Record<string, number> = {};
   /** files `classify` ignored but whose extension a game can read at run time (text-like or image), by lower-cased path; the entry is kept, not read */
-  private pending = new Map<string, { rel: string; f: JSZip.JSZipObject; src: string }>();
+  private pending = new Map<string, { rel: string; f: ZObj; src: string }>();
   /** lower-cased first folder names that string literals in the game's code point into (`"dat/x.xml"`, `@"Folder/%N%.webp"`, `"Folder/"`) */
   private refs = new Set<string>();
   private extraBytes = 0;
@@ -172,8 +195,13 @@ export class GameLoader {
   private readonly scanReferences: boolean;
   constructor(
     private log?: (line: string) => void,
-    opts: { erbBytes?: boolean; scanReferences?: boolean } = {},
+    opts: { erbBytes?: boolean; scanReferences?: boolean; lazyImages?: boolean } = {},
   ) {
+    this.lazyImages = THIN_ZIP && !!opts.lazyImages;
+    if (this.lazyImages) {
+      this.files.imageRefs = {};
+      this.files.imageSources = [];
+    }
     this.bytesMode = !!opts.erbBytes;
     this.scanReferences = !!opts.scanReferences;
     if (this.bytesMode) this.files.erbBytes = {};
@@ -182,7 +210,8 @@ export class GameLoader {
   async add(src: Source, onProgress?: (done: number, total: number) => void): Promise<void> {
     const out = this.files,
       si = this.n++;
-    const z = await JSZip.loadAsync(src.blob, { decodeFileName: decodeZipName });
+    const z = await openZip(src.blob);
+    if (this.lazyImages) this.files.imageSources![si] = src.blob;
     const entries = Object.entries(z.files).filter(([, f]) => !f.dir);
     const r = detectRoot(
       entries.map(([n]) => n),
@@ -238,10 +267,11 @@ export class GameLoader {
       if (prev !== undefined) {
         this.clashes++;
         if (this.clashes <= CAP) this.log?.(`${rel}: overridden ${prev} -> ${src.name}`);
-        dropEarlier(out, table, lc); // the earlier copy may differ only in case
+        dropEarlier(out, table, lc, this.keyOf.get(k)); // the earlier copy may differ only in case
         if (table === 'e') for (const p of Object.keys(this.erbLen)) if (p.toLowerCase() === lc) delete this.erbLen[p];
       }
       this.owner.set(k, src.name);
+      this.keyOf.set(k, rel);
       if (table === 'e' && this.bytesMode) {
         const ab = await f.async('arraybuffer');
         const t = decodeText(new Uint8Array(ab));
@@ -257,8 +287,10 @@ export class GameLoader {
       else if (table === 'f') out.fonts.push({ path: rel, data: await f.async('arraybuffer') });
       else if (table === 'a')
         out.sounds.set(rel.slice(6).replace(/\\/g, '/').toLowerCase(), new Blob([await f.async('arraybuffer')]));
-      else if (table === 'i') out.images[rel] = await f.async('arraybuffer');
-      else out.texts[rel.replace(/\\/g, '/')] = decodeText(await f.async('uint8array'));
+      else if (table === 'i') {
+        if (this.lazyImages) out.imageRefs![rel] = this.makeRef(f, rel.split('.').pop()!.toLowerCase(), si);
+        else out.images[rel] = await f.async('arraybuffer');
+      } else out.texts[rel.replace(/\\/g, '/')] = decodeText(await f.async('uint8array'));
     }
     await this.loadReferenced();
     if (si === 0) out.base = { erb: this.bytesMode ? { ...this.erbLen } : { ...out.erb }, csv: { ...out.csv } };
@@ -296,8 +328,9 @@ export class GameLoader {
         table = isImg ? 'i' : 't',
         k = table + ':' + lc;
       const prev = this.owner.get(k);
-      if (prev !== undefined) dropEarlier(out, table, lc);
+      if (prev !== undefined) dropEarlier(out, table, lc, this.keyOf.get(k));
       this.owner.set(k, e.src);
+      this.keyOf.set(k, isImg ? rel : rel.replace(/\\/g, '/'));
       if (isImg) {
         const ab = await e.f.async('arraybuffer');
         this.extraBytes += ab.byteLength;
@@ -343,10 +376,11 @@ export async function readGameZip(
   return l.finish();
 }
 
-/** a path supplied again by a later source: delete the earlier entry from whichever table holds it */
-function dropEarlier(out: GameFiles, table: string, lc: string) {
+/** a path supplied again by a later source: delete the earlier entry from whichever table holds it (`key` = the key it was stored under, when known; else the table is searched for a key that differs only in case) */
+function dropEarlier(out: GameFiles, table: string, lc: string, key?: string) {
   const kill = (t: Record<string, unknown>) => {
-    for (const p of Object.keys(t)) if (p.toLowerCase() === lc) delete t[p];
+    if (key !== undefined) delete t[key]; // the key it was stored under, recorded when it was added
+    else for (const p of Object.keys(t)) if (p.toLowerCase() === lc) delete t[p];
   };
   if (table === 'e') {
     kill(out.erb);
@@ -354,7 +388,9 @@ function dropEarlier(out: GameFiles, table: string, lc: string) {
   } else if (table === 'c') kill(out.csv);
   else if (table === 'r') kill(out.rescsv);
   else if (table === 't') kill(out.texts);
-  else if (table === 'i') kill(out.images);
-  else if (table === 'a') out.sounds.delete(lc.slice(6).replace(/\\/g, '/'));
+  else if (table === 'i') {
+    kill(out.images);
+    if (out.imageRefs) kill(out.imageRefs);
+  } else if (table === 'a') out.sounds.delete(lc.slice(6).replace(/\\/g, '/'));
   else if (table === 'f') out.fonts = out.fonts.filter((f) => f.path.toLowerCase() !== lc);
 }

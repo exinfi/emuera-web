@@ -1,5 +1,5 @@
 /**
- * Resource images: encoded bytes + header-sniffed sizes always, decoded bitmaps only on demand.
+ * Resource images: encoded bytes + header-sniffed sizes (read when added, or on first ask for images left in their zip), decoded bitmaps only on demand.
  * The full erablue_resort_en set is 23.6 MB encoded but ~660 MB as decoded RGBA, so decoded images live in a
  * bounded LRU cache. Decoding is async; Gfx queues draw operations that need an image that is not decoded yet
  * and replays them after `ensure()` (see Gfx.flush).
@@ -64,7 +64,15 @@ export class ImageStore {
   backend?: DecodeBackend;
   /** decoded-pixel budget in bytes (RGBA) */
   budget = 256 * 1024 * 1024;
-  private encoded = new Map<string, { bytes: ArrayBuffer; ext: string }>();
+  private encoded = new Map<
+    string,
+    { bytes?: ArrayBuffer; ext: string; load?: () => Promise<ArrayBuffer>; size: number; sniff?: () => Size | undefined }
+  >(); // insertion order = LRU order of the resident ones
+  /** budget in bytes for encoded images that are resident AND can be read again (registered with `addRef`); eagerly added images are never dropped */
+  encodedBudget = Infinity;
+  private encodedUsed = 0;
+  /** counters for tests and the debug log */
+  stats = { loads: 0, loadBytes: 0, loadMs: 0, evictions: 0 };
   private dims = new Map<string, Size>();
   private cache = new Map<string, any>(); // insertion order = LRU order (oldest first)
   private inflight = new Map<string, Promise<void>>();
@@ -73,9 +81,21 @@ export class ImageStore {
 
   /** register an encoded image (path is the lower-case key) */
   add(path: string, bytes: ArrayBuffer, ext: string) {
-    this.encoded.set(path, { bytes, ext });
+    this.encoded.set(path, { bytes, ext, size: bytes.byteLength });
     const sz = sniffSize(new Uint8Array(bytes));
     if (sz) this.dims.set(path, sz);
+  }
+  /** register an image by reference: no bytes yet, `load` reads them on first use. The width and height are `dim` when the host knows them, else `sniff` reads them from the header the first time they are asked (synchronously; once). */
+  addRef(
+    path: string,
+    ext: string,
+    size: number,
+    dim: Size | undefined,
+    load: () => Promise<ArrayBuffer>,
+    sniff?: () => Size | undefined,
+  ) {
+    this.encoded.set(path, { ext, load, size, sniff: dim ? undefined : sniff });
+    if (dim) this.dims.set(path, dim);
   }
   /** register an already-decoded image (tests, or hosts that decode eagerly) */
   set(path: string, img: any) {
@@ -95,7 +115,23 @@ export class ImageStore {
   }
   /** header size: no decode */
   dim(path: string): Size | undefined {
-    return this.dims.get(path);
+    const d = this.dims.get(path);
+    if (d) return d;
+    const e = this.encoded.get(path);
+    if (e?.sniff) {
+      const f = e.sniff;
+      e.sniff = undefined; // asked once, whatever the answer
+      try {
+        const s = f();
+        if (s) {
+          this.dims.set(path, s);
+          return s;
+        }
+      } catch {
+        /* unreadable header: the size stays unknown, as for an image whose header holds none */
+      }
+    }
+    return undefined;
   }
   /** decoded image if it is in the cache (marks it recently used) */
   get(path: string): any | undefined {
@@ -111,6 +147,50 @@ export class ImageStore {
   }
   get decodedBytes() {
     return this.used;
+  }
+
+  /** the encoded bytes of an entry: resident, or read now through its loader (then counted against `encodedBudget`) */
+  private async entryBytes(
+    p: string,
+    e: { bytes?: ArrayBuffer; load?: () => Promise<ArrayBuffer>; size: number },
+  ): Promise<ArrayBuffer> {
+    if (e.bytes) {
+      if (e.load) {
+        const v = this.encoded.get(p);
+        if (v) {
+          this.encoded.delete(p);
+          this.encoded.set(p, v);
+        }
+      }
+      return e.bytes;
+    }
+    const t = performance.now();
+    const b = await e.load!();
+    this.stats.loads++;
+    this.stats.loadBytes += b.byteLength;
+    this.stats.loadMs += performance.now() - t;
+    e.bytes = b;
+    this.encodedUsed += b.byteLength;
+    const v = this.encoded.get(p);
+    if (v) {
+      this.encoded.delete(p);
+      this.encoded.set(p, v);
+    }
+    return b;
+  }
+  /** drop the least recently used resident encoded images that can be read again, down to `encodedBudget` (never one the current call needs) */
+  private trimEncoded(pin: Set<string>) {
+    if (this.encodedUsed <= this.encodedBudget) return;
+    for (const [k, e] of this.encoded) {
+      if (this.encodedUsed <= this.encodedBudget) break;
+      if (!e.load || !e.bytes || pin.has(k) || this.inflight.has(k)) continue;
+      this.encodedUsed -= e.bytes.byteLength;
+      e.bytes = undefined;
+      this.stats.evictions++;
+    }
+  }
+  get encodedBytes() {
+    return this.encodedUsed;
   }
 
   private bytesOf(img: any) {
@@ -131,8 +211,8 @@ export class ImageStore {
       if (!e || !this.backend || this.failed.has(p)) continue;
       let job = this.inflight.get(p);
       if (!job) {
-        job = this.backend
-          .decode(e.bytes, e.ext)
+        job = this.entryBytes(p, e)
+          .then((bytes) => this.backend!.decode(bytes, e.ext))
           .then(
             (img) => {
               if (img) {
@@ -151,6 +231,7 @@ export class ImageStore {
       jobs.push(job);
     }
     await Promise.all(jobs);
+    this.trimEncoded(pin);
     for (const [k, v] of this.cache) {
       if (this.used <= this.budget) break;
       if (pin.has(k) || !this.encoded.has(k)) continue; // never evict pinned images or ones we could not re-decode

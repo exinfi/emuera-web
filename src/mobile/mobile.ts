@@ -1545,6 +1545,7 @@ async function load(blob: Blob, name: string) {
     const loader = new GameLoader((l) => log.push(l), {
       erbBytes: !!readOptions().xloader,
       scanReferences: !!readOptions().xrefs,
+      lazyImages: !!readOptions().ximages,
     }); // experimental loader: ERB stays as bytes
     await loader.add({ name, blob }, (n, t) => say(`Reading zip… ${n}/${t}`));
     let packSrc: Source[] = [];
@@ -1611,6 +1612,8 @@ async function load(blob: Blob, name: string) {
         deltaLines: !new URLSearchParams(location.search).has('nodelta'),
         patchOff: patchUi.offIds(),
         images: g.images,
+        imageRefs: g.imageRefs,
+        imageSources: g.imageSources,
         rescsv: g.rescsv,
         texts: g.texts,
         fonts: fonts.startFonts(),
@@ -1619,7 +1622,7 @@ async function load(blob: Blob, name: string) {
     );
     void memory.refreshUi();
     say(
-      `Card "${m.cardName}": ${Object.keys(m.saves).filter((k) => k !== 'global').length} save slot(s). Loaded ${Object.keys(g.erbBytes ?? g.erb).length} ERB, ${Object.keys(g.csv).length} CSV, ${Object.keys(g.images).length} images${usedPacks ? `, ${usedPacks} pack(s)` : ''}. Booting (game init can take a minute)…`,
+      `Card "${m.cardName}": ${Object.keys(m.saves).filter((k) => k !== 'global').length} save slot(s). Loaded ${Object.keys(g.erbBytes ?? g.erb).length} ERB, ${Object.keys(g.csv).length} CSV, ${Object.keys(g.images).length + Object.keys(g.imageRefs ?? {}).length} images${g.imageRefs ? ' (read on demand)' : ''}${usedPacks ? `, ${usedPacks} pack(s)` : ''}. Booting (game init can take a minute)…`,
     );
     void packsUi.refresh();
   } catch (e) {

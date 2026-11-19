@@ -18,7 +18,7 @@ export const FORM_FOLDER_ALIASES: readonly (readonly [string, readonly string[]]
 ];
 
 /** adds the alias paths to `images` (same bytes, no copy); returns the folders that were aliased as "from -> to" */
-export function addFormFolderAliases(images: Record<string, ArrayBuffer>): string[] {
+export function addFormFolderAliases<T>(images: Record<string, T>): string[] {
   const top = new Map<string, string[]>(); // lower-cased top folder under resources/ -> its keys
   for (const k of Object.keys(images)) {
     const m = /^resources\/([^/]+)\//i.exec(k.replace(/\\/g, '/'));
