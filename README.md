@@ -135,7 +135,7 @@ The debug tools are in the **dbg** button in the top bar (your top bar must not 
 - **Export game snapshot** downloads a JSON copy of every game variable that differs from its default (characters, flags, tables, maps). It lets someone restore your exact game state to reproduce a problem. It holds no screen, call stack or files, at the time of export.
 - **Crash snapshot** appears after a crash and holds the game state at that moment.
 
-The log and snapshot contain text from the game and the inputs you typed, and the snapshot contains your game state. Look through them before you post them publicly. Your saved files and the game itself are not included.
+The log and snapshot contain text from the game and the inputs you typed, and the snapshot contains your game state. Look through them before you post them publicly. Your save files and the game itself are not included.
 
 ## Attribution
 
