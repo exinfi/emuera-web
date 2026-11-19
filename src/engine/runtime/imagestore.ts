@@ -1,5 +1,5 @@
 /**
- * Resource images: encoded bytes + header-sniffed sizes (read when added, or on first ask for images left in their zip), decoded bitmaps only on demand.
+ * Resource images: encoded bytes + header-sniffed sizes (read when added; for images left in their zip, given by the host or read on first ask), decoded bitmaps only on demand.
  * The full erablue_resort_en set is 23.6 MB encoded but ~660 MB as decoded RGBA, so decoded images live in a
  * bounded LRU cache. Decoding is async; Gfx queues draw operations that need an image that is not decoded yet
  * and replays them after `ensure()` (see Gfx.flush).
@@ -72,7 +72,7 @@ export class ImageStore {
   encodedBudget = Infinity;
   private encodedUsed = 0;
   /** counters for tests and the debug log */
-  stats = { loads: 0, loadBytes: 0, loadMs: 0, evictions: 0 };
+  stats = { loads: 0, loadBytes: 0, loadMs: 0, evictions: 0, sizeReads: 0, sizeReadFails: 0 };
   private dims = new Map<string, Size>();
   private cache = new Map<string, any>(); // insertion order = LRU order (oldest first)
   private inflight = new Map<string, Promise<void>>();
@@ -121,14 +121,16 @@ export class ImageStore {
     if (e?.sniff) {
       const f = e.sniff;
       e.sniff = undefined; // asked once, whatever the answer
+      this.stats.sizeReads++;
       try {
         const s = f();
+        if (!s) this.stats.sizeReadFails++;
         if (s) {
           this.dims.set(path, s);
           return s;
         }
       } catch {
-        /* unreadable header: the size stays unknown, as for an image whose header holds none */
+        this.stats.sizeReadFails++; // unreadable header: the size stays unknown, as for an image whose header holds none
       }
     }
     return undefined;

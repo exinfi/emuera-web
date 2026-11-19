@@ -2,7 +2,8 @@
 import JSZip from 'jszip';
 import { decodeText } from '../../engine/textdecode';
 import type { ImageRef } from '../protocol';
-import { loadThin } from './zipindex';
+import { loadThin, sweepHeads } from './zipindex';
+import { sniffSize } from '../../engine/runtime/imagestore';
 
 /**
  * The zip reader. `true` (the default) uses the thin reader in zipindex.ts: it reads the central directory only, inflates one entry at a
@@ -352,6 +353,50 @@ export class GameLoader {
     if (left) this.log?.(`${left} readable file(s) in folders the game's code never names were not loaded`);
   }
   /** closes the log with the override total; call once after the last source */
+  /**
+   * Option `lazyImages`: the width and height of every image left in its zip, read in one forward pass per zip (`sweepHeads`) and stored in
+   * its `ImageRef`, so the engine never reads a file to learn a size. Call after the last `add`, before `finish`. Image bytes are not kept.
+   */
+  async sweepImageSizes(onProgress?: (done: number, total: number) => void): Promise<SweepStats> {
+    const t0 = performance.now();
+    const out: SweepStats = { images: 0, sized: 0, reads: 0, bytes: 0, ms: 0 };
+    const refs = this.files.imageRefs,
+      srcs = this.files.imageSources;
+    if (!refs || !srcs) return out;
+    const bySrc = new Map<number, ImageRef[]>();
+    for (const r of Object.values(refs)) {
+      if (r.dim || !srcs[r.src]) continue;
+      let l = bySrc.get(r.src);
+      if (!l) bySrc.set(r.src, (l = []));
+      l.push(r);
+    }
+    for (const l of bySrc.values()) out.images += l.length;
+    let before = 0;
+    for (const [si, list] of bySrc) {
+      const st = await sweepHeads(
+        srcs[si],
+        list,
+        16384,
+        (i, head) => {
+          const d = head && sniffSize(head);
+          if (d) {
+            list[i].dim = d;
+            out.sized++;
+          }
+        },
+        (n) => onProgress?.(before + n, out.images),
+      );
+      before += list.length;
+      out.reads += st.reads;
+      out.bytes += st.bytes;
+    }
+    out.ms = performance.now() - t0;
+    if (out.images)
+      this.log?.(
+        `image sizes: ${out.sized} of ${out.images} read in one pass (${out.reads} reads, ${(out.bytes / 1048576).toFixed(0)} MB)${out.sized < out.images ? '; the rest are read when first asked' : ''}`,
+      );
+    return out;
+  }
   finish(): GameFiles {
     if (this.clashes > CAP)
       this.log?.(`... ${this.clashes - CAP} more overrides not listed (${this.clashes} in total)`);
@@ -363,6 +408,15 @@ export class GameLoader {
 }
 
 /** game zip plus optional packs in one call */
+/** what `GameLoader.sweepImageSizes` did */
+export interface SweepStats {
+  images: number;
+  sized: number;
+  reads: number;
+  bytes: number;
+  ms: number;
+}
+
 export async function readGameZip(
   file: Bytes,
   onProgress?: (done: number, total: number) => void,

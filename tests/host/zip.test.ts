@@ -1,7 +1,7 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { deflateRawSync } from 'node:zlib';
-import { loadThin, readEntryRef, readHeadSync, readEntrySync, crc32 } from '../../src/host/web/zipindex.ts';
+import { loadThin, readEntryRef, readHeadSync, readEntrySync, sweepHeads, crc32 } from '../../src/host/web/zipindex.ts';
 import { sniffSize } from '../../src/engine/runtime/imagestore.ts';
 import { GameLoader, decodeZipName } from '../../src/host/web/gamezip.ts';
 
@@ -388,4 +388,113 @@ describe('a file supplied again by a later zip', () => {
       assert.equal(f.texts['DAT/Note.txt'], 'new note');
     });
   }
+});
+
+/** a Blob that records where each slice starts (the sweep's reads) */
+class CountingBlob extends Blob {
+  starts: number[] = [];
+  slice(start?: number, end?: number, type?: string): Blob {
+    this.starts.push(start ?? 0);
+    return super.slice(start, end, type);
+  }
+}
+/** a JPEG whose SOF marker comes after 20000 bytes of comment: its size is not in the first 16 KB */
+const lateJpeg = () => {
+  const b = new Uint8Array(20028);
+  b.set([0xff, 0xd8, 0xff, 0xfe, (20002 >> 8) & 255, 20002 & 255]);
+  b.set([0xff, 0xc0, 0, 17, 8, 0, 5, 0, 6, 3, 1, 0x11, 0, 2, 0x11, 0, 3, 0x11, 0], 20006);
+  return b;
+};
+
+describe('image sizes read in one forward pass', () => {
+  // 30 images, stored and deflated, each followed by filler so that heads fall at every place in a slice, with text entries between
+  const many = () => {
+    const es: E[] = [{ name: 'ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' }, { name: 'CSV/GameBase.csv', data: 'コード,1' }];
+    for (let i = 0; i < 30; i++) {
+      const filler = new Uint8Array(300 + ((i * 97) % 500)).map((_, k) => (k * 31 + i) & 255);
+      const data = new Uint8Array(33 + filler.length);
+      data.set(png(10 + i, 20 + i));
+      data.set(filler, 33);
+      es.push({ name: `resources/p${i}.png`, data, deflate: i % 3 === 0 });
+      if (i % 7 === 0) es.push({ name: `dat/t${i}.txt`, data: 'x'.repeat(200 + i) });
+    }
+    return build(es);
+  };
+
+  for (const sliceSize of [600, 1500, 4096, 1 << 20]) {
+    test(`every head is cut out of forward reads, also across slice ends (slice ${sliceSize} bytes)`, async () => {
+      const zip = many();
+      const l = new GameLoader(undefined, { lazyImages: true });
+      await l.add({ name: 'g.zip', blob: new Blob([zip]) });
+      const refs = Object.entries(l.finish().imageRefs!);
+      const blob = new CountingBlob([zip]);
+      const got = new Map<string, { w: number; h: number } | undefined>();
+      const st = await sweepHeads(
+        blob,
+        refs.map(([, r]) => r),
+        16384,
+        (i, head) => got.set(refs[i][0], head && sniffSize(head)),
+        undefined,
+        sliceSize,
+      );
+      for (const [k] of refs) {
+        const i = Number(/p(\d+)\.png/.exec(k)![1]);
+        assert.deepEqual(got.get(k), { w: 10 + i, h: 20 + i }, k);
+      }
+      assert.equal(st.reads, blob.starts.length);
+      for (let i = 1; i < blob.starts.length; i++) assert.ok(blob.starts[i] >= blob.starts[i - 1], 'reads never move backwards');
+      if (sliceSize >= 4096) assert.ok(st.reads < refs.length / 2, `${st.reads} reads for ${refs.length} images`);
+      if (sliceSize === 1 << 20) assert.equal(st.reads, 1);
+    });
+  }
+
+  test('the loader stores every size in its reference, a pack image with its own size; no image bytes are kept', async () => {
+    const game = build([
+      { name: 'ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' },
+      { name: 'CSV/GameBase.csv', data: 'コード,1' },
+      { name: 'resources/a.png', data: png(48, 96) },
+      { name: 'resources/b.png', data: png(7, 9), deflate: true },
+    ]);
+    const pack = build([
+      { name: 'resources/a.png', data: png(10, 20) },
+      { name: 'resources/c.png', data: png(3, 4), deflate: true },
+    ]);
+    const log: string[] = [];
+    const l = new GameLoader((x) => log.push(x), { lazyImages: true });
+    await l.add({ name: 'game.zip', blob: new Blob([game]) });
+    await l.add({ name: 'pack.zip', blob: new Blob([pack]) });
+    const progress: number[] = [];
+    const st = await l.sweepImageSizes((n) => progress.push(n));
+    const f = l.finish();
+    assert.deepEqual(f.imageRefs!['resources/a.png'].dim, { w: 10, h: 20 });
+    assert.deepEqual(f.imageRefs!['resources/b.png'].dim, { w: 7, h: 9 });
+    assert.deepEqual(f.imageRefs!['resources/c.png'].dim, { w: 3, h: 4 });
+    assert.deepEqual(Object.keys(f.images), []);
+    assert.equal(st.images, 3);
+    assert.equal(st.sized, 3);
+    assert.equal(st.reads, 2); // one per zip
+    assert.equal(progress.at(-1), 3);
+    assert.ok(log.some((x) => x.startsWith('image sizes: 3 of 3 read in one pass (2 reads')), log.join('\n'));
+  });
+
+  test('an image whose size is not in its first 16 KB keeps no size (read when first asked); without the option nothing is done', async () => {
+    const zip = build([
+      { name: 'ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' },
+      { name: 'CSV/GameBase.csv', data: 'コード,1' },
+      { name: 'resources/a.png', data: png(4, 5) },
+      { name: 'resources/j.jpg', data: lateJpeg() },
+    ]);
+    const log: string[] = [];
+    const l = new GameLoader((x) => log.push(x), { lazyImages: true });
+    await l.add({ name: 'g.zip', blob: new Blob([zip]) });
+    const st = await l.sweepImageSizes();
+    const f = l.finish();
+    assert.deepEqual(f.imageRefs!['resources/a.png'].dim, { w: 4, h: 5 });
+    assert.equal(f.imageRefs!['resources/j.jpg'].dim, undefined);
+    assert.equal(st.sized, 1);
+    assert.ok(log.some((x) => x.includes('the rest are read when first asked')));
+    const off = new GameLoader(undefined, {});
+    await off.add({ name: 'g.zip', blob: new Blob([zip]) });
+    assert.deepEqual(await off.sweepImageSizes(), { images: 0, sized: 0, reads: 0, bytes: 0, ms: 0 });
+  });
 });

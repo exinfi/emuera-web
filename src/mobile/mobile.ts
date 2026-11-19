@@ -64,7 +64,8 @@ let tlPanel: MobilePanel | undefined;
 let tlOpen = false; // the translation panel is open: the game is locked
 let tl: Translation | null = null; // the optional translation module (created below; inert until switched on)
 
-type Issue = { t: number; level: 'warn' | 'error'; text: string };
+/** `info`: a load or image fact for the debug list, not counted as an issue */
+type Issue = { t: number; level: 'info' | 'warn' | 'error'; text: string };
 const issues: Issue[] = [];
 let crashSnap = '',
   crashText = '';
@@ -87,16 +88,32 @@ function refreshDebugBtn() {
     'err',
     issues.some((i) => i.level === 'error'),
   );
-  b.classList.toggle('warn', issues.length > 0);
-  b.querySelector('span')!.textContent = issues.length ? `dbg ${issues.length}` : 'dbg';
+  const n = issues.filter((i) => i.level !== 'info').length;
+  b.classList.toggle('warn', n > 0);
+  b.querySelector('span')!.textContent = n ? `dbg ${n}` : 'dbg';
+}
+/** a debug-list fact by key, replaced in place when sent again (load timing, image facts from the engine) */
+const infoByKey = new Map<string, Issue>();
+function setInfo(key: string, text: string) {
+  let e = infoByKey.get(key);
+  if (!e || !issues.includes(e)) {
+    e = { t: Date.now(), level: 'info', text };
+    issues.push(e);
+    infoByKey.set(key, e);
+  } else e.text = text;
+  refreshDebugBtn();
+  if (!$('dbg').hidden) renderDebug();
 }
 function renderDebug() {
   const list = $('dlist');
   list.textContent = '';
-  if (!issues.length) {
-    list.textContent = 'No issues reported.';
-    list.className = 'small';
-  } else list.className = '';
+  list.className = '';
+  if (!issues.some((i) => i.level !== 'info')) {
+    const d = document.createElement('div');
+    d.className = 'small';
+    d.textContent = 'No issues reported.';
+    list.appendChild(d);
+  }
   for (const i of issues) {
     const d = document.createElement('div');
     d.className = 'dent ' + i.level;
@@ -265,6 +282,8 @@ const client: Client = new Client({
     }
   }, // move/resume: the input window is not placed over the game
   status: (msg) => say(msg),
+  info: (key, text) => setInfo(key, text),
+  workerError: (msg) => addIssue('error', msg),
   busy: (b) => {
     setBusy(b);
     if (b) {
@@ -1536,6 +1555,8 @@ optReset.onclick = () => {
 syncOptReset();
 let loaderLog: string[] = [];
 async function load(blob: Blob, name: string) {
+  const tLoad = performance.now();
+  let loadInfo = '';
   lenientByName = /trim/i.test(name);
   setBusy(true);
   say('Reading zip…');
@@ -1566,6 +1587,14 @@ async function load(blob: Blob, name: string) {
         addIssue('warn', t);
       }
     }
+    const tZip = performance.now();
+    loadInfo = `Load: zip ${((tZip - tLoad) / 1000).toFixed(1)} s`;
+    if (readOptions().ximages) {
+      // every image's width and height in one forward pass over each zip, so the engine never reads a file to learn a size
+      const sw = await loader.sweepImageSizes((n, t) => say(`Reading image sizes… ${n}/${t}`));
+      if (sw.images)
+        loadInfo += ` | image sizes ${(sw.ms / 1000).toFixed(1)} s: ${sw.sized} of ${sw.images} in ${sw.reads} reads (${(sw.bytes / 1048576).toFixed(0)} MB)`;
+    }
     const g = loader.finish();
     loaderLog = log;
     // game-embedded fonts (font/*.ttf|otf, as Emuera EM+EE loads them) are registered before the engine starts
@@ -1577,6 +1606,7 @@ async function load(blob: Blob, name: string) {
     lastBlob = { blob, name };
     ($('reload') as HTMLButtonElement).disabled = false;
     issues.length = 0;
+    setInfo('page', loadInfo);
     crashSnap = crashText = '';
     refreshDebugBtn();
     view.clearSprites();

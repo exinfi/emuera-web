@@ -110,7 +110,7 @@ export const DEFAULT_OPTIONS: StartOptions = Object.fromEntries(
 ) as unknown as StartOptions;
 
 // ---------------------------------------------------------------- shared payload shapes
-/** a resource image left in its zip (option `ximages`): where its data is (`src` indexes `StartMsg.imageSources`), its size in bytes, and its width and height when the host knows them (otherwise the worker reads them from the file header when the game first asks) */
+/** a resource image left in its zip (option `ximages`): where its data is (`src` indexes `StartMsg.imageSources`), its size in bytes, and its width and height when the host knows them (the page's loader reads them all in one pass at load; otherwise the worker reads them from the file header when the game first asks) */
 export interface ImageRef {
   src: number;
   offset: number;
@@ -353,6 +353,8 @@ export type ToPage =
   | { type: 'textbox'; op: 'move'; x: number; y: number; width: number }
   | { type: 'textbox'; op: 'resume' }
   | { type: 'status'; msg: string }
+  /** additive: a line for the shell's debug list (load and image facts, not an issue), replaced by `key` when sent again */
+  | { type: 'info'; key: string; text: string }
   | { type: 'persist'; key: string; value: SavedSlot | null }
   | { type: 'persistFile'; key: string; text: string }
   | { type: 'restart' }

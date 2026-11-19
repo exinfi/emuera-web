@@ -111,5 +111,8 @@ describe('image store: images registered by reference', () => {
       throw new Error('not to be called');
     });
     assert.deepEqual(s.dim('d'), { w: 2, h: 3 });
+    // counted for the debug list: three reads from the file (a, b, c), two of them gave no size; d had its size and read nothing
+    assert.equal(s.stats.sizeReads, 3);
+    assert.equal(s.stats.sizeReadFails, 2);
   });
 });

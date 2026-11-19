@@ -49,7 +49,7 @@ body.tsel:not(.mtap) #vp{user-select:text;-webkit-user-select:text}
 label.btn{display:inline-flex;align-items:center;cursor:pointer}
 #status{color:#8c8;font-size:13px;margin:4px 0;word-break:break-word}#fwarn{color:#fb4}#cardwarn{color:#fb4;font-size:12px}
 .small{font-size:12px;color:#999;word-break:break-word}
-#dlist{display:flex;flex-direction:column;gap:6px;margin:6px 0}.dent{border-left:3px solid #666;padding:2px 8px;font:12px/1.3 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word}.dent.error{border-color:#ff5a3a;color:#fcb}.dent.warn{border-color:#ff9a2e;color:#fd9}.dent time{color:#888;margin-right:6px}
+#dlist{display:flex;flex-direction:column;gap:6px;margin:6px 0}.dent{border-left:3px solid #666;padding:2px 8px;font:12px/1.3 ui-monospace,monospace;white-space:pre-wrap;word-break:break-word}.dent.error{border-color:#ff5a3a;color:#fcb}.dent.warn{border-color:#ff9a2e;color:#fd9}.dent.info{border-color:#4a9;color:#bdc}.dent time{color:#888;margin-right:6px}
 #ilist{white-space:pre-wrap;font:12px/1.4 ui-monospace,monospace;margin:6px 0}
 #inbar{flex:none;display:flex;gap:6px;padding:6px 8px calc(6px + env(safe-area-inset-bottom));background:#16161c;border-top:1px solid #333}#inbar[hidden]{display:none}
 #inp{flex:1;min-width:0;background:#000;color:#fff;font-size:16px}#send{flex:none;padding:0 16px}

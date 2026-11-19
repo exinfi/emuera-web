@@ -89,6 +89,69 @@ export async function readEntryRef(src: Bytes, r: EntryRef, name = 'entry'): Pro
   return exact(r.method === 0 ? raw : (pako.inflateRaw(raw) as Uint8Array));
 }
 
+/**
+ * The first `n` bytes of many entries' content, read in ONE forward pass over the zip: slices of the read-ahead size taken in file order, each
+ * entry's head cut out of the slice it falls in, the slice then dropped. A slice starts at the first entry not yet done, so reads only move
+ * forward and skip what lies between. Few reads (a file-backed Blob pays per read, and on some devices far more for a small read at a scattered
+ * place than for a large forward one), nothing kept but what `each` keeps. `each` gets undefined for an entry whose local header is not where
+ * the central directory says, or whose method is not stored or deflate.
+ */
+export async function sweepHeads(
+  src: Bytes,
+  refs: EntryRef[],
+  n: number,
+  each: (i: number, head: Uint8Array | undefined) => void,
+  onProgress?: (done: number, total: number) => void,
+  sliceSize = WINDOW,
+): Promise<{ reads: number; bytes: number }> {
+  const order = refs.map((_, i) => i).sort((a, b) => refs[a].offset - refs[b].offset);
+  const total = sizeOf(src);
+  let k = 0,
+    reads = 0,
+    bytes = 0;
+  const read = async (a: number, b: number) => {
+    const d = 'size' in src ? new Uint8Array(await src.slice(a, b).arrayBuffer()) : src.subarray(a, b);
+    reads++;
+    bytes += d.length;
+    return d;
+  };
+  const headOf = (r: EntryRef, raw: Uint8Array) =>
+    r.method === 0 ? raw.slice(0, n) : r.method === 8 ? inflatePrefix(raw, n) : undefined;
+  while (k < order.length) {
+    const start = refs[order[k]].offset;
+    const end = Math.min(total, start + sliceSize);
+    const data = await read(start, end);
+    const from = k;
+    while (k < order.length) {
+      const r = refs[order[k]];
+      const lo = r.offset - start;
+      if (lo + 30 > data.length) break;
+      const dv = new DataView(data.buffer, data.byteOffset + lo, 30);
+      if (dv.getUint32(0, true) !== 0x04034b50) {
+        each(order[k++], undefined);
+        continue;
+      }
+      const ds = lo + 30 + dv.getUint16(26, true) + dv.getUint16(28, true);
+      const want = Math.min(r.csize, r.method === 0 ? n : n + 2048);
+      if (ds + want > data.length && end < total) break; // runs past this slice: the next slice starts at this entry
+      each(order[k++], headOf(r, data.subarray(ds, Math.min(data.length, ds + want))));
+    }
+    if (k === from) {
+      // the first entry's head is longer than a whole slice (only with a slice smaller than `n`): read exactly what it needs, still forward
+      const r = refs[order[k]];
+      const dv = data.length >= 30 ? new DataView(data.buffer, data.byteOffset, 30) : undefined;
+      if (dv && dv.getUint32(0, true) === 0x04034b50) {
+        const ds = 30 + dv.getUint16(26, true) + dv.getUint16(28, true);
+        const want = Math.min(r.csize, r.method === 0 ? n : n + 2048);
+        const all = await read(start, Math.min(total, start + ds + want));
+        each(order[k++], headOf(r, all.subarray(ds)));
+      } else each(order[k++], undefined);
+    }
+    onProgress?.(k, order.length);
+  }
+  return { reads, bytes };
+}
+
 /** the first `n` bytes a deflate stream's prefix inflates to (the prefix may be cut anywhere; whatever inflates before the cut is returned) */
 function inflatePrefix(raw: Uint8Array, n: number): Uint8Array {
   const parts: Uint8Array[] = [];

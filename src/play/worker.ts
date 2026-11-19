@@ -1322,7 +1322,37 @@ async function registerFonts(vm: VM, fonts: FontFile[]) {
   // host-web/fonts.ts (BUNDLED_MONO): the engine tier must not import the host tier.
   vm.gfx.fallbackFonts = vm.fontFamilies.filter((f) => key(f) === key('BIZ UDGothic')).slice(0, 1);
 }
+/** load and image facts for the shell's debug list (`info` message): not an issue, not shown to the player otherwise */
+const freshFacts = () => ({ t0: 0, parsed: 0, tables: 0, firstScreen: 0, waits: 0, waitMs: 0, waitMax: 0, sent: '', sentAt: 0, later: false });
+let loadFacts = freshFacts();
+function sendLoadFacts(gfx: VM['gfx'], force = false) {
+  const f = loadFacts,
+    st = gfx.images.stats;
+  const s = (ms: number) => (ms / 1000).toFixed(1) + ' s';
+  const text =
+    `Engine: parsed ${s(f.parsed)}, sprite tables ${Math.round(f.tables)} ms, first screen ${f.firstScreen ? s(f.firstScreen) : '-'}` +
+    ` | image sizes read from the file: ${st.sizeReads}${st.sizeReadFails ? ` (${st.sizeReadFails} unreadable)` : ''}` +
+    ` | image reads ${st.loads} (${(st.loadBytes / 1048576).toFixed(1)} MB)${gfx.images.failed.size ? `, ${gfx.images.failed.size} failed` : ''}` +
+    ` | waiting for images: ${Math.round(f.waitMs)} ms over ${f.waits} screens, longest ${Math.round(f.waitMax)} ms`;
+  const now = performance.now();
+  if (text === f.sent) return;
+  if (!force && now - f.sentAt < 1000) {
+    if (!f.later) {
+      f.later = true; // the last change in a burst is still sent
+      setTimeout(() => {
+        f.later = false;
+        if (loadFacts === f) sendLoadFacts(gfx, true);
+      }, 1000);
+    }
+    return;
+  }
+  f.sent = text;
+  f.sentAt = now;
+  post({ type: 'info', key: 'engine', text });
+}
 async function start(m: StartMsg) {
+  loadFacts = freshFacts();
+  loadFacts.t0 = performance.now();
   if (m.lenient) (globalThis as any).process = { env: { EMU_LENIENT: '1' } };
   const { erb, csv } = m;
   theGameId = String((m as any).gameId ?? '');
@@ -1372,6 +1402,7 @@ async function start(m: StartMsg) {
     : Object.entries(erb).map(([path, text]) => ({ path, text: srcPatches.length ? fixText(path, text) : text }));
   if (m.erbBytes) m.erbBytes = undefined; // the map is dropped; each entry lives on only in its source object until released
   const prog = parseProgram(sources, { csv, lazy: m.lazy !== false });
+  loadFacts.parsed = performance.now() - loadFacts.t0;
   const r = new WebRenderer();
   theR = r;
   const vm = new VM(prog, new Tables(csv), r);
@@ -1538,7 +1569,9 @@ async function start(m: StartMsg) {
     );
     gfx.imageLookupByName = true; // PuchiEmuera finds resource images by file name only (see Gfx.imageLookupByName)
   }
+  const tTables = performance.now();
   for (const [p, text] of Object.entries(m.rescsv)) gfx.loadResourceCsv(text, p.slice(0, p.lastIndexOf('/') + 1));
+  loadFacts.tables = performance.now() - tTables;
   if (gfx.droppedRows.length)
     r.note(
       `${gfx.droppedRows.length} resource rows name an image file the game does not contain and were dropped, as PuchiEmuera does: ${gfx.droppedRows.slice(0, 12).join(', ')}${gfx.droppedRows.length > 12 ? ', ...' : ''}`,
@@ -1577,7 +1610,16 @@ async function start(m: StartMsg) {
     for (const l of gfx.cbg) if (l.kind === 'sprite') keep.add(l.ref as string);
     gfx.prunePins(keep); // a printed image lives as long as a line holds it (ConsoleImagePart.cImage); pins no line uses any more are released
     if (gfx.warnings.length > 100) gfx.warnings.length = 100;
+    const tWait = performance.now();
     await gfx.prepare(spriteNames(gfx, names)); // replay queued draws + decode what the screen shows
+    const waited = performance.now() - tWait;
+    loadFacts.waits++;
+    loadFacts.waitMs += waited;
+    if (waited > loadFacts.waitMax) loadFacts.waitMax = waited;
+    if (!loadFacts.firstScreen) {
+      loadFacts.firstScreen = performance.now() - loadFacts.t0;
+      sendLoadFacts(gfx, true);
+    } else sendLoadFacts(gfx);
     const c = collect(gfx, names, sent);
     lastExtras = { island, bgs, layers: c.layers, buttons: c.buttons, tooltip: vm.tooltip, sizes: c.sizes };
     if (vm.tooltip.img) {

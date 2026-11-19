@@ -33,6 +33,10 @@ export interface ClientHooks {
   textbox(m: Extract<ToPage, { type: 'textbox' }>): void;
   /** one-line engine/status text; `msg` is user-facing progress, shells may show or hide it */
   status(msg: string): void;
+  /** optional: a debug-list line, replaced by `key` (see `ToPage` `info`) */
+  info?(key: string, text: string): void;
+  /** optional: the worker threw outside the engine's own error handling */
+  workerError?(msg: string): void;
   /** optional: the per-game patches in effect (sent once the game is parsed) */
   patches?(m: { active: string[]; width: number; widthFrom: 'game' | 'patch' | 'override'; boot?: string[] }): void;
   /** true while the engine is working on an input, false when a screen has arrived (the shell clears it in `screen`) */
@@ -100,6 +104,11 @@ export class Client {
     this.held = new Map();
     const w = (this.worker = factory());
     w.onmessage = (e: MessageEvent<ToPage>) => this.onMessage(e.data);
+    w.onerror = (e) => {
+      const msg = `Engine worker error: ${e.message || 'unknown'}`;
+      this.hooks.status(msg);
+      this.hooks.workerError?.(msg);
+    };
   }
   start(m: Omit<StartMsg, 'type'>, transfer: Transferable[] = []) {
     this.post({ type: 'start', ...m }, transfer);
@@ -110,6 +119,9 @@ export class Client {
     switch (m.type) {
       case 'status':
         h.status(m.msg);
+        break;
+      case 'info':
+        h.info?.(m.key, m.text);
         break;
       case 'screen':
         this.rehydrate(m);
