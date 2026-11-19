@@ -1566,7 +1566,6 @@ async function load(blob: Blob, name: string) {
         addIssue('warn', t);
       }
     }
-    await loader.readSpriteSizes((n, t) => say(`Reading image sizes… ${n}/${t}`));
     const g = loader.finish();
     loaderLog = log;
     // game-embedded fonts (font/*.ttf|otf, as Emuera EM+EE loads them) are registered before the engine starts

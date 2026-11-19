@@ -1543,10 +1543,6 @@ async function start(m: StartMsg) {
     r.note(
       `${gfx.droppedRows.length} resource rows name an image file the game does not contain and were dropped, as PuchiEmuera does: ${gfx.droppedRows.slice(0, 12).join(', ')}${gfx.droppedRows.length > 12 ? ', ...' : ''}`,
     );
-  if (gfx.images.stats.sizeErrors)
-    status(
-      `${gfx.images.stats.sizeErrors} image size read(s) failed while loading the sprite tables; sprites whose image could not be read are missing. Untick "read images on demand" and reload if images are broken.`,
-    );
   status(`Graphics: ${gfx.images.size} images (decoded on demand), ${gfx.resourceSprites.size} sprites. Running…`);
 
   erbSources = erb; // empty with the low memory loader: the error report then takes its excerpt from the text lazily parsed functions keep (`bodySource`)

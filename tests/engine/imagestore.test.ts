@@ -90,28 +90,6 @@ describe('image store: images registered by reference', () => {
     await s.ensure(['a']);
     assert.ok(s.encodedBytes <= 33 + 33);
   });
-  test('a size read that fails is asked again, up to three tries, and each failure is counted', () => {
-    const s = new ImageStore();
-    let n = 0;
-    s.addRef('a', 'png', 33, undefined, async () => png(5, 6).buffer as ArrayBuffer, () => {
-      if (++n < 3) throw new Error('not readable now');
-      return { w: 5, h: 6 };
-    });
-    assert.equal(s.dim('a'), undefined);
-    assert.equal(s.dim('a'), undefined);
-    assert.deepEqual(s.dim('a'), { w: 5, h: 6 }); // the third try answers
-    assert.equal(s.dim('a')?.w, 5);
-    assert.equal(n, 3);
-    assert.equal(s.stats.sizeErrors, 2);
-    let m = 0;
-    s.addRef('b', 'png', 33, undefined, async () => png(1, 1).buffer as ArrayBuffer, () => {
-      m++;
-      throw new Error('never readable');
-    });
-    for (let i = 0; i < 6; i++) assert.equal(s.dim('b'), undefined);
-    assert.equal(m, 3); // gives up after three
-    assert.equal(s.stats.sizeErrors, 5);
-  });
   test('a size not given at registration is read by `sniff` the first time it is asked, once', () => {
     const s = new ImageStore();
     let calls = 0;

@@ -110,7 +110,7 @@ export const DEFAULT_OPTIONS: StartOptions = Object.fromEntries(
 ) as unknown as StartOptions;
 
 // ---------------------------------------------------------------- shared payload shapes
-/** a resource image left in its zip (option `ximages`): where its data is (`src` indexes `StartMsg.imageSources`), its size in bytes, and its width and height when the host knows them (the page's loader reads them for the images the resource tables name; for any other image the worker reads them from the file header when the game first asks) */
+/** a resource image left in its zip (option `ximages`): where its data is (`src` indexes `StartMsg.imageSources`), its size in bytes, and its width and height when the host knows them (otherwise the worker reads them from the file header when the game first asks) */
 export interface ImageRef {
   src: number;
   offset: number;
