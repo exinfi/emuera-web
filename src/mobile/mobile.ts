@@ -149,11 +149,13 @@ const sheets = ['panel', 'dbg', 'ilog'],
 function openSheet(id: string | null) {
   for (const s of sheets) $(s).hidden = s !== id;
   $('bpanel').classList.toggle('on', id === 'panel');
+  document.body.classList.toggle('pnl', id === 'panel'); // hides the tap toggle and the quick buttons while the control panel is open
   $('bdbg').classList.toggle('on', id === 'dbg' || id === 'ilog');
   if (id === 'dbg') renderDebug();
   if (id === 'ilog') renderInputLog();
 }
 const toggleSheet = (id: string) => openSheet($(id).hidden ? id : null);
+document.body.classList.toggle('pnl', !$('panel').hidden); // the control panel is open when the page starts
 $('bpanel').onclick = () => toggleSheet('panel');
 $('bdbg').onclick = () => openSheet($('dbg').hidden && $('ilog').hidden ? 'dbg' : null);
 for (const [b, sheet] of [

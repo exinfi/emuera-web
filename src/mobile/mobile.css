@@ -18,7 +18,7 @@ body.hdrc #top .tb{pointer-events:auto}body.hdrc #quick button{pointer-events:au
 body.hdrc #tools>.tb:not(#bpanel):not(#binp):not(#bhide):not(#btl):not(#bdpad){display:none}
 body.hdrc.tlover #top{z-index:18}   /* phone overlay only (a desktop is always docked, so never here): the panel covers the buttons and closes by its tab, the sliver or Esc */
 body.hdrc .sheet{padding-top:54px}body.hdrc #tlpanel.dock{padding-top:54px;box-sizing:border-box}   /* sheets and the docked panel start below the buttons */
-#tools{flex:none;display:flex;gap:4px;margin-left:auto}#quick[hidden]{display:none}#quick{margin-left:calc(8px*var(--sp,1))}#mode{min-width:62px;height:57px;align-self:flex-start;margin:2px 0 -16px 4px;position:relative;z-index:26}#mode b{font-size:22px}   /* 1.3 x the original 48 x 44 and 17 px; it hangs below the bar instead of growing it, and the quick buttons keep their 8 px distance */.stabs button.on{background:#2d3f5c;border-color:#5c82c4}
+#tools{flex:none;display:flex;gap:4px;margin-left:auto}#quick[hidden]{display:none}body.pnl #mode,body.pnl #quick{display:none}   /* the control panel is open: the tap toggle and the quick buttons are not needed */#quick{margin-left:calc(8px*var(--sp,1))}#mode{min-width:62px;height:57px;align-self:flex-start;margin:2px 0 -16px 4px;position:relative;z-index:26}#mode b{font-size:22px}   /* 1.3 x the original 48 x 44 and 17 px; it hangs below the bar instead of growing it, and the quick buttons keep their 8 px distance */.stabs button.on{background:#2d3f5c;border-color:#5c82c4}
 #mainrow{flex:1;min-height:0;display:flex}
 #main{flex:1;min-width:0;min-height:0;position:relative}
 #vp{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;background:#000}
@@ -37,7 +37,7 @@ body.tsel:not(.mtap) #vp{user-select:text;-webkit-user-select:text}
 #stage>canvas.emu-bg,#stage>.emu-cbgbtn{transform:translateY(var(--cbgy,0px))}
 /* fixed-image layer and fade veil (eraSumireTeru only) are the game window too: the view draws them over the whole root, which here is as tall as the log */
 .emu-fix,.emu-fixveil{top:var(--cbgy,0px)!important;bottom:auto!important;height:var(--cfgh,100%)!important}
-.flash{position:absolute;pointer-events:none;border-radius:3px;z-index:20;outline:2px solid var(--tap,#6cf);background:color-mix(in srgb,var(--tap,#6cf) 27%,transparent);animation:fl .35s forwards}.flash.r{outline-color:var(--alt,#f77);background:color-mix(in srgb,var(--alt,#f77) 27%,transparent)}.flash.h{outline-color:var(--ok,#7e8);background:color-mix(in srgb,var(--ok,#7e8) 27%,transparent)}
+.flash{position:absolute;pointer-events:none;border-radius:3px;z-index:20;outline:2px solid var(--tap-l,#42aaff);background:color-mix(in srgb,var(--tap-l,#42aaff) 27%,transparent);animation:fl .35s forwards}.flash.r{outline-color:var(--tap-r,#b52f2f);background:color-mix(in srgb,var(--tap-r,#b52f2f) 27%,transparent)}.flash.h{outline-color:var(--tap-h,#4cad47);background:color-mix(in srgb,var(--tap-h,#4cad47) 27%,transparent)}
 @keyframes fl{to{opacity:0}}
 #busy{position:absolute;right:10px;bottom:10px;width:22px;height:22px;border:3px solid #667a;border-top-color:#7cf;border-radius:50%;animation:spin .8s linear infinite;pointer-events:none;z-index:30;background:#0008}#busy[hidden]{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
@@ -124,8 +124,10 @@ body.bbtn .emu-screen a.btn:active{background:#3a3a48}
 --atext:#7b58a8;   /* hsv(266,48%,66%)  accent used as text */
 --aink:#f2efe6;   /* hsv(45,5%,95%)  text on accent */
 --accentbg:#20162c;   /* hsv(267,50%,17%)  accent tint */
---tap:#515bcf;   /* hsv(235,61%,81%)  tap mode L (left click) and its assist flash */
---alt:#b52f2f;   /* hsv(0,74%,71%)  second accent: R tap, record button */
+--tap-l:#42aaff;   /* hsv(207,74%,100%)  tap mode L (left click): the toggle and the assist flash */
+--tap-r:#b52f2f;   /* hsv(0,74%,71%)  tap mode R (right click): the toggle and the assist flash */
+--tap-h:#4cad47;   /* hsv(117,59%,68%)  tap mode H (hover): the toggle and the assist flash */
+--alt:#b52f2f;   /* hsv(0,74%,71%)  second accent */
 --altbg:#281212;   /* hsv(0,55%,16%)  second accent tint */
 --busy:#7ad0f0;   /* hsv(196,49%,94%)  busy indicator */
 --ok:#4cad47;   /* hsv(117,59%,68%)  ok */
@@ -156,9 +158,9 @@ body.hdrc #top{background:none;border:0}
 /* on / selected: a dark accent fill with an accent border */
 .tb.on,.stabs button.on,#bdpad.on{background:var(--accentbg);border-color:var(--accent);color:var(--atext)}
 /* tap mode: solid fills so the mode shows in the corner of the eye */
-#mode[data-mode=left]{background:var(--tap);border-color:var(--tap)}#mode[data-mode=left] b{color:var(--aink)}
-#mode[data-mode=right]{background:var(--alt);border-color:var(--alt)}#mode[data-mode=right] b{color:var(--aink)}
-#mode[data-mode=hover]{background:var(--ok);border-color:var(--ok)}#mode[data-mode=hover] b{color:var(--aink)}
+#mode[data-mode=left]{background:var(--tap-l);border-color:var(--tap-l)}#mode[data-mode=left] b{color:var(--aink)}
+#mode[data-mode=right]{background:var(--tap-r);border-color:var(--tap-r)}#mode[data-mode=right] b{color:var(--aink)}
+#mode[data-mode=hover]{background:var(--tap-h);border-color:var(--tap-h)}#mode[data-mode=hover] b{color:var(--aink)}
 #bdbg.warn{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}#bdbg.err{background:var(--errbg);border-color:var(--err);color:var(--err)}
 #quick button.run{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}
 #vp{background:var(--bg)}
