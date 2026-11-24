@@ -336,6 +336,9 @@ const client: Client = new Client({
     if (m.op === 'clear') {
       inp.value = '';
       client.setInputText('');
+    } else if (m.op === 'set') {
+      inp.value = m.text;
+      client.setInputText(m.text);
     }
   }, // move/resume: the input window is not placed over the game
   status: (msg) => say(msg),
@@ -424,11 +427,11 @@ function onScreen(m: ScreenMsg) {
 
 // ---------------------------------------------------------------- sending input
 function press(v: string) {
-  send(v);
+  send(v, false, true);
 }
-function send(v: string, raw = false): boolean {
+function send(v: string, raw = false, byMouse = false): boolean {
   if (busyNow && !raw) return false; // the engine is working: a second tap or Send would queue a duplicate input
-  const ok = client.submit(v, raw);
+  const ok = client.submit(v, raw, byMouse);
   if (ok) {
     inp.value = '';
     client.setInputText('');
@@ -740,7 +743,10 @@ function bindQuick(b: HTMLButtonElement, value: () => string | null) {
 }
 function renderQuick() {
   quick.textContent = '';
-  const rep = Object.assign(mkBtn('', () => {}), { id: 'qlast', title: 'Send the last input again. Right click: send it and skip.' });
+  const rep = Object.assign(
+    mkBtn('', () => {}),
+    { id: 'qlast', title: 'Send the last input again. Right click: send it and skip.' },
+  );
   bindQuick(rep, () => lastAction()?.value ?? null);
   quick.append(rep);
   quickVals.forEach((v, i) => {
@@ -1013,7 +1019,10 @@ function paintPad() {
     cc = sh.middle[0];
   m.style.clipPath = clipOf(dia);
   m.textContent = '';
-  m.insertAdjacentHTML('beforeend', `<svg class="pb" viewBox="0 0 ${px1(W)} ${px1(W)}"><polygon points="${polyPts(dia)}"/></svg>`);
+  m.insertAdjacentHTML(
+    'beforeend',
+    `<svg class="pb" viewBox="0 0 ${px1(W)} ${px1(W)}"><polygon points="${polyPts(dia)}"/></svg>`,
+  );
   if (padCfg.keys.mid !== PAD_DEFAULT.mid) m.append(label('mid', padCfg.keys.mid, cc, cc, true)); // the middle shows its key only when it was changed
 }
 /** key code of a single character, for an INPUTMOUSEKEY wait (digits as the numpad: peek reads 104/100/98/102 and 101; letters as their key; Enter for empty) */
@@ -1591,7 +1600,8 @@ function renderFontUi() {
   add('', configFont ? `Game default (${configFont})` : 'Game default');
   for (const f of fonts.families()) add(f, f);
   // MS Gothic cannot be bundled: offer it whenever the device has it, whatever the game's default is
-  if (msGothicInstalled() && !fonts.families().some((f) => familyKey(f) === familyKey('MS Gothic'))) add('MS Gothic', 'MS Gothic (installed)');
+  if (msGothicInstalled() && !fonts.families().some((f) => familyKey(f) === familyKey('MS Gothic')))
+    add('MS Gothic', 'MS Gothic (installed)');
   if (cur && ![...fonts.families(), 'MS Gothic'].includes(cur)) add(cur, cur);
   else if (cur === 'MS Gothic' && !msGothicInstalled()) add(cur, cur);
   fontsel.value = cur;
@@ -1612,7 +1622,9 @@ function msGothicInstalled(): boolean {
       c!.font = `40px ${f}`;
       return c!.measureText(t).width;
     };
-    msGothicSeen = ['"MS Gothic"', '"ＭＳ ゴシック"'].some((n) => w(`${n}, monospace`) !== w('monospace') || w(`${n}, serif`) !== w('serif'));
+    msGothicSeen = ['"MS Gothic"', '"ＭＳ ゴシック"'].some(
+      (n) => w(`${n}, monospace`) !== w('monospace') || w(`${n}, serif`) !== w('serif'),
+    );
   } catch {
     msGothicSeen = false;
   }
@@ -1790,6 +1802,7 @@ async function load(blob: Blob, name: string) {
         imageSources: g.imageSources,
         rescsv: g.rescsv,
         texts: g.texts,
+        textRefs: g.textRefs,
         fonts: fonts.startFonts(),
       },
       xfer,
@@ -1933,7 +1946,11 @@ async function loadBundle() {
   };
   show('bundled', !!bundle.game, bundle.game ? `Load bundled game: ${bundle.game.name}` : undefined);
   show('pbundled', !!bundle.packs?.length, `Load bundled packs (${bundle.packs?.length ?? 0})`);
-  show('tlbundled', !!bundle.translation?.length, `Load bundled translation files (${bundle.translation?.length ?? 0})`);
+  show(
+    'tlbundled',
+    !!bundle.translation?.length,
+    `Load bundled translation files (${bundle.translation?.length ?? 0})`,
+  );
   show('cbundled', !!bundle.saves?.length, `Load bundled cards (${bundle.saves?.length ?? 0})`);
   $('cextra').hidden = !!($('cbundled').hidden && $('cdir').hidden);
   void memory.refreshUi();

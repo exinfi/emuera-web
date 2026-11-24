@@ -16,6 +16,8 @@ export interface RuntimeConfig {
   textColor: number;
   backColor: number;
   focusColor: number;
+  /** `ONEINPUT系命令でマウスによる2文字以上の入力を許可する` (AllowLongInputByMouse): a button clicked during ONEINPUT/ONEINPUTS keeps its whole value */
+  allowLongInputByMouse: boolean;
   /** 履歴ログの行数: how many display lines the console keeps (default 5000, never below 500) */
   maxLog: number;
   /** _Replace.csv / config values that drive the system flow */
@@ -208,6 +210,7 @@ export function loadConfig(csv: Record<string, string>): RuntimeConfig {
     textColor: rgb(raw.get('文字色'), 0xc0c0c0),
     backColor: rgb(raw.get('背景色'), 0),
     focusColor: rgb(raw.get('選択中文字色'), 0xffff00),
+    allowLongInputByMouse: rawBool('ONEINPUT系命令でマウスによる2文字以上の入力を許可する', false),
   };
 }
 

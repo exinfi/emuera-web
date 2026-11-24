@@ -2,8 +2,8 @@
 import { Cursor } from '../compiler/cursor';
 import { ExprParser } from '../compiler/expr';
 import type { FormPart } from '../compiler/ast';
-import { compileForm, toNum } from './eval';
-import { def, S } from './funcs';
+import { compile, compileForm, toNum } from './eval';
+import { def, defRaw, refOf, S } from './funcs';
 import { sjisWidth } from './text';
 import { EmueraError } from './value';
 import type { VM } from './vm';
@@ -191,16 +191,11 @@ def('MONEYSTR', (vm, a) => {
 });
 
 // ----------------------------------------------------------------- STRFORM --
-const formCache = new Map<string, FormPart[]>();
+// The text is parsed while the game runs; `vm.formString` gives it the same CSV-name resolution as source text (TALENT:CID:正妻 inside {} in an XML condition)
 def('STRFORM', (vm, a, fr) => {
   const s = String(a[0]);
-  let parts = formCache.get(s);
   try {
-    if (!parts) {
-      parts = new ExprParser(new Cursor(s)).form('eol', false);
-      formCache.set(s, parts);
-    }
-    return compileForm(parts, fr.fn, vm)(fr);
+    return vm.formString(s, fr.fn)(fr);
   } catch (e) {
     throw new EmueraError(`STRFORM: invalid format string "${s}": ${(e as Error).message}`);
   }
@@ -265,28 +260,48 @@ def('ENCODETOUNI', (_vm, a) => {
 });
 
 // ---- regex
-def('REGEXPMATCH', (vm, a) => {
-  let re: RegExp;
-  try {
-    re = netRegex(S(a[1]), 'g');
-  } catch {
-    throw new EmueraError(`REGEXPMATCH: bad pattern ${S(a[1])}`);
-  }
-  const ms = [...S(a[0]).matchAll(re)];
-  if (a[2] !== undefined && toNum(a[2]) !== 0) {
-    const groups = ms.length ? ms[0].length : 0;
-    vm.global('RESULT')[1] = groups;
-    const rs = vm.global('RESULTS');
-    ms.forEach((m, i) =>
-      m.forEach((g, j) => {
-        const k = i * groups + j;
-        if (k < rs.length) rs[k] = g ?? '';
-      }),
-    );
-  }
-  return ms.length;
+// REGEXPMATCH(str, pattern [, flag]) / REGEXPMATCH(str, pattern, countVar, outArray) (EM+EE RegexpMatchMethod): the number of matches.
+// Flag form: a non-zero flag puts the group count in RESULT:1 and the matches in RESULTS. Four-argument form: the group count goes into countVar and the matches into
+// outArray (the whole array, from index 0, whatever subscript was written). Each match gives one entry per group (group 0 is the whole match), up to the array's size.
+defRaw('REGEXPMATCH', (vm, ex, fn) => {
+  const a = ex.map((e) => compile(e, fn, vm));
+  const cnt = ex.length === 4 ? refOf(ex[2], fn, vm) : null;
+  const outRef = ex.length === 4 ? refOf(ex[3], fn, vm) : null;
+  return (fr) => {
+    const pat = S(a[1](fr));
+    let re: RegExp;
+    try {
+      re = netRegex(pat, 'g');
+    } catch {
+      throw new EmueraError(`REGEXPMATCH: bad pattern ${pat}`);
+    }
+    const ms = [...S(a[0](fr)).matchAll(re)];
+    // Regex.GetGroupNumbers().Length: the capture groups plus group 0, known from the pattern even without a match
+    const groups = new RegExp(re.source + '|', re.flags.replace('g', '')).exec('')!.length;
+    const fill = (arr: any[], from = 0) => {
+      let idx = from;
+      for (const m of ms)
+        for (let j = 0; j < groups; j++) {
+          if (idx >= arr.length) return;
+          arr[idx++] = m[j] ?? '';
+        }
+    };
+    if (ex.length === 3 && toNum(a[2](fr)) !== 0) {
+      vm.global('RESULT')[1] = groups;
+      if (ms.length) fill(vm.global('RESULTS'));
+    }
+    if (cnt && outRef) {
+      const c = cnt.locate(fr);
+      c.arr[c.off] = groups;
+      if (ms.length) {
+        // an array written without a subscript starts at its own first element (also when it is a #DIM REF parameter bound into a larger array)
+        const o = outRef.locate(fr);
+        fill(o.arr, (ex[3] as { idx: unknown[] }).idx.length ? 0 : o.off);
+      }
+    }
+    return ms.length;
+  };
 });
-
 // HASH_XXH32(str): XxHash32 of the UTF-8 bytes, seed 0, as an unsigned 32-bit number
 def('HASH_XXH32', (_vm, a) => xxh32(new TextEncoder().encode(String(a[0]))));
 function xxh32(b: Uint8Array): number {

@@ -539,7 +539,7 @@ COMMANDS.WAIT =
 COMMANDS.FORCEWAIT = COMMANDS.WAIT;
 COMMANDS.WAITANYKEY = COMMANDS.WAIT;
 // ------------------------------------------------------------- misc no-ops --
-for (const n of ['ASSERT', 'DEBUGCLEAR', 'MOUSESKIP', 'SETANIMETIMER']) {
+for (const n of ['ASSERT', 'DEBUGCLEAR', 'MOUSESKIP']) {
   COMMANDS[n] = () => () => {};
 }
 // DEBUGPRINT[FORM][L]: nothing on the game screen (the original prints to its debug console); the text is kept for the playtest log (VM.debugLines)

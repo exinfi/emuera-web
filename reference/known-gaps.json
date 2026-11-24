@@ -2,11 +2,6 @@
   "_doc": "Ledger of everything not fully implemented or known to differ from the originals: stub (accepted, no effect), approx (implemented, differs in the stated way) or todo (known unported behavior). Nothing enforces this list any more (the old status test is gone; tests/data/reference.test.ts only checks that the JSON is well formed), so keep it honest by hand. Inventory refreshed 2026-11-24 at 41.2 against the live registries: all 568 catalogue builtins are registered.",
   "entries": [
     {
-      "name": "SETTEXTBOX",
-      "kind": "stub",
-      "note": "text box: host hooks only, no web UI (GETTEXTBOX returns empty)"
-    },
-    {
       "name": "OUTPUTLOG",
       "kind": "stub",
       "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
@@ -14,7 +9,7 @@
     {
       "name": "SETANIMETIMER",
       "kind": "stub",
-      "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
+      "note": "the argument is range checked like the originals (int32 min to int16 max) and the call returns 1, but no redraw timer is started. The original's timer only repaints the window while the game waits for input, so animated sprites advance (a desktop window is repainted on demand); the page redraws animated sprites on its own animation-frame clock (screenview.ts), so the same sprites should animate without the timer. Not checked with eraFL's graphic library; the frame rate a game asks for is not used"
     },
     {
       "name": "ISSKIP",
@@ -223,8 +218,8 @@
     },
     {
       "name": "PRINT_RECT",
-      "kind": "stub",
-      "note": "no-op: the original (PrintShape \"rect\" with number or px arguments) draws a rectangle in the log. The HTML form (<shape type='rect'> inside HTML_PRINT) is implemented. No game in hand calls PRINT_RECT"
+      "kind": "approx",
+      "note": "draws a filled rectangle in the current color through the same path as <shape type='rect'> (one value = width, four = x, y, width, height, percent of the font size). The px suffix EM+EE allows after a value (PRINT_RECT 0, 0, 100px, 10) is not parsed; no game in hand uses it. The color under a selected button is not modelled"
     },
     {
       "name": "unread-config-items",

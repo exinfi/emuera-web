@@ -148,6 +148,15 @@ export function constFold(e: Expr, ctx: ParseCtx): CV {
         b = constFold(e.r, ctx);
       if (typeof a === 'string' || typeof b === 'string') {
         if (e.op === '+' && typeof a === 'string' && typeof b === 'string') return a + b;
+        if (e.op === '*' && typeof a !== typeof b) {
+          // string * integer (either order): repeat the string; MultStrInt in both Emuera sources refuses a negative count and 10000 or more
+          const str = (typeof a === 'string' ? a : b) as string,
+            n = typeof a === 'string' ? b : a;
+          const cnt = BigInt(n as number | bigint);
+          if (cnt < 0n) return bad(`multiplying a string by a negative value (${cnt})`);
+          if (cnt >= 10000n) return bad(`multiplying a string by ${cnt} (10000 or more)`);
+          return str.repeat(Number(cnt));
+        }
         return bad('string op');
       }
       const x = BigInt(a),

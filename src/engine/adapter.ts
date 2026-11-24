@@ -127,6 +127,18 @@ export class Capture implements Renderer {
   note(m: string) {
     this.notes.push(m);
   }
+  /** PRINT_RECT calls (values, px flags) and the input box text, kept for tests; neither adds to the printed lines */
+  rects: { v: number[]; px: boolean[] }[] = [];
+  rect(v: number[], px: boolean[]) {
+    this.rects.push({ v, px });
+  }
+  inputText = '';
+  setTextBox(t: string) {
+    this.inputText = t;
+  }
+  getTextBox() {
+    return this.inputText;
+  }
   lineIsEmpty() {
     return this.cur === '';
   }
@@ -160,6 +172,16 @@ async function run(files: GameFiles, opts: RunOptions & { maxSteps?: number } = 
     ...(((opts as any).extraFiles as string[]) ?? []),
   ];
   for (const f of ((opts as any).unloadedFiles as string[]) ?? []) vm.unloadedFiles.add(f);
+  // text files the game can LOADTEXT: held (`textFiles`) or left in their zip and read on first use (`lazyTextFiles`, key -> reader), as the page's worker sets them up
+  for (const [k, v] of Object.entries(((opts as any).textFiles as Record<string, string>) ?? {}))
+    (vm.textFiles.set(k.toLowerCase(), v), vm.gameFiles.push(k));
+  for (const [k, rd] of Object.entries(
+    ((opts as any).lazyTextFiles as Record<string, () => string | undefined>) ?? {},
+  )) {
+    vm.lazyTexts.set(k.toLowerCase(), rd);
+    vm.gameFiles.push(k);
+  }
+  if ((opts as any).textCacheBudget) vm.textCacheBudget = (opts as any).textCacheBudget;
   vm.fontFamilies = ((opts as any).fontFamilies as string[]) ?? [];
   const sounds: unknown[] = [];
   for (const f of (opts as any).soundFiles ?? []) vm.soundFiles.add(String(f).toLowerCase());
@@ -205,6 +227,12 @@ async function run(files: GameFiles, opts: RunOptions & { maxSteps?: number } = 
           break;
         }
         let inp = queue.shift()!;
+        // "@label" is a left button click, "@@label" a right one (RESULT:1 = 2), "@@" a right click on no button; anything else is typed
+        const right = inp.startsWith('@@');
+        vm.inputState.byMouse = inp.startsWith('@');
+        vm.inputState.click = inp.startsWith('@') ? { b: right ? 2 : 1, k: 0 } : null;
+        if (right) inp = '@' + inp.slice(2);
+        if (inp === '@') inp = ''; // a click on no button
         if (inp.startsWith('@')) {
           // "@label" picks the most recently shown button with that label (or label substring)
           const want = inp.slice(1);
@@ -244,6 +272,7 @@ async function run(files: GameFiles, opts: RunOptions & { maxSteps?: number } = 
     finished,
     starved,
     sounds,
+    rects: cap.rects,
   } as RunResult;
 }
 

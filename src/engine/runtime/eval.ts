@@ -760,8 +760,14 @@ function buildBin(e: Expr & { k: 'bin' }, fn: FuncDef, vm: VM): Fn {
       return (fr) => {
         const a = l(fr),
           b = r(fr);
-        if (typeof a === 'string') return a.repeat(Math.max(0, toNum(b)));
-        if (typeof b === 'string') return b.repeat(Math.max(0, toNum(a)));
+        if (typeof a === 'string' || typeof b === 'string') {
+          // MultStrInt (both Emuera sources): a negative count or 10000 or more is an error
+          const str = (typeof a === 'string' ? a : b) as string,
+            n = toNum(typeof a === 'string' ? b : a);
+          if (n < 0) throw new EmueraError(`文字列に負の値(${n})を乗算しようとしました`);
+          if (n >= 10000) throw new EmueraError(`文字列に10000以上の値(${n})を乗算しようとしました`);
+          return str.repeat(n);
+        }
         return V.mul(a, asInt(b));
       };
     case '/':

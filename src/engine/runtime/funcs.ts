@@ -574,10 +574,22 @@ dtRaw('DT_COLUMN_NAMES', (vm, a, fr, ex, fn) => {
 dtRaw('DT_ROW_LENGTH', (vm, a, fr) => dtOf(vm, a, fr)?.rows.length ?? -1);
 
 function dtSetCell(t: DataTable, row: (Value | null)[], col: string, v: Value | undefined) {
+  // DataTableRowSetMethod.CheckName refuses only the exact name "id". The column lookup then ignores case, so "ID" reaches the id column and sets it
+  // (eraFL: DT_ROW_ADD "CC_SP_TOKEN_NUM", "ID", ACTOR_DID, to give a row the same id as its CC_ACTOR row).
+  if (col === 'id') throw new EmueraError('DT: the id column cannot be edited');
   const i = t.colIndex(col);
   if (i < 0) throw new EmueraError(`DT: no column '${col}'`);
-  if (i === 0) throw new EmueraError('DT: the id column cannot be edited');
   const c = t.cols[i];
+  if (i === 0) {
+    if (v === undefined) throw new EmueraError("DT: column 'id' does not allow nulls");
+    if (typeof v === 'string') throw new EmueraError(`DT: type mismatch for column '${col}'`);
+    const id = t.clamp(c, v);
+    if (t.rows.some((r) => r !== row && Number(r[0]) === Number(id)))
+      throw new EmueraError(`DT: column 'id' is constrained to be unique, value '${id}' is already present`);
+    row[0] = id;
+    t.reserveId(id);
+    return;
+  }
   if (v === undefined) {
     row[i] = null;
     return;
@@ -603,7 +615,7 @@ function dtFillRow(
     return Math.max(0, n);
   }
   let c = 0;
-  for (let k = b + 1; k + 1 < a.length + 1 && k < a.length; k += 2) {
+  for (let k = b + 1; k < a.length; k += 2) {
     dtSetCell(t, row, S(a[k](fr)), a[k + 1]?.(fr));
     c++;
   }

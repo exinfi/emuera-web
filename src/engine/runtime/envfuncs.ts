@@ -30,8 +30,14 @@ def('CHKFONT', (vm, a) =>
     ? 1
     : 0,
 );
-def('MOUSEX', (vm) => vm.mouse.x);
-def('MOUSEY', (vm) => vm.mouse.y);
+def('MOUSEX', (vm) => {
+  vm.mouseRead = { x: vm.mouse.x, y: vm.mouse.y, n: vm.mouseRead.n + 1 };
+  return vm.mouse.x;
+});
+def('MOUSEY', (vm) => {
+  vm.mouseRead = { x: vm.mouse.x, y: vm.mouse.y, n: vm.mouseRead.n + 1 };
+  return vm.mouse.y;
+});
 def('CLIENTWIDTH', (vm) => vm.config.windowWidth);
 def('CLIENTHEIGHT', (vm) => vm.config.windowHeight);
 const cfgGet = (vm: VM, name: Value | undefined, fn: string, want: 'int' | 'str') => {
@@ -45,7 +51,17 @@ const cfgGet = (vm: VM, name: Value | undefined, fn: string, want: 'int' | 'str'
 };
 def('GETCONFIG', (vm, a) => cfgGet(vm, a[0], 'GETCONFIG', 'int'));
 def('GETCONFIGS', (vm, a) => cfgGet(vm, a[0], 'GETCONFIGS', 'str'));
-for (const n of ['OUTPUTLOG', 'SETTEXTBOX', 'SETANIMETIMER']) def(n, () => 0);
+def('OUTPUTLOG', () => 0);
+def('SETTEXTBOX', (vm, a) => {
+  vm.host.setTextBox?.(String(a[0] ?? ''));
+  return 1;
+});
+// SETANIMETIMER ms: sets the redraw timer (ArgIsOutOfRange outside int32 min .. int16 max). Frames here are drawn by AWAIT, so there is no timer to start.
+def('SETANIMETIMER', (_vm, a) => {
+  const n = Number(a[0]);
+  if (n < -2147483648 || n > 32767) throw new EmueraError(`SETANIMETIMER: argument 1 (${n}) is out of range`);
+  return 1;
+});
 def('ISSKIP', () => 0);
 
 def('MESSKIP', (vm) => (vm.mesSkip ? 1 : 0));

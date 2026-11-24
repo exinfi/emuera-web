@@ -447,7 +447,19 @@ COMMANDS.PRINT_IMG = (st, fn, vm) => {
     else vm.host.print('');
   };
 };
-COMMANDS.PRINT_RECT = () => () => {};
+// PRINT_RECT w  /  PRINT_RECT x, y, w, h  (EM+EE: SP_PRINT_SHAPE, 1 or 4 values; the original takes any count). Values are percent of the font size.
+COMMANDS.PRINT_RECT = (st, fn, vm) => {
+  const l = exprs(st).map((e) => compile(e, fn, vm));
+  return (fr) => {
+    if (vm.system.skipDisp) return;
+    if (l.length !== 1 && l.length !== 4)
+      throw new EmueraError('PRINT_RECT: the number of arguments is wrong (1 or 4)');
+    vm.host.rect?.(
+      l.map((f) => toNum(f(fr))),
+      l.map(() => false),
+    );
+  };
+};
 COMMANDS.PRINT_SPACE = (st, fn, vm) => {
   const f = compile(exprs(st)[0], fn, vm);
   return (fr) => {

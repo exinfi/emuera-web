@@ -102,7 +102,7 @@ export const OPTION_DEFS: readonly OptionDef[] = [
     default: false,
     label: 'enable extra file check',
     title:
-      "Normally only the standard game folders are loaded. This also loads files from other folders whose names appear in the game's code (a best guess; paths the game builds at run time are missed). Tick it if the game reports a missing file, then reload.",
+      'Normally only the standard game folders (ERB, CSV, resources, sound, font, dat) are loaded. Tick this to also let the game read the other text files (XML, JSON, TXT, CSV and similar) and images in the zip. Folders such as docs, backups and tools are skipped. Tick it if the game reports a missing file or an XML or data file error, then reload.',
   },
 ];
 export const DEFAULT_OPTIONS: StartOptions = Object.fromEntries(
@@ -120,6 +120,15 @@ export interface ImageRef {
   ext: string;
   size: number;
   dim?: { w: number; h: number };
+}
+/** a text-like file left in its zip (option `xrefs`): where its data is (`src` indexes `StartMsg.imageSources`) and its size in bytes; the worker reads and decodes it when the game first asks for it */
+export interface TextRef {
+  src: number;
+  offset: number;
+  csize: number;
+  method: number;
+  nameLen: number;
+  size: number;
 }
 export interface SavedSlot {
   info: string;
@@ -247,7 +256,10 @@ export interface StartMsg extends StartOptions {
   images: Record<string, ArrayBuffer>;
   /** optional (additive, option `ximages`): resource images left in their zips; read by the worker on first use. `imageSources` are the zips (Blobs are posted as handles, not copied). */
   imageRefs?: Record<string, ImageRef>;
+  /** the zips that `imageRefs` and `textRefs` point into */
   imageSources?: (Blob | Uint8Array)[];
+  /** optional (additive, option `xrefs`): text-like files outside the usual folders, left in their zips and read by the worker when the game first asks (LOADTEXT) */
+  textRefs?: Record<string, TextRef>;
   /** optional (additive): cap in MB on image files held in memory after being read on demand (default 128); least recently used are dropped and read again */
   imageCacheMB?: number;
   /** optional (additive): paths in the game zip the loader did not load; the engine notes it when the game asks for one of them */
@@ -270,7 +282,8 @@ export interface StartMsg extends StartOptions {
 }
 export type ToWorker =
   | StartMsg
-  | { type: 'input'; value: string }
+  /** `m` (additive): the value is a clicked button's, not typed text; ONEINPUT keeps a long button value only then (AllowLongInputByMouse). `b` (1 left, 2 right, 3 middle) and `k` (modifier bits) describe the click: a mouse-flagged INPUT(S) reads them as RESULT:1 / RESULT:2. An empty `value` with `m` is a click on no button; the engine ignores it unless the wait takes the mouse. */
+  | { type: 'input'; value: string; m?: boolean; b?: number; k?: number }
   /** INPUTMOUSEKEY event: [kind(1 click, 2 wheel, 3 key, 4 timeout), r1..r5]; click: [1, button, x, y, 0, 0] with y measured from the stage bottom (<= 0) */
   | { type: 'mousekey'; ev: number[] }
   | { type: 'mousepos'; x: number; y: number }
@@ -350,6 +363,7 @@ export type ToPage =
   | { type: 'sound'; m: SoundMsg }
   | { type: 'title'; title: string }
   | { type: 'textbox'; op: 'clear' }
+  | { type: 'textbox'; op: 'set'; text: string }
   | { type: 'textbox'; op: 'move'; x: number; y: number; width: number }
   | { type: 'textbox'; op: 'resume' }
   | { type: 'status'; msg: string }

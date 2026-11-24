@@ -49,9 +49,9 @@ export function schemaXml(t: DataTable, name: string): string {
   let cols = '';
   t.cols.forEach((c, i) => {
     const d = c.def !== undefined ? ` default="${xEscape(String(c.def))}"` : '';
-    cols += `<xs:element name="${c.name}" type="${XS[t.typeNum(i)]}"${i === 0 ? ' msdata:AutoIncrement="true" msdata:AutoIncrementSeed="1"' : ''}${c.nullable || i === 0 ? '' : ''}${d}${i === 0 || !c.nullable ? '' : ' minOccurs="0"'} />`;
+    cols += `<xs:element name="${c.name}" type="${XS[t.typeNum(i)]}"${d}${i === 0 || !c.nullable ? '' : ' minOccurs="0"'} />`;
   });
-  return `<?xml version="1.0" encoding="utf-16"?><xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"><xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="${name}" msdata:UseCurrentLocale="true"><xs:complexType><xs:choice minOccurs="0" maxOccurs="unbounded"><xs:element name="${name}"><xs:complexType><xs:sequence>${cols}</xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema>`;
+  return `<?xml version="1.0" encoding="utf-16"?><xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata"><xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="${name}" msdata:UseCurrentLocale="true"><xs:complexType><xs:choice minOccurs="0" maxOccurs="unbounded"><xs:element name="${name}"><xs:complexType><xs:sequence>${cols}</xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType><xs:unique name="Constraint1" msdata:PrimaryKey="true"><xs:selector xpath=".//${name}" /><xs:field xpath="id" /></xs:unique></xs:element></xs:schema>`;
 }
 export function dataXml(t: DataTable, name: string): string {
   let s = '<?xml version="1.0" encoding="utf-16"?><DocumentElement>';

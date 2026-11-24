@@ -305,6 +305,26 @@ export class WebRenderer implements Renderer {
     this.newline();
     this.tempLast = true;
   }
+  /** PRINT_RECT (ConsoleShapePart.CreateShape 'rect'): one value is the width at one line height, four are x, y, width, height; a rectangle that fails the checks draws nothing (Emuera shows its error text) */
+  rect(v: number[], px: boolean[]) {
+    const fs = theVm?.config.fontSize ?? 16;
+    const L = (i: number): Len => ({ n: v[i], px: !!px[i] });
+    const pix = (i: number) => (px[i] ? v[i] : (fs * v[i]) / 100);
+    const z: Len = { n: 0, px: true };
+    const r =
+      v.length === 1 && v[0] > 0
+        ? { x: z, y: z, w: L(0), h: { n: fs, px: true } }
+        : v.length === 4 && pix(0) >= 0 && pix(2) > 0 && pix(3) > 0
+          ? { x: L(0), y: L(1), w: L(2), h: L(3) }
+          : null;
+    if (!r) return;
+    const px_ = (l: Len) => (l.px ? l.n : (fs * l.n) / 100);
+    this.cur.push({
+      t: '',
+      sp: { n: px_(r.x) + px_(r.w), px: true },
+      rc: { ...r, c: this.color >= 0 ? this.color : undefined },
+    });
+  }
   image(n: string, h?: number, w?: number, o?: Partial<Img>) {
     const pin = (x: string) => theVm?.gfx.pin(x) ?? x; // the sprite is bound when the line is printed (ConsoleImagePart)
     this.cur.push({ t: '', img: { n: pin(n).toUpperCase(), alt: n, h, w, ...o } });
@@ -685,6 +705,10 @@ export class WebRenderer implements Renderer {
   getTextBox() {
     return this.inputText;
   }
+  setTextBox(text: string) {
+    this.inputText = text;
+    post({ type: 'textbox', op: 'set', text });
+  }
   clearText() {
     this.inputText = '';
     post({ type: 'textbox', op: 'clear' });
@@ -705,6 +729,8 @@ export class WebRenderer implements Renderer {
 let pending: ((s: string | null) => void) | null = null;
 /** what the pending wait is for: an INPUTMOUSEKEY wait takes only mouse/key events, any other input only text (a click's late text press must not become a key press) */
 let pendingKind = '';
+/** the pending input was asked with the mouse flag (INPUT/INPUTS ..., 1) */
+let pendingMouse = false;
 let theVm: VM | null = null;
 /** the error that stopped the run, kept so a manual export made afterwards still reports it (null while the game runs) */
 let fatalErr: any = null;
@@ -793,7 +819,11 @@ function buildReport(err: any, vm: VM, sourceNote: string, userNote = '', verbos
   const miss = new Set<string>();
   for (const g of imgSegs(lastScreen)) if (g.img && !gfx.sprites.has(g.img.n)) miss.add(baseName(g.img.n));
   out.push(
-    err ? (manual ? '# Playtest log (manual export, the game had stopped on an error)' : '# Engine error report') : '# Playtest log (manual export)',
+    err
+      ? manual
+        ? '# Playtest log (manual export, the game had stopped on an error)'
+        : '# Engine error report'
+      : '# Playtest log (manual export)',
     '',
     ...(userNote ? [`player note: ${userNote}`] : []),
     ...(err ? [`error: ${String(err?.message ?? err).split('\n')[0]}`] : []),
@@ -866,6 +896,9 @@ function buildReport(err: any, vm: VM, sourceNote: string, userNote = '', verbos
     }
   }
   out.push('', '## Game state', st.join('  '));
+  out.push(
+    `pointer: now (${vm.mouse.x}, ${vm.mouse.y}); last read by MOUSEX/MOUSEY (${vm.mouseRead.x}, ${vm.mouseRead.y}), ${vm.mouseRead.n} reads; y is from the stage bottom, so it is 0 or less (Emuera GetMousePosition)`,
+  );
   // consecutive identical answers (a mouse event repeated as the pointer moves) are one entry with a count; the short form keeps the last 25 entries, the verbose form the first 50 and the last 50
   const grouped: { x: (typeof recentInputs)[number]; n: number }[] = [];
   for (const x of recentInputs) {
@@ -1146,8 +1179,14 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
     post({ type: 'logexport', text: '', snapshot });
   } else if (m.type === 'card') setCard(m.saves, m.files);
   else if (m.type === 'input' && pending && (pendingKind !== 'mousekey' || m.value.startsWith(MK_PREFIX))) {
+    // a click on no button (empty value) only answers an input that takes the mouse (EmueraConsole: IsWaintingInputWithMouse); any other wait keeps waiting
+    if (m.m && m.value === '' && !pendingMouse) return;
     const p = pending;
     pending = null;
+    if (theVm) {
+      theVm.inputState.byMouse = !!m.m;
+      theVm.inputState.click = m.m ? { b: m.b ?? 1, k: m.k ?? 0 } : null;
+    }
     p(m.value);
   } else if (m.type === 'keystate' && theVm) {
     const k = m.code & 255,
@@ -1325,7 +1364,18 @@ async function registerFonts(vm: VM, fonts: FontFile[]) {
   vm.gfx.fallbackFonts = vm.fontFamilies.filter((f) => key(f) === key('BIZ UDGothic')).slice(0, 1);
 }
 /** load and image facts for the shell's debug list (`info` message): not an issue, not shown to the player otherwise */
-const freshFacts = () => ({ t0: 0, parsed: 0, tables: 0, firstScreen: 0, waits: 0, waitMs: 0, waitMax: 0, sent: '', sentAt: 0, later: false });
+const freshFacts = () => ({
+  t0: 0,
+  parsed: 0,
+  tables: 0,
+  firstScreen: 0,
+  waits: 0,
+  waitMs: 0,
+  waitMax: 0,
+  sent: '',
+  sentAt: 0,
+  later: false,
+});
 let loadFacts = freshFacts();
 function sendLoadFacts(gfx: VM['gfx'], force = false) {
   const f = loadFacts,
@@ -1500,6 +1550,21 @@ async function start(m: StartMsg) {
   ];
   post({ type: 'patches', active: activePatches, width: vm.config.windowWidth, widthFrom, boot });
   for (const [k, v] of Object.entries(m.texts)) vm.textFiles.set(k.toLowerCase(), v);
+  // option `xrefs`: text files left in their zips are read and decoded when the game first asks (LOADTEXT), see VM.getText
+  for (const [p, r] of Object.entries(m.textRefs ?? {})) {
+    const zipSrc = m.imageSources?.[r.src];
+    if (!zipSrc) continue;
+    vm.lazyTexts.set(p.toLowerCase(), () => {
+      try {
+        const u = readEntrySync(zipSrc, r, p);
+        if (u) return decodeText(u);
+        vm.host.note(`LOADTEXT: "${p}" could not be read from the zip here (no synchronous read in this worker)`);
+      } catch (e) {
+        vm.host.note(`LOADTEXT: "${p}" could not be read from the zip: ${e instanceof Error ? e.message : e}`);
+      }
+      return undefined;
+    });
+  }
   for (const n of m.sounds ?? []) vm.soundFiles.add(n.toLowerCase());
   for (const n of m.unloaded ?? []) vm.unloadedFiles.add(n);
   await registerFonts(vm, m.fonts ?? []);
@@ -1510,6 +1575,7 @@ async function start(m: StartMsg) {
     ...Object.keys(m.images),
     ...Object.keys(m.imageRefs ?? {}),
     ...Object.keys(m.texts),
+    ...Object.keys(m.textRefs ?? {}),
     ...(m.sounds ?? []).map((n) => 'sound/' + n),
   ];
   theVm = vm;
@@ -1711,6 +1777,7 @@ async function start(m: StartMsg) {
         const v = await new Promise<string | null>((ok) => {
           pending = ok;
           pendingKind = q.kind;
+          pendingMouse = !!q.mouse;
           if (q.timeoutMs && q.countdown) {
             // TINPUT with the countdown shown: changeLastLine("Remaining: x.x") every ~100 ms
             const t0 = Date.now(),

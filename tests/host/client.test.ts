@@ -52,8 +52,11 @@ function rig() {
     });
   const down = (o: Partial<PointerDown> = {}): boolean =>
     c.pointerDown({ button: 0, x: 10, y: -5, inside: true, onChrome: false, onControl: false, ...o });
-  const inputs = () => sent.filter((m) => m.type === 'input').map((m) => (m as any).value);
-  return { c, sent, screen, down, inputs };
+  /** answers sent to the game; a click on no button (empty value with `m`) is listed in `clicks` instead, since the engine ignores it unless the wait takes the mouse */
+  const inputs = () =>
+    sent.filter((m) => m.type === 'input' && !((m as any).m && (m as any).value === '')).map((m) => (m as any).value);
+  const clicks = () => sent.filter((m) => m.type === 'input' && (m as any).m && (m as any).value === '') as any[];
+  return { c, sent, screen, down, inputs, clicks };
 }
 
 describe('input rules every shell relies on', () => {
@@ -83,6 +86,46 @@ describe('input rules every shell relies on', () => {
     r.screen('anykey');
     r.down({ pressButton: () => {} });
     assert.deepEqual(r.inputs(), []);
+  });
+});
+
+describe('click type for mouse-flagged INPUT', () => {
+  // Source: EM+EE MainWindow.MouseUp (click type and modifier bits reach RESULT:1 and RESULT:2 of a mouse-flagged input).
+  test('a button press carries its click type and the held modifiers', () => {
+    const r = rig();
+    r.screen('str');
+    r.c.keyDown({
+      keyCode: 17,
+      key: 'Control',
+      repeat: false,
+      isComposing: false,
+      shift: false,
+      ctrl: true,
+      alt: false,
+    });
+    r.down({ button: 2, pressButton: () => r.c.submit('77', false, true) });
+    assert.deepEqual(r.sent.at(-1), { type: 'input', value: '77', m: true, b: 2, k: 0x20000 });
+    r.c.keyUp(17);
+    r.screen('str');
+    r.down({ button: 0, pressButton: () => {} }); // a left press on a button is handled by the shell, which then submits
+    r.c.submit('5', false, true);
+    assert.deepEqual(r.sent.at(-1), { type: 'input', value: '5', m: true, b: 1, k: 0 });
+  });
+  test('a click on no button at a text or number wait is sent as an empty click; typed input has no click', () => {
+    const r = rig();
+    r.screen('str');
+    r.down({ button: 2 });
+    assert.deepEqual(r.clicks().at(-1), { type: 'input', value: '', m: true, b: 2, k: 0 });
+    r.c.submit('x');
+    assert.deepEqual(r.sent.at(-1), { type: 'input', value: 'x' });
+  });
+  test('no empty click on a chrome press, outside the stage, or on a control', () => {
+    const r = rig();
+    r.screen('str');
+    r.down({ onChrome: true });
+    r.down({ inside: false });
+    r.down({ onControl: true });
+    assert.equal(r.clicks().length, 0);
   });
 });
 

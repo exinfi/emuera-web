@@ -33,6 +33,17 @@ function* ask(vm: VM, req: Record<string, unknown>): Generator<any, [string, boo
 }
 
 type Spec = { str: boolean; one: boolean; timed: boolean };
+/** EmueraConsole mouse handling: a click that answers a mouse-flagged INPUT(S) also sets RESULT:1 (click type), RESULT:2 (modifier bits) and RESULTS:1 (the clicked button's text) */
+const applyClick = (vm: VM, mouseOn: boolean, text: string) => {
+  const c = vm.inputState.click;
+  vm.inputState.click = null;
+  if (!mouseOn || !c) return;
+  vm.setResult(c.b, 1);
+  vm.setResult(c.k, 2);
+  if (text !== '') vm.setResult(text, 1);
+};
+/** ONEINPUT-family waits take one character, unless the answer is a clicked button and the config allows long input by mouse (EmueraConsole.PressEnterKey, `!AllowLongInputByMouse || !changedByMouse`) */
+const keepLong = (vm: VM) => vm.config.allowLongInputByMouse && vm.inputState.byMouse;
 const make =
   ({ str, one, timed }: Spec): Factory =>
   (st, fn, vm) => {
@@ -88,17 +99,19 @@ const make =
           }
           if (str) {
             if (text === '' && hasDef && !running) text = txt(defV);
-            if (one) text = text.slice(0, 1);
+            if (one && !keepLong(vm)) text = text.slice(0, 1);
             vm.echoInput(text);
             vm.setResult(text, 0);
+            applyClick(vm, mouseOn, text);
             return;
           }
           if (text.trim() === '' && hasDef && !running) text = txt(defV);
           if (!intRe.test(text)) continue;
-          const shown = one ? text.trim().slice(0, 1) : text.trim();
+          const shown = one && !keepLong(vm) ? text.trim().slice(0, 1) : text.trim();
           if (one && !intRe.test(shown)) continue;
           vm.echoInput(shown);
           vm.setResult(V.parseIntLoose(shown), 0);
+          applyClick(vm, mouseOn, '');
           return;
         }
       })();

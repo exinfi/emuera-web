@@ -16,7 +16,7 @@ import type {
   NativeImported,
   NativeExported,
 } from './protocol';
-import { mouseButtonCode, modifierBits } from './screen';
+import { mouseButtonCode, modifierBits, promptClass } from './screen';
 
 /** one input sent to the game */
 export interface InputEntry {
@@ -71,6 +71,8 @@ export interface PointerDown {
   pressButton?: () => void;
   /** the value of the game button under the press (what the page's hover would have reported), '' for none. During INPUTMOUSEKEY it is what the game reads as the clicked button (RESULT:5 / RESULTS), so a shell that presses without a DOM pointer event must set it (`ScreenView.valueAt`). Left out: the last hover value stands. */
   pointing?: string;
+  /** modifier bits held during the press (0x10000 Shift, 0x20000 Ctrl, 0x40000 Alt); left out: the client's own key state */
+  mods?: number;
 }
 
 const ARROW_DIGIT: Record<string, string> = { ArrowUp: '8', ArrowLeft: '4', ArrowRight: '6', ArrowDown: '2' };
@@ -78,6 +80,10 @@ export class Client {
   private worker: Worker | null = null;
   private skip = false;
   private lastMove = 0;
+  /** modifier keys held now (bits 0x10000 Shift, 0x20000 Ctrl, 0x40000 Alt), from keyDown/keyUp */
+  private mods = 0;
+  /** the click that is being turned into an answer (set by pointerDown, used by the next mouse submit) */
+  private click: { b: number; k: number } | null = null;
   /** what the game is waiting for ('wait', 'anykey', 'mousekey', an input kind, 'done', 'error'), '' while the engine runs */
   kind: ScreenKind | '' = '';
   /** the kind of the most recent screen (unlike `kind`, not cleared while the engine runs) */
@@ -199,14 +205,16 @@ export class Client {
 
   // ---- input
   /** typed text, or a button's value. INPUTMOUSEKEY waits want events, not text, unless `raw`. */
-  submit(v: string, raw = false): boolean {
+  submit(v: string, raw = false, byMouse = false): boolean {
     if (this.kind === 'mousekey' && !raw) return false;
     const entry: InputEntry = { value: v, kind: this.screenKind, t: Date.now() };
     this.log.push(v);
     this.entries.push(entry);
     this.hooks.inputLog(this.log);
     this.hooks.input?.(entry);
-    this.post({ type: 'input', value: v });
+    const c = byMouse ? (this.click ?? { b: 1, k: this.mods }) : null;
+    this.click = null;
+    this.post(c ? { type: 'input', value: v, m: true, b: c.b, k: c.k } : { type: 'input', value: v });
     this.hooks.status('Running…');
     this.hooks.busy(true);
     return true;
@@ -232,6 +240,16 @@ export class Client {
     this.kind = k;
     return false;
   }
+  /** a click on no game button while a number/text input waits: Emuera's mouse-flagged INPUT takes it (RESULT:1 = click type, RESULTS empty), any other input ignores it, so the worker decides */
+  private emptyClick(e: PointerDown): boolean {
+    const cls = promptClass(this.kind);
+    if (!e.inside || e.onChrome || (cls !== 'number' && cls !== 'text' && cls !== 'any')) return false;
+    // not through submit(): the engine may ignore the click (no mouse flag), and then nothing is running, so no log entry and no busy state
+    const c = this.click ?? { b: 1, k: this.mods };
+    this.click = null;
+    this.post({ type: 'input', value: '', m: true, b: c.b, k: c.k });
+    return false;
+  }
   /** returns true when the shell should preventDefault. Rules (as in Emuera): during INPUTMOUSEKEY a press on the stage is a game event;
    *  otherwise left click at a wait continues, right click at a wait continues and skips to the next real input, right click on a button presses it and skips. */
   pointerDown(e: PointerDown): boolean {
@@ -241,6 +259,7 @@ export class Client {
       return true;
     }
     if (e.onControl) return false;
+    this.click = { b: e.button === 2 ? 2 : e.button === 1 ? 3 : 1, k: e.mods ?? this.mods };
     if (e.button === 2) {
       if (e.pressButton) {
         this.skip = true;
@@ -253,13 +272,15 @@ export class Client {
         this.submit('');
         return true;
       }
-      return false;
+      return this.emptyClick(e);
     }
     if (e.button === 0 && !e.pressButton && this.isWait) {
       this.kind = '';
       this.submit('');
+      return false;
     }
-    return false;
+    if (e.button !== 0) return this.emptyClick(e);
+    return e.pressButton ? false : this.emptyClick(e);
   }
   /** wheel over the stage during INPUTMOUSEKEY; returns true if consumed (shell preventDefaults) */
   wheel(deltaY: number, x: number, y: number, inside: boolean): boolean {
@@ -284,6 +305,7 @@ export class Client {
     ctrl: boolean;
     alt: boolean;
   }): boolean {
+    this.mods = modifierBits(e);
     if (!e.repeat) this.post({ type: 'keystate', code: e.keyCode, down: true });
     if (this.skip) {
       this.skip = false;
@@ -295,6 +317,9 @@ export class Client {
     return true;
   }
   keyUp(keyCode: number) {
+    if (keyCode === 16) this.mods &= ~0x10000;
+    else if (keyCode === 17) this.mods &= ~0x20000;
+    else if (keyCode === 18) this.mods &= ~0x40000;
     this.post({ type: 'keystate', code: keyCode, down: false });
   }
   setActive(active: boolean) {

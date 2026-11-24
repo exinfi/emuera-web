@@ -86,6 +86,11 @@ export class DataTable {
     const id = Number(cells[0]);
     if (Number.isFinite(id) && id >= this.nextId) this.nextId = id + 1;
   }
+  /** an explicit id was given to a row: later automatic ids start above it (the original draws them from the clock, so they never meet a small explicit id) */
+  reserveId(id: Int): void {
+    const n = Number(id);
+    if (Number.isFinite(n) && n >= this.nextId) this.nextId = n + 1;
+  }
   findId(id: Int): number {
     return this.rows.findIndex((r) => r[0] === id || Number(r[0]) === Number(id));
   }
@@ -128,8 +133,8 @@ export class DataTable {
 }
 
 // ---------------------------------------------------------------------------
-// minimal .NET DataColumn.Expression subset: comparisons, AND/OR/NOT, LIKE, IN, IS [NOT] NULL,
-// + - * / %, parentheses, 'strings', numbers, [bracketed] or bare column names.
+// minimal .NET DataColumn.Expression subset: comparisons, AND/OR/NOT, LIKE, IN, IS [NOT] NULL, Len/Trim/IsNull/IIf/Substring/Convert
+// and Count/Sum/Avg/Min/Max, + - * / %, parentheses, 'strings', numbers, [bracketed] or bare column names.
 type Tok = { t: 'num' | 'str' | 'id' | 'op' | 'kw'; v: string };
 const KW = new Set(['AND', 'OR', 'NOT', 'LIKE', 'IN', 'IS', 'NULL', 'TRUE', 'FALSE']);
 
@@ -375,6 +380,99 @@ function compileFilter(src: string, dt: DataTable): (r: Row) => Cell | boolean {
     }
     return primary();
   }
+  // .NET expression functions: Len, IsNull, IIf, Trim, Substring, Convert, and the whole-table aggregates.
+  function callFn(name: string): Ev {
+    const fn = name.toUpperCase();
+    p++; // (
+    const args: Ev[] = [];
+    let star = false;
+    while (!isOp(')')) {
+      if (isOp('*')) {
+        p++;
+        star = true;
+      } else args.push(orE());
+      if (isOp(',')) p++;
+      else if (!isOp(')')) fail(`bad argument list for ${name}`);
+    }
+    p++;
+    const need = (n: number) => {
+      if (args.length !== n) fail(`${name} takes ${n} argument${n === 1 ? '' : 's'}`);
+    };
+    const str = (x: Cell | boolean) => (typeof x === 'boolean' ? (x ? 'True' : 'False') : String(x));
+    switch (fn) {
+      case 'LEN':
+        need(1);
+        return (r) => {
+          const x = args[0](r);
+          return x === null ? null : str(x).length;
+        };
+      case 'TRIM':
+        need(1);
+        return (r) => {
+          const x = args[0](r);
+          return x === null ? null : str(x).trim();
+        };
+      case 'ISNULL':
+        need(2);
+        return (r) => {
+          const x = args[0](r);
+          return x === null ? args[1](r) : x;
+        };
+      case 'IIF':
+        need(3);
+        return (r) => (args[0](r) === true ? args[1](r) : args[2](r));
+      case 'SUBSTRING':
+        need(3);
+        return (r) => {
+          const x = args[0](r);
+          if (x === null) return null;
+          const s = str(x);
+          let st = Math.trunc(Number(num(args[1](r) as Cell)));
+          const len = Math.trunc(Number(num(args[2](r) as Cell)));
+          if (len < 0) throw new EmueraError(`DT_SELECT: Substring length is negative in filter '${src}'`);
+          if (st < 1) st = 1;
+          return st > s.length ? '' : s.substr(st - 1, len);
+        };
+      case 'CONVERT':
+        need(2);
+        return (r) => {
+          const x = args[0](r);
+          if (x === null) return null;
+          const ty = String(args[1](r))
+            .replace(/^System\./i, '')
+            .toLowerCase();
+          if (ty === 'string') return str(x);
+          if (ty === 'boolean')
+            return typeof x === 'boolean' ? x : typeof x === 'string' ? x.toLowerCase() === 'true' : Number(x) !== 0;
+          const n = typeof x === 'string' ? Number(x.trim()) : Number(num(x));
+          if (Number.isNaN(n)) throw new EmueraError(`DT_SELECT: cannot convert '${x}' to ${ty} in filter '${src}'`);
+          return /^(int|uint|byte|sbyte)/.test(ty) ? Math.round(n) : n;
+        };
+      case 'COUNT':
+      case 'SUM':
+      case 'AVG':
+      case 'MIN':
+      case 'MAX': {
+        if (fn === 'COUNT' && star) return () => dt.rows.length;
+        need(1);
+        return () => {
+          const vals = dt.rows.map((row) => args[0](row)).filter((v) => v !== null);
+          if (fn === 'COUNT') return vals.length;
+          if (!vals.length) return null;
+          if (fn === 'MIN' || fn === 'MAX') {
+            return vals.reduce((a, b) => {
+              const c = dt.cmp(a as Cell, b as Cell);
+              return fn === 'MIN' ? (c <= 0 ? a : b) : c >= 0 ? a : b;
+            });
+          }
+          const sum = vals.reduce((a, b) => Number(a) + Number(num(b as Cell)), 0) as number;
+          return fn === 'SUM' ? sum : sum / vals.length;
+        };
+      }
+      default:
+        return fail(`unknown function '${name}'`);
+    }
+  }
   function primary(): Ev {
     const t = toks[p++];
     if (!t) return fail('unexpected end');
@@ -385,7 +483,7 @@ function compileFilter(src: string, dt: DataTable): (r: Row) => Cell | boolean {
       return e;
     }
     if (t.t === 'num') {
-      const v = t.v.includes('.') ? Number(t.v) : Number(t.v);
+      const v = Number(t.v);
       return () => v;
     }
     if (t.t === 'str') {
@@ -397,6 +495,7 @@ function compileFilter(src: string, dt: DataTable): (r: Row) => Cell | boolean {
       return () => v;
     }
     if (t.t === 'kw' && t.v === 'NULL') return () => null;
+    if (t.t === 'id' && isOp('(')) return callFn(t.v);
     if (t.t === 'id') {
       const i = dt.colIndex(t.v);
       if (i < 0) return fail(`unknown column '${t.v}'`);

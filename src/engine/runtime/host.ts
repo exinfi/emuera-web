@@ -78,6 +78,10 @@ export interface Renderer {
   /** CLEARTEXTBOX / GETTEXTBOX / MOVETEXTBOX / RESUMETEXTBOX / SETBGIMAGE...: optional UI hooks */
   clearText?(): void;
   getTextBox?(): string;
+  /** SETTEXTBOX: put text in the input box (the next GETTEXTBOX returns it) */
+  setTextBox?(text: string): void;
+  /** PRINT_RECT: a filled rectangle in the current color; each value is a width/height in percent of the font size (px when the matching `px` entry is true); 1 value = width, 4 = x, y, width, height */
+  rect?(v: number[], px: boolean[]): void;
   moveTextBox?(x: number, y: number, width: number): void;
   resumeTextBox?(): void;
   setTitle?(title: string): void;

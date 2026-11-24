@@ -185,12 +185,52 @@ export class VM {
     seen: new Array<number>(256).fill(0),
     pointing: '',
     active: true,
+    /** the answer now being delivered to an input wait came from a button click (EmueraConsole changedByMouse); set by the host just before it resolves the wait */
+    byMouse: false,
+    /** the click behind that answer (EmueraConsole MouseUp): b = 1 left / 2 right / 3 middle, k = modifier bits (Shift 2^16, Ctrl 2^17, Alt 2^18); null for typed input */
+    click: null as { b: number; k: number } | null,
   };
   bitmapCache = false;
   hotkeys = new Map<number, number>();
   /** QUIT_AND_RESTART / FORCE_QUIT_AND_RESTART: the host boots the game again once the run ends */
   restart = false;
   textFiles = new Map<string, string>();
+  /**
+   * Shipped text files the host left in their zip (option `xrefs`): key (as in `textFiles`) -> a reader that returns the decoded text, or undefined
+   * when it cannot be read. `textFiles` wins when a key is in both (a file the game saved over it). Decoded texts are kept in a bounded
+   * least-recently-used cache and read again when dropped.
+   */
+  lazyTexts = new Map<string, () => string | undefined>();
+  private textCache = new Map<string, string>();
+  private textCacheChars = 0;
+  /** decoded characters kept (about 32 MB as JS strings) */
+  textCacheBudget = 16_000_000;
+  hasText(k: string): boolean {
+    return this.textFiles.has(k) || this.lazyTexts.has(k);
+  }
+  /** the text of a game file by key, or undefined when there is none (or a lazy one could not be read) */
+  getText(k: string): string | undefined {
+    const t = this.textFiles.get(k);
+    if (t !== undefined) return t;
+    const rd = this.lazyTexts.get(k);
+    if (!rd) return undefined;
+    const hit = this.textCache.get(k);
+    if (hit !== undefined) {
+      this.textCache.delete(k); // most recently used goes last
+      this.textCache.set(k, hit);
+      return hit;
+    }
+    const s = rd();
+    if (s === undefined) return undefined;
+    this.textCache.set(k, s);
+    this.textCacheChars += s.length;
+    for (const [o, v] of this.textCache) {
+      if (this.textCacheChars <= this.textCacheBudget || o === k) break;
+      this.textCache.delete(o);
+      this.textCacheChars -= v.length;
+    }
+    return s;
+  }
   /** lower-cased relative names of the files under sound/ (EXISTSOUND / PLAYSOUND check these; the host owns the bytes) */
   soundFiles = new Set<string>();
   /** family names of the fonts the host registered (game-embedded or user-imported); CHKFONT answers 1 for them */
@@ -236,6 +276,8 @@ export class VM {
   userFiles = new VersionedSet();
   /** pointer position in client coordinates, y measured from the bottom edge (so it is <= 0), as Emuera reports it */
   mouse = { x: 0, y: 0 };
+  /** what the game last read through MOUSEX / MOUSEY and how often (debug log: where popups placed from the pointer should have landed) */
+  mouseRead = { x: 0, y: 0, n: 0 };
   onPersistFile?: (key: string, text: string) => void;
   gfx = new Gfx();
   /** profile 'puchi' only: the fixed-image layer and screen effects (runtime/fixedimg.ts); null for every other game */
