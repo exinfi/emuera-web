@@ -174,13 +174,50 @@ $('binp').onclick = () => {
 // the top bar can hide (chevron at its right end): see `body.hdrc` in mobile.css
 const hdrBtn = $('bhide');
 let hdrCollapsed = lsGet('emu.hdr') === '1';
+// Immersive view: holding the hide button for 3 s hides every control (bar, buttons, tabs, input window, direction pad, custom buttons, translation panel and sheets; the busy indicator stays)
+// and leaves only that button, dimmed; a click on it brings everything back as it was. The state is not stored (a reload starts with the controls) and nothing else is changed:
+// the controls are only hidden by `body.imm` in mobile.css, so each keeps the state it had.
+const IMM_HOLD_MS = 3000;
+let immersive = false;
+let immTimer: ReturnType<typeof setTimeout> | undefined;
+let immFired = false; // the hold ended in immersive view: the click that follows the release must not also toggle the bar
 function applyHeader() {
-  document.body.classList.toggle('hdrc', hdrCollapsed);
-  hdrBtn.title = hdrCollapsed
-    ? 'Show the top bar'
-    : 'Hide the top bar (the tap mode, quick buttons, control panel and input buttons stay)';
+  document.body.classList.toggle('hdrc', hdrCollapsed || immersive); // the bar's own space goes to the game while immersive
+  document.body.classList.toggle('imm', immersive);
+  hdrBtn.title = immersive
+    ? 'Show the controls again'
+    : hdrCollapsed
+      ? 'Show the top bar (hold for 3 seconds: hide all controls)'
+      : 'Hide the top bar (the tap mode, quick buttons, control panel and input buttons stay; hold for 3 seconds: hide all controls)';
 }
+function enterImmersive() {
+  immersive = true;
+  if (tlOpen) tlPanel?.open(false); // an overlay translation panel locks the game (inert): it closes, as it would by its tab
+  (document.activeElement as HTMLElement | null)?.blur?.();
+  applyHeader();
+}
+const stopHold = () => clearTimeout(immTimer);
+hdrBtn.addEventListener('pointerdown', (e) => {
+  immFired = false;
+  stopHold();
+  if (immersive || (e.pointerType === 'mouse' && e.button !== 0)) return;
+  immTimer = setTimeout(() => {
+    immFired = true;
+    enterImmersive();
+  }, IMM_HOLD_MS);
+});
+for (const t of ['pointerup', 'pointercancel', 'pointerleave']) hdrBtn.addEventListener(t, stopHold);
+hdrBtn.addEventListener('contextmenu', (e) => e.preventDefault()); // a long touch must not open the browser's menu
 hdrBtn.onclick = () => {
+  if (immFired) {
+    immFired = false;
+    return;
+  }
+  if (immersive) {
+    immersive = false;
+    applyHeader();
+    return;
+  }
   hdrCollapsed = !hdrCollapsed;
   lsSet('emu.hdr', hdrCollapsed ? '1' : '0');
   applyHeader();

@@ -166,8 +166,11 @@ COMMANDS.ARRAYCOPY = (st, fn, vm) => {
       }
       if (r.meta.chara)
         throw new EmueraError(`The ${pos} argument of the ARRAYCOPY instruction "${n}" is a character variable`);
-      if (r.meta.calc || r.meta.konst || r.meta.rank < 1)
+      // as in Emuera, a constant array may be copied FROM (a #DIM CONST table); only the destination must be writable
+      if (r.meta.calc || r.meta.rank < 1)
         throw new EmueraError(`The ${pos} argument of the ARRAYCOPY instruction "${n}" is not an array variable`);
+      if (pos === 2 && r.meta.konst)
+        throw new EmueraError(`The ${pos} argument of the ARRAYCOPY instruction "${n}" cannot be changed (a constant)`);
       // a #DIM REF parameter has only a placeholder size: use the dimensions of the array it is bound to
       const bound = fr.refs?.get(key(n.trim()));
       if (bound)
@@ -207,7 +210,12 @@ COMMANDS.ARRAYCOPY = (st, fn, vm) => {
 };
 COMMANDS.ARRAYSORT = (st, fn, vm) => {
   const l = exprs(st);
-  const ref = resolveRef(varExpr(l[0], 'ARRAYSORT'), fn, vm);
+  const target = varExpr(l[0], 'ARRAYSORT');
+  let ref = resolveRef(target, fn, vm);
+  // As in Emuera, the sort covers the whole 1D array: only the character subscript counts, and the element subscript
+  // (ARRAYSORT ARR:I) is evaluated but never used, so it may even be out of range (a FOR counter left at its end value).
+  if (ref.meta.rank === 1 && target.idx.length > (ref.meta.chara ? 1 : 0))
+    ref = resolveRef({ ...target, idx: target.idx.slice(0, -1) }, fn, vm);
   const back = l[1]?.k === 'var' && l[1].name.toUpperCase() === 'BACK';
   const start = l[2] ? compile(l[2], fn, vm) : null,
     count = l[3] ? compile(l[3], fn, vm) : null;

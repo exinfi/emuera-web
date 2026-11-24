@@ -221,3 +221,10 @@ body.bbtn .emu-screen a.btn:active{background:var(--btnon)}
 #dpadgrip{left:0;top:0;width:24px;height:24px;border-radius:0;background:transparent;color:var(--aink);font-size:14px}
 #dpadx{right:0;top:0;width:24px;height:24px;border-radius:0;background:transparent;color:var(--aink)}
 .xb{background:color-mix(in srgb,var(--btn) 86%,transparent);opacity:1}.xb.off{opacity:.3}
+/* immersive view (hold the hide button 3 s, see mobile.ts): every control is hidden but the hide button, which is dimmed; the bar's layout is the collapsed one (body.hdrc is set too) */
+body.imm #top{z-index:30!important}
+body.imm #mode,body.imm #quick,body.imm #tools>.tb:not(#bhide),body.imm #dpad,body.imm #xpad,body.imm #dpadbar,body.imm #padedit,body.imm #padscrim,body.imm #inbar,body.imm #tltab,body.imm #tlpanel,body.imm .sheet{display:none!important}
+body.imm #bhide{opacity:.16;background:transparent;border-color:transparent;box-shadow:none;transition:opacity .2s}
+body.imm #bhide:hover,body.imm #bhide:focus-visible{opacity:.55}
+#bhide{-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}
+

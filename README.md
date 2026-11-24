@@ -30,7 +30,7 @@ If you are changing the code, there is a test suite to check your work. Run `npm
 
 ---
 
-**I Just Want to Play Games:** Go to dist-play/play.html and drag that file on your browser. All features may not work.
+**I Just Want to Play Games:** Go to dist-play/play.html and drag that file on your browser.
 
 ## How to Use
 
@@ -41,7 +41,7 @@ If you are changing the code, there is a test suite to check your work. Run `npm
     - Most supported files (game, memory card, resource packs, language packs) can be drag and dropped in, otherwise use the respective load button.
 3. The game supports both mouse input on desktop and tap input on mobile devices.
     - The keyboard icon can be used to show/hide the text input box.
-    - If on mobile, the **L / R / H** button at the top left sets what a tap does: left click, right click, or hover (a long press does the other click).
+    - If on mobile, the **L / R / H** button at the top left sets what a tap does: left click, right click, or hover. You can hold the tap to perform the other click (for example, when set to **L** hold-tap to right-click instead).
 4. **Reload Game** starts the loaded game again from the beginning.
 
 The default options work for most games. If a game keeps its files in an unusual folder layout, you may need to turn on the extra file check in **Options**.
@@ -60,7 +60,7 @@ The default options work for most games. If a game keeps its files in an unusual
 
 ### Saves
 
-Saves are kept in your browser, in "memory cards" associated to their games. They stay on this device and in this browser only. Clearing your browser's site data, or switching browsers or devices, loses them.
+Saves are kept in your browser, in "memory cards" associated to their games. Clearing your browser's site data, or switching browsers or devices, loses them.
 
 Use **Export saves** (under **Memory card**) to download a backup zip, and **Import saves…** to restore one. Make a backup before you clear browser data.
 
@@ -81,7 +81,7 @@ A resource pack is an extra zip whose files are laid over the game's own files w
 
 - Add packs under **Resource packs** with **Add pack zip…**. Once enabled, they will apply to any game you load next.
 - Packs apply in list order. A later pack's file will override an earlier one. You can reorder, disable or remove a pack. Each entry shows its size and indicates if it carries code (ERB) or data (CSV).
-- A pack can include a `pack.txt` at its root (name, author, version, game, url, description). This file is not loaded into the game.
+- A pack can include a `pack.txt` at its root (name, author, version, game, url, description).
 - Changes take effect on the next load. Press **Apply: reload game** to reload the open game with the current pack list.
 
 For more info on resource packs see the [wiki page.](https://github.com/exinfi/emuera-web/wiki/Resource-Packs)
@@ -107,7 +107,7 @@ For more information on in-game translation and how to build your own pack see t
 
 On-screen controls to help play without a keyboard and can be configured under **Widgets** in the control panel.
 
-- **Direction pad:** a cross of buttons that sends 8, 4, 5, 6 and 2. It can be dragged and resized, and each key can be changed. **Reset cross** restores it to its original state.
+- **Direction pad:** a cross of buttons that sends 8, 4, 5, 6 and 2. You can customize the button values and add more buttons if desired. **Reset cross** restores it to its original state.
 - **Quick access button:** Header buttons to help with repetitive inputs. When enabled, a 'last action' button is enabled by default with the ability to add more buttons with your own user set value.
 
 ## Issues
@@ -130,7 +130,7 @@ The debug tools are in the **dbg** button in the top bar (your top bar must not 
 
 - **Debug** tab: engine and game information, plus any load errors and warnings. **Copy report** copies it as text.
 - **Inputs** tab: the recent inputs you sent.
-- **Export debug log** downloads a text file about what is happening right now: engine and game info, what the game is waiting for, the recent inputs, the last lines of screen text, the recent ERB function calls, and load errors and warnings. Type a short note in the box first and it goes at the top of the file. **Verbose** makes the lists longer (every load error and warning, the first and last 50 inputs, 200 lines of screen text, the last 200 ERB calls); use it when the normal log did not show the problem.
+- **Export debug log** downloads a text file about what is happening right now: engine and game info, what the game is waiting for, the recent inputs, the last lines of screen text, the recent ERB function calls, and load errors and warnings. **Verbose** makes the lists longer (every load error and warning, the first and last 50 inputs, 200 lines of screen text, the last 200 ERB calls); use it when the normal log did not show the problem.
 - **Export game snapshot** downloads a JSON copy of every game variable that differs from its default (characters, flags, tables, maps). It lets someone restore your exact game state to reproduce a problem. It holds no screen, call stack or files, at the time of export.
 - **Crash snapshot** appears after a crash and holds the game state at that moment.
 
@@ -181,7 +181,7 @@ The OFL texts are in `public/assets/font/`.
 
 ### Optional translation components
 
-All files in this section are included **unmodified**, as released by their authors, and are licensed under the Mozilla Public License 2.0. 
+All files in this section are included unmodified, as released by their authors, and are licensed under the Mozilla Public License 2.0. 
 
 - `translation.engine.zip` is the Bergamot translation engine (WebAssembly and its JavaScript wrapper): the three `worker/` files of the npm package [@browsermt/bergamot-translator](https://www.npmjs.com/package/@browsermt/bergamot-translator) 0.4.9 (source: [browsermt/bergamot-translator](https://github.com/browsermt/bergamot-translator)).
 - `translation.ja-en.zip`, `translation.ko-en.zip` and `translation.zh-Hans-en.zip` are the Japanese, Korean and Simplified Chinese to English models, with their vocabulary and shortlist files, from [Mozilla Firefox Translations](https://mozilla.github.io/translations/firefox-models/).

@@ -706,6 +706,8 @@ let pending: ((s: string | null) => void) | null = null;
 /** what the pending wait is for: an INPUTMOUSEKEY wait takes only mouse/key events, any other input only text (a click's late text press must not become a key press) */
 let pendingKind = '';
 let theVm: VM | null = null;
+/** the error that stopped the run, kept so a manual export made afterwards still reports it (null while the game runs) */
+let fatalErr: any = null;
 let theR: WebRenderer | null = null;
 let theGameId = '';
 let erbSources: Record<string, string> = {};
@@ -781,7 +783,7 @@ const gfxKind = (t: string): [string, string] => {
 /** the short form lists at most this many entries of each long list and says how many more the verbose form has */
 const more = (shown: number, total: number) =>
   total > shown ? [`  ... ${total - shown} more (the verbose export lists all)`] : [];
-function buildReport(err: any, vm: VM, sourceNote: string, userNote = '', verbose = false): string {
+function buildReport(err: any, vm: VM, sourceNote: string, userNote = '', verbose = false, manual = false): string {
   const out: string[] = [];
   const gfx = vm.gfx;
   // errors found while reading the ERB; functions are parsed when first reached, so the list grows during play
@@ -791,7 +793,7 @@ function buildReport(err: any, vm: VM, sourceNote: string, userNote = '', verbos
   const miss = new Set<string>();
   for (const g of imgSegs(lastScreen)) if (g.img && !gfx.sprites.has(g.img.n)) miss.add(baseName(g.img.n));
   out.push(
-    err ? '# Engine error report' : '# Playtest log (manual export)',
+    err ? (manual ? '# Playtest log (manual export, the game had stopped on an error)' : '# Engine error report') : '# Playtest log (manual export)',
     '',
     ...(userNote ? [`player note: ${userNote}`] : []),
     ...(err ? [`error: ${String(err?.message ?? err).split('\n')[0]}`] : []),
@@ -1121,7 +1123,7 @@ self.onmessage = (e: MessageEvent<ToWorker>) => {
   else if (m.type === 'exportlog' && theVm) {
     let text = '';
     try {
-      text = buildReport(null, theVm, String(theGameId), String(m.note ?? ''), !!m.verbose);
+      text = buildReport(fatalErr, theVm, String(theGameId), String(m.note ?? ''), !!m.verbose, true);
     } catch (e2) {
       text = 'log failed: ' + e2;
     }
@@ -1510,6 +1512,7 @@ async function start(m: StartMsg) {
     ...(m.sounds ?? []).map((n) => 'sound/' + n),
   ];
   theVm = vm;
+  fatalErr = null;
   setCard(m.saves, m.files ?? {});
   vm.onPersist = (key, v) => post({ type: 'persist', key, value: v });
   vm.onPersistFile = (key, text) => post({ type: 'persistFile', key, text });
@@ -1750,6 +1753,7 @@ async function start(m: StartMsg) {
     await emit('done', []);
     if (vm.restart) post({ type: 'restart' });
   } catch (err: any) {
+    fatalErr = err;
     await emit('error', [String(err?.message ?? err)]).catch(() => {});
     try {
       post({
