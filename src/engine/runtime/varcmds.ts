@@ -1,4 +1,6 @@
 /** Statements that read and modify variables: arithmetic (TIMES, POWER), SWAP, VARSIZE, array range/copy/sort/search, bit operations, SPLIT, VARI/VARS. */
+import type { FuncDef } from '../compiler/types';
+import type { VM } from './vm';
 import type { Expr } from '../compiler/ast';
 import { key } from '../util/key';
 import { asInt, asStr, compile, resolveRef, toNum } from './eval';
@@ -63,6 +65,26 @@ COMMANDS.VARSIZE = (st, fn, vm) => {
   };
 };
 
+/**
+ * The array behind ARRAYSORT / ARRAYSHIFT / ARRAYREMOVE, as in Emuera: only a one-dimensional array or a character array variable is accepted
+ * (checked when the statement runs), the whole array is the target, and only the character subscript counts. The element subscript
+ * (ARRAYSHIFT ARR:I, ...) is evaluated but never used, so it may even be out of range (a FOR counter left at its end value).
+ */
+function oneDTarget(e: Expr, cmd: string, fn: FuncDef, vm: VM) {
+  const target = varExpr(e, cmd);
+  let ref = resolveRef(target, fn, vm);
+  const ok = ref.meta.rank === 1;
+  // the element subscript is replaced by 0 (not removed: for a character variable a lone subscript would read as the element of TARGET)
+  if (ok && target.idx.length >= (ref.meta.chara ? 2 : 1))
+    ref = resolveRef({ ...target, idx: [...target.idx.slice(0, -1), { k: 'int', v: 0 }] }, fn, vm);
+  return {
+    ref,
+    check: () => {
+      if (!ok) throw new EmueraError(`${cmd} supports only one-dimensional arrays and character array variables`);
+    },
+  };
+}
+
 function rowRange(ref: ReturnType<typeof resolveRef>, fr: any, start: number, count: number) {
   const { arr, off } = ref.locate(fr);
   const rd = ref.dimsOf(fr),
@@ -74,10 +96,11 @@ function rowRange(ref: ReturnType<typeof resolveRef>, fr: any, start: number, co
 }
 COMMANDS.ARRAYREMOVE = (st, fn, vm) => {
   const l = exprs(st);
-  const ref = resolveRef(varExpr(l[0], 'ARRAYREMOVE'), fn, vm);
+  const { ref, check } = oneDTarget(l[0], 'ARRAYREMOVE', fn, vm);
   const s = compile(l[1], fn, vm),
     c = compile(l[2], fn, vm);
   return (fr) => {
+    check();
     const st0 = toNum(s(fr)),
       cnt = toNum(c(fr));
     if (st0 < 0) throw new EmueraError(`The 2 argument of "ARRAYREMOVE" instruction (${st0}) is negative`);
@@ -92,12 +115,13 @@ COMMANDS.ARRAYREMOVE = (st, fn, vm) => {
 };
 COMMANDS.ARRAYSHIFT = (st, fn, vm) => {
   const l = exprs(st);
-  const ref = resolveRef(varExpr(l[0], 'ARRAYSHIFT'), fn, vm);
+  const { ref, check } = oneDTarget(l[0], 'ARRAYSHIFT', fn, vm);
   const sh = compile(l[1], fn, vm),
     def = compile(l[2], fn, vm);
   const s = l[3] ? compile(l[3], fn, vm) : null,
     c = l[4] ? compile(l[4], fn, vm) : null;
   return (fr) => {
+    check();
     const shift = toNum(sh(fr)),
       d = def(fr);
     const st0 = s ? toNum(s(fr)) : 0,
@@ -210,16 +234,12 @@ COMMANDS.ARRAYCOPY = (st, fn, vm) => {
 };
 COMMANDS.ARRAYSORT = (st, fn, vm) => {
   const l = exprs(st);
-  const target = varExpr(l[0], 'ARRAYSORT');
-  let ref = resolveRef(target, fn, vm);
-  // As in Emuera, the sort covers the whole 1D array: only the character subscript counts, and the element subscript
-  // (ARRAYSORT ARR:I) is evaluated but never used, so it may even be out of range (a FOR counter left at its end value).
-  if (ref.meta.rank === 1 && target.idx.length > (ref.meta.chara ? 1 : 0))
-    ref = resolveRef({ ...target, idx: target.idx.slice(0, -1) }, fn, vm);
+  const { ref, check } = oneDTarget(l[0], 'ARRAYSORT', fn, vm);
   const back = l[1]?.k === 'var' && l[1].name.toUpperCase() === 'BACK';
   const start = l[2] ? compile(l[2], fn, vm) : null,
     count = l[3] ? compile(l[3], fn, vm) : null;
   return (fr) => {
+    check();
     const { arr, off } = ref.locate(fr);
     const st0 = start ? toNum(start(fr)) : 0;
     if (st0 < 0) throw new EmueraError(`The 3 argument of "ARRAYSORT" instruction (${st0}) is negative`);

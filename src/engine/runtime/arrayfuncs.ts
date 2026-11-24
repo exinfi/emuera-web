@@ -298,7 +298,11 @@ function sortOrder(arr: Value[], count: number, ascending: boolean, stopAtEmpty:
   return list.map((x) => x.i);
 }
 defRaw('ARRAYMSORT', (vm, args, fn) => {
-  const refs = args.map((e) => refOf(e, fn, vm));
+  // As in Emuera, every argument stands for its whole array: the subscripts are never evaluated, so they may be out of range.
+  const refs = args.map((e) => {
+    const r = refOf(e, fn, vm);
+    return e.k === 'var' && e.idx.length > 0 && !r.meta.chara && r.meta.rank >= 1 ? refOf({ ...e, idx: [] }, fn, vm) : r;
+  });
   return (fr) => {
     const k = refs[0];
     const karr = k.locate(fr).arr;

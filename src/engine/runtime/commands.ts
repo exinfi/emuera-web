@@ -93,6 +93,10 @@ COMMANDS.VARSET = (st, fn, vm) => {
   const l = exprs(st);
   const target = l[0] as Expr & { k: 'var' };
   const ref = resolveRef(target, fn, vm);
+  // As in Emuera, an ordinary (non-character) array is filled as a whole and its element subscript is not checked, except when a 1-D array
+  // is filled over part of its range (VariableEvaluator.SetValueAll: IsArrayRangeValid checks the element only then). `whole` ignores the subscript.
+  const whole =
+    !ref.meta.chara && ref.meta.rank >= 1 && target.idx.length > 0 ? resolveRef({ ...target, idx: [] }, fn, vm) : ref;
   // an omitted or empty argument (`VARSET A,` / `VARSET A, , 2`) is "not given": the value defaults to 0 or "" by the variable's type (SP_VAR_SET_ArgumentBuilder)
   const given = (e?: Expr) => (e && !(e.k === 'var' && e.name === '__EMPTY__') ? compile(e, fn, vm) : null);
   const val = given(l[1]);
@@ -105,7 +109,7 @@ COMMANDS.VARSET = (st, fn, vm) => {
   // anything but the whole array is range-checked 0..length). 2-D/3-D arrays are always filled completely. CALC variables ignore the assignment.
   return (fr) => {
     if (ref.meta.calc) return;
-    const { arr } = ref.locate(fr);
+    const { arr } = whole.locate(fr);
     const v = val ? val(fr) : ref.meta.isStr ? '' : 0;
     if (ref.meta.rank > 1) {
       arr.fill(v as never);
@@ -121,6 +125,7 @@ COMMANDS.VARSET = (st, fn, vm) => {
     if (ref.meta.rank === 1 && (start !== 0 || end !== len)) {
       if (start < 0 || start > len) throw oor(3, start);
       if (end < 0 || end > len) throw oor(4, end);
+      if (whole !== ref) ref.locate(fr); // the element subscript counts for a partial fill
     }
     for (let i = start; i < end; i++) arr[i] = v as never;
   };
