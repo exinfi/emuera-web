@@ -107,6 +107,17 @@ export function configValue(cfg: RuntimeConfig, name: string): string | number |
   const l = given !== undefined ? given.split(/[,/]/).map((x) => x.trim()) : (def as (string | number)[]); // list items: value text as the original prints it
   return l.join(',');
 }
+/** setting.json "UseNewRandom" (both Emuera sources: a missing file or key is false, which keeps RANDOMIZE working) */
+export function useNewRandom(files: Record<string, string>): boolean {
+  const sj = Object.keys(files).find((k) => /(^|\/)setting\.json$/i.test(k));
+  if (!sj) return false;
+  try {
+    return JSON.parse(String(files[sj]).replace(/^\uFEFF/, '')).UseNewRandom === true;
+  } catch {
+    return false;
+  }
+}
+
 export function loadConfig(csv: Record<string, string>): RuntimeConfig {
   const raw = new Map<string, string>();
   const pick = (suffix: string) => Object.keys(csv).find((p) => p.toLowerCase().endsWith(suffix));

@@ -146,6 +146,12 @@ export class VersionedSet extends Set<string> {
 export class VM {
   store: Store;
   rng: () => number = Math.random;
+  /**
+   * Emuera's legacy generator. Null until RANDOMIZE (or INITRAND / DUMPRAND) first needs it: until then draws come from `rng`. Once it exists every draw uses it, as the original does.
+   * `useNewRandom` is the game's setting.json key: when true RANDOMIZE, INITRAND and DUMPRAND do nothing and draws never use the legacy generator.
+   */
+  mt: import('./sfmt').MTRandom | null = null;
+  useNewRandom = false;
   stepCount = 0;
   /** Emuera.EM MAP_* storage */
   maps = new Map<string, Map<string, string>>();
@@ -394,6 +400,7 @@ export class VM {
   randInt(n: Int): Int {
     const m = Number(n);
     if (m <= 0) throw new EmueraError('RAND: argument must be positive');
+    if (this.mt && !this.useNewRandom) return this.mt.nextMod(n);
     return Math.floor(this.rng() * m);
   }
 

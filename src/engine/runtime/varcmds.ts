@@ -10,7 +10,8 @@ import * as V from './value';
 import { EmueraError, Int, Value } from './value';
 import { compareValues } from './compare';
 import { exprs, varExpr } from './cmdargs';
-import { runtimeVar } from './varbyname';
+import { byName, runtimeVar } from './varbyname';
+import { MTRandom } from './sfmt';
 
 COMMANDS.TIMES = (st, fn, vm) => {
   const l = exprs(st);
@@ -282,34 +283,79 @@ for (const n of ['VARI', 'VARS'])
     };
   };
 
-// MATCHALL (profile 'emuera-net' only)
-// MATCHALL var, value[, begin[, end]] (MATCHALL_Instruction): every index of a 1-D array whose element equals value; RESULT:0 = number of hits, RESULT:1.. = the indices (as many as fit)
+// MATCHALL (profile 'emuera-net' only), MATCHALL_Instruction + SP_MATCHALL_ArgumentBuilder of Emuera.NET:
+//   MATCHALL arr, value[, begin[, end]]          non-character variable: must be a 1-D array; scans its elements
+//   MATCHALL cvar, value[, begin[, end]]         character variable without an array (NAME, ...): scans that value of every character
+//   MATCHALL cvar1d, index, value[, begin[, end]] 1-D character variable (CFLAG, ...): `index` is an integer constant; scans cvar1d:chara:index over the characters
+// Any subscripts written on the variable are ignored (only the variable's name is used). The range is [begin, end) over the elements, or over the characters 0..CHARANUM-1
+// for a character variable (end defaults to the size, or CHARANUM). RESULT:0 = hits, RESULT:1.. = the indices (as many as fit). 2-D/3-D character variables are refused.
+// The value's type must be the variable's type (the original refuses the line at load time; here it throws when run).
 COMMANDS.MATCHALL = (st, fn, vm) => {
   const l = st.arg.a === 'exprs' ? st.arg.list : [];
   if (!l.length || l[0].k !== 'var') throw new EmueraError('MATCHALL: the 1st argument must be a variable');
   const ref = resolveRef(l[0] as Expr & { k: 'var' }, fn, vm);
-  if (ref.meta.chara) throw new EmueraError('MATCHALL on a character variable is not implemented yet');
-  if (ref.meta.rank !== 1) throw new EmueraError('MATCHALL: a non-character variable must be a 1-D array');
-  if (!l[1]) throw new EmueraError('MATCHALL: no value to look for');
-  const val = compile(l[1], fn, vm),
-    beg = l[2] ? compile(l[2], fn, vm) : null,
-    end = l[3] ? compile(l[3], fn, vm) : null;
+  const m = ref.meta;
+  if (m.chara && m.rank > 1) throw new EmueraError('MATCHALL: 変数の次元が大きすぎます');
+  if (!m.chara && m.rank !== 1) throw new EmueraError('MATCHALL: a non-character variable must be a 1-D array');
+  let p = 1;
+  let slot = 0; // 1-D character variable: the array index
+  if (m.chara && m.rank === 1) {
+    if (!l[p]) throw new EmueraError('MATCHALL: 1次元キャラクタ変数に対するインデックス指定がありません');
+    const ix = l[p];
+    if (ix.k !== 'int') throw new EmueraError('MATCHALL: 1次元キャラクタ変数に対するインデックス指定は整数定数である必要があります');
+    slot = Number(ix.v);
+    if (slot < 0) throw new EmueraError('MATCHALL: インデックスが負の値です');
+    p++;
+  }
+  if (!l[p]) throw new EmueraError('MATCHALL: no value to look for');
+  const val = compile(l[p], fn, vm),
+    beg = l[p + 1] ? compile(l[p + 1], fn, vm) : null,
+    end = l[p + 2] ? compile(l[p + 2], fn, vm) : null;
+  if (l.length > p + 3) throw new EmueraError('MATCHALL: 引数が多すぎます');
   return (fr) => {
-    const { arr } = ref.locate(fr);
-    const len = ref.dimsOf(fr)[0];
+    const len = m.chara ? vm.store.charas.length : ref.dimsOf(fr)[0];
     const a = beg ? Number(beg(fr)) : 0,
       b = end ? Number(end(fr)) : len;
     if (a < 0 || b < 0) throw new EmueraError('MATCHALL: 検索範囲に負の値が渡されました');
     if (a > b) throw new EmueraError('MATCHALL: 検索範囲の指定が不正です');
     if (Math.max(a, b) > len) throw new EmueraError('MATCHALL: 検索範囲が変数のサイズを超えています');
-    const v = val(fr),
-      res = vm.global('RESULT');
+    const v = val(fr);
+    if ((typeof v === 'string') !== m.isStr) throw new EmueraError('MATCHALL: 検索する値と対象変数の型が一致しません');
+    const res = vm.global('RESULT');
     let n = 0;
-    for (let i = a; i < b; i++)
-      if (arr[i] === v) {
-        if (n + 1 < res.length) res[n + 1] = i;
-        n++;
-      }
+    const hit = (i: number) => {
+      if (n + 1 < res.length) res[n + 1] = i;
+      n++;
+    };
+    if (m.chara) {
+      if (a < b && slot >= m.dims[0]) throw new EmueraError(`${m.name}: index ${slot} is out of range (0..${m.dims[0] - 1})`);
+      for (let c = a; c < b; c++) if (vm.store.charaArrRead(c, m)[slot] === v) hit(c);
+    } else {
+      const { arr } = ref.locate(fr);
+      for (let i = a; i < b; i++) if (arr[i] === v) hit(i);
+    }
     res[0] = n;
   };
+};
+
+// ---- RANDOMIZE / INITRAND / DUMPRAND (the legacy generator, runtime/sfmt.ts). With the game's UseNewRandom on they do nothing, as in both Emuera sources.
+COMMANDS.RANDOMIZE = (st, fn, vm) => {
+  const a = exprs(st)[0];
+  const e = a ? compile(a, fn, vm) : null;
+  return (fr) => {
+    const seed = e ? asInt(e(fr)) : 0; // the argument is evaluated even when ignored (the original reads it first)
+    if (!vm.useNewRandom) vm.mt = new MTRandom(seed);
+  };
+};
+COMMANDS.INITRAND = (_st, _fn, vm) => () => {
+  if (vm.useNewRandom) return;
+  const { arr, off } = byName(vm, 'RANDDATA');
+  (vm.mt ??= new MTRandom(Date.now())).setState((i) => Number(arr[off + i] ?? 0));
+};
+COMMANDS.DUMPRAND = (_st, _fn, vm) => () => {
+  if (vm.useNewRandom) return;
+  const { arr, off } = byName(vm, 'RANDDATA');
+  (vm.mt ??= new MTRandom(Date.now())).getState((i, v) => {
+    arr[off + i] = v;
+  });
 };

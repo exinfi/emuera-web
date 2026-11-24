@@ -1,5 +1,5 @@
 {
-  "_doc": "Ledger of everything not fully implemented. tests/status.test.ts fails if a builtin is missing from the engine and not listed here as 'missing', or if a 'missing' entry has since been implemented (move it out).",
+  "_doc": "Ledger of everything not fully implemented or known to differ from the originals: stub (accepted, no effect), approx (implemented, differs in the stated way) or todo (known unported behavior). Nothing enforces this list any more (the old status test is gone; tests/data/reference.test.ts only checks that the JSON is well formed), so keep it honest by hand. Inventory refreshed 2026-11-24 at 41.2 against the live registries: all 568 catalogue builtins are registered.",
   "entries": [
     {
       "name": "SETTEXTBOX",
@@ -55,21 +55,6 @@
       "name": "MOUSESKIP",
       "kind": "stub",
       "note": "accepted with no effect or a fixed result (no equivalent in the browser)"
-    },
-    {
-      "name": "RANDOMIZE",
-      "kind": "stub",
-      "note": "accepted, no effect: the original ignores them when UseNewRandom is on; our RAND is not seedable the Emuera way"
-    },
-    {
-      "name": "INITRAND",
-      "kind": "stub",
-      "note": "accepted, no effect: the original ignores them when UseNewRandom is on; our RAND is not seedable the Emuera way"
-    },
-    {
-      "name": "DUMPRAND",
-      "kind": "stub",
-      "note": "accepted, no effect: the original ignores them when UseNewRandom is on; our RAND is not seedable the Emuera way"
     },
     {
       "name": "DEBUGPRINT",
@@ -154,12 +139,12 @@
     {
       "name": "TONEINPUT",
       "kind": "approx",
-      "note": "the Remaining: line is printed once, it does not tick"
+      "note": "the \"Remaining: x.x\" line ticks every 100 ms in the play build like TINPUT's (all four timed input commands share one path); the headless test engine prints it once"
     },
     {
       "name": "TONEINPUTS",
       "kind": "approx",
-      "note": "the Remaining: line is printed once, it does not tick"
+      "note": "the \"Remaining: x.x\" line ticks every 100 ms in the play build like TINPUT's (all four timed input commands share one path); the headless test engine prints it once"
     },
     {
       "name": "DT_TOXML",
@@ -192,14 +177,9 @@
       "note": "base position is applied to GDRAWSPRITE exactly, but for printed/CBG sprites it only shifts inside the sprite's own canvas (the original draws shifted without clipping)"
     },
     {
-      "name": "XML-save-clearing",
-      "kind": "todo",
-      "note": "when XML_* documents exist: store them in vm and remove x.xmls[group] in VM.clearExt (RemoveEMSaveData/Global/Static); save/load of XML docs in slots"
-    },
-    {
       "name": "omitted-arg-audit",
       "kind": "todo",
-      "note": "Function arity is validated at parse time from a table derived from FunctionMethod.CheckArgumentTypeEx (reference/function-arity.json; erablue has zero violations); mismatches surface as warnings. Audited against C# for functions with optional arguments (array/range/string/CSV, ENUM*, HTML_*, DT_*, MAP_*, ARRAY*, VARSET/CVARSET, STRJOIN ranges, VARSIZE dimension config). Subscript-count rules (VariableParser): bare 2D/3D names, missing/extra subscripts are errors on read/write; reference uses (VARSET, ARRAYCOPY, REF args) still accept bare names; tools/subscript-scan.mts reports 0 violations in erablue. By-name builtins (GETVAR/GETVARS/SETVAR/EXISTVAR/GETNUM/GETNUMB/ERDNAME/ARRAYCOPY) verified against C#. Config audit: SortWithFilename (load order) and VarsizeDimConfig now honored. Statement argument counts come from the ArgumentBuilder classes (reference/stmt-arity.json, 82 statements with plain count rules): too few arguments or a hole makes an error line that throws when executed, too many is a warning (RETURN takes any number of values); VOID instructions ignore stray arguments. Not covered: statements with custom builders (PRINT*, CALL*, INPUT*, REF, PRINT_IMG, HTML_PRINT, SORTCHARA, TIMES), argument types (static operand types are not tracked), dynamic-class forms are a union, string sorts (ARRAYSORT/ARRAYMSORT/ARRAYMSORTEX/SORTCHARA) use root collation like the original's invariant-culture CompareTo (src/engine/runtime/compare.ts); ties in ARRAYMSORT/ARRAYMSORTEX are stable here while the original's List.Sort is unstable above 16 items (port .NET introsort if a playtest shows a tie-order difference). AllowFunctionOverloading=NO is enforced for system functions and reserved words (function refused, body skipped; erablue has no such names); name clashes with system variables/instructions are level-1 warnings; refused labels no longer let their body lines attach to the previous function. XML_* absent."
+      "note": "Function arity is validated at parse time from a table derived from FunctionMethod.CheckArgumentTypeEx (src/engine/compiler/arity-table.ts; erablue has zero violations); mismatches surface as warnings. Audited against C# for functions with optional arguments (array/range/string/CSV, ENUM*, HTML_*, DT_*, MAP_*, ARRAY*, VARSET/CVARSET, STRJOIN ranges, VARSIZE dimension config). Subscript-count rules (VariableParser): bare 2D/3D names, missing/extra subscripts are errors on read/write; reference uses (VARSET, ARRAYCOPY, REF args) still accept bare names; tools/subscript-scan.mts reports 0 violations in erablue. By-name builtins (GETVAR/GETVARS/SETVAR/EXISTVAR/GETNUM/GETNUMB/ERDNAME/ARRAYCOPY) verified against C#. Config audit: SortWithFilename (load order) and VarsizeDimConfig now honored. Statement argument counts come from the ArgumentBuilder classes (src/engine/compiler/stmt-arity-table.ts, 82 statements with plain count rules): too few arguments or a hole makes an error line that throws when executed, too many is a warning (RETURN takes any number of values); VOID instructions ignore stray arguments. Not covered: statements with custom builders (PRINT*, CALL*, INPUT*, REF, PRINT_IMG, HTML_PRINT, SORTCHARA, TIMES), argument types (static operand types are not tracked), dynamic-class forms are a union, string sorts (ARRAYSORT/ARRAYMSORT/ARRAYMSORTEX/SORTCHARA) use root collation like the original's invariant-culture CompareTo (src/engine/runtime/compare.ts); ties in ARRAYMSORT/ARRAYMSORTEX are stable here while the original's List.Sort is unstable above 16 items (port .NET introsort if a playtest shows a tie-order difference). AllowFunctionOverloading=NO is enforced for system functions and reserved words (function refused, body skipped; erablue has no such names); name clashes with system variables/instructions are level-1 warnings; refused labels no longer let their body lines attach to the previous function. The XML_* functions are implemented (r26)."
     },
     {
       "name": "tooltip-format",
@@ -224,7 +204,7 @@
     {
       "name": "PLAYSOUND",
       "kind": "approx",
-      "note": "implemented (10 sound channels + 1 looping bgm, first idle channel else 0, volume 0..100, missing file = silent no-op; engine src/engine/runtime/sound.ts, player in src/host/web/audio.ts via HTMLAudioElement; the first-gesture unlock listens on pointerdown, a pointerup unlock for touch is deferred by the owner). Differences: playback needs a first click/key (browser autoplay policy), formats are whatever the browser decodes (no .wma/.mid), an undecodable file shows a status note instead of the original CodeEE, and the audio path is only covered by a headless-browser smoke, not by ear"
+      "note": "implemented (10 sound channels + 1 looping bgm, first idle channel else 0, volume 0..100, missing file = silent no-op; engine src/engine/runtime/sound.ts, player in src/host/web/audio.ts via HTMLAudioElement; the first-gesture unlock listens on pointerdown, a pointerup unlock for touch is deferred). Differences: playback needs a first click/key (browser autoplay policy), formats are whatever the browser decodes (no .wma/.mid), an undecodable file shows a status note instead of the original CodeEE, and the audio path is only covered by a headless-browser smoke, not by ear"
     },
     {
       "name": "ISDEFINED",
@@ -240,6 +220,21 @@
       "name": "TINPUT",
       "kind": "approx",
       "note": "the \"Remaining: x.x\" line now ticks every 100 ms in the play build (worker timer, replaces the last line like changeLastLine); the headless test engine still prints it once. Timer starts when the prompt is shown, not after the first redraw as in the original"
+    },
+    {
+      "name": "PRINT_RECT",
+      "kind": "stub",
+      "note": "no-op: the original (PrintShape \"rect\" with number or px arguments) draws a rectangle in the log. The HTML form (<shape type='rect'> inside HTML_PRINT) is implemented. No game in hand calls PRINT_RECT"
+    },
+    {
+      "name": "unread-config-items",
+      "kind": "todo",
+      "note": "Config items that GETCONFIG/GETCONFIGS list but no engine code acts on (found by searching src for each key and its Japanese name, 2026-11-24): CompatiRAND (RAND:n as draw(32768) % n, eramaker style), CompatiDRAWLINE, CompatiCallEvent, CompatiErrorLine, ButtonWrap, IgnoreUncalledFunction, ReduceArgumentOnLoad, SearchSubdirectory, UseERD, IgnoreCase (the engine is always case-insensitive), UseReplaceFile, DisplayWarningLevel and DisplayReport (warnings go to the playtest log), plus window, debug-window, clipboard and Rikai items that only make sense on a desktop. erablue and ShinEraTenseiP set none of the behavioral ones to a non-default value (erablue has CompatiRAND NO); a game that turns one on would differ"
+    },
+    {
+      "name": "RANDOMIZE",
+      "kind": "approx",
+      "note": "implemented in 41.2 (runtime/sfmt.ts): RANDOMIZE seeds an SFMT-19937 port (first outputs for seed 1234 equal the published reference values), RAND and the random-choice commands then draw from it as in EM+EE and Emuera.NET; INITRAND/DUMPRAND copy its state to and from RANDDATA; setting.json UseNewRandom true turns all three off (a missing file or key is false). Differences: before the first RANDOMIZE draws come from Math.random (the original seeds from the tick count, equivalent); the original prints a warning when it ignores RANDOMIZE, we stay silent; exact sequences against a real Emuera run are unchecked; CompatiRAND is not honored (see unread-config-items)"
     }
   ]
 }

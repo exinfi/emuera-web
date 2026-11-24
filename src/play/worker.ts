@@ -13,7 +13,7 @@ import { RANCEK_PATCHES, installRanceKPatches, whyNotRanceK } from '../engine/pa
 import { gameCode as patchGameCode, patchWidth, patchesFor } from '../engine/patches/registry';
 import { applySourcePatch, sourcePatchesFor, type SourcePatch } from '../engine/patches/sourcepatch';
 import { addFormFolderAliases } from '../engine/patches/formfolders';
-import { loadConfig, applyLogCap } from '../engine/runtime/config';
+import { loadConfig, applyLogCap, useNewRandom } from '../engine/runtime/config';
 import { CharaTemplates } from '../engine/runtime/charatemplates';
 import { EmueraError } from '../engine/runtime/value';
 import { MK_PREFIX, TIMEOUT, type Renderer, type SoundMsg } from '../engine/runtime/host';
@@ -1412,6 +1412,7 @@ async function start(m: StartMsg) {
   if (compilerCfg.profile === 'puchi') for (const n of vm.tables.loadTranslation(csv)) r.note(n);
   vm.templates = new CharaTemplates(csv, vm.tables);
   vm.config = loadConfig(csv);
+  vm.useNewRandom = useNewRandom(csv);
   const lc = applyLogCap(vm.config.maxLog, m.logCap);
   r.maxLog = lc.used;
   if (lc.capped)

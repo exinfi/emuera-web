@@ -7,7 +7,7 @@ import { Tables } from './compiler/tables';
 import { cfg as compilerCfg } from './compiler/config';
 import { VM } from './runtime/vm';
 import { compile } from './runtime/eval';
-import { loadConfig } from './runtime/config';
+import { loadConfig, useNewRandom } from './runtime/config';
 import { CharaTemplates } from './runtime/charatemplates';
 import { formatStack } from './runtime/errctx';
 import { installPatches } from './patches/erablue';
@@ -169,6 +169,7 @@ async function run(files: GameFiles, opts: RunOptions & { maxSteps?: number } = 
   const errors0: string[] = [];
   const env = (globalThis as any).process?.env ?? {};
   vm.setOptimize(env.EMU_OPT === '1');
+  vm.useNewRandom = useNewRandom(csv);
   if (env.EMU_SEED) {
     let a = Number(env.EMU_SEED) >>> 0;
     vm.rng = () => {
