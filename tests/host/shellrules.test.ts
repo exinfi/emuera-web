@@ -1,6 +1,6 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
-import { padShapes, dpadDefault, parseQuickVals, type Pt } from '../../src/mobile/rules.ts';
+import { padShapes, dpadDefault, needsPad, parseQuickVals, type Pt } from '../../src/mobile/rules.ts';
 
 /** even-odd point in polygon, written here so the expectations do not lean on the code under test */
 function inside(poly: Pt[], x: number, y: number): boolean {
@@ -82,7 +82,8 @@ describe('direction pad shapes', () => {
         assert.ok(hit.length <= 1, `(${x},${y}) is on ${hit.join(' and ')}`);
         if (inside(sh.diamond, x, y)) continue;
         const onCross = Math.abs(dx) <= half || Math.abs(dy) <= half;
-        if (!onCross && Math.abs(dx) > half + 2 && Math.abs(dy) > half + 2) assert.equal(hit.length, 0, `(${x},${y}) is in a corner`);
+        if (!onCross && Math.abs(dx) > half + 2 && Math.abs(dy) > half + 2)
+          assert.equal(hit.length, 0, `(${x},${y}) is in a corner`);
         // clear of the diamond, the diagonals, and the outer rim: the wedge is the one the touch leans toward
         const inner = Math.abs(dx) + Math.abs(dy) > hd + 2 && Math.abs(Math.abs(dx) - Math.abs(dy)) > 8; // shrinking moves a diagonal edge about 3.9 px off the true diagonal (5.5 px in |dx| - |dy|)
         const rim = Math.max(Math.abs(dx), Math.abs(dy)) < sh.size / 2 - 6 && Math.min(Math.abs(dx), Math.abs(dy)) < 25; // the shrunk arm is 2 x 28.8 px thick (32.4 x 8/9 each side)
@@ -102,7 +103,8 @@ describe('direction pad shapes', () => {
     for (const d of ['up', 'right', 'down', 'left'] as const) assert.equal(inside(sh.wedges[d].poly, x, y), false);
     assert.equal(inside(sh.diamond, x, y), false);
     assert.equal(inside(sh.diamond, mid, mid), true);
-    for (const d of ['up', 'right', 'down', 'left'] as const) assert.equal(inside(sh.wedges[d].poly, mid + 0.01, mid + 0.01), false);
+    for (const d of ['up', 'right', 'down', 'left'] as const)
+      assert.equal(inside(sh.wedges[d].poly, mid + 0.01, mid + 0.01), false);
   });
 
   test('a bigger pad scales every point', () => {
@@ -115,13 +117,27 @@ describe('direction pad shapes', () => {
 });
 
 describe('shell settings rules', () => {
-  test('the direction pad: a stored choice wins; with none, only an Emuera.NET game on touch turns it on', () => {
+  test('the direction pad: a stored choice wins; with none, only a game that needs the pad, on touch, turns it on', () => {
     assert.equal(dpadDefault('1', false, true), true);
     assert.equal(dpadDefault('0', true, false), false);
     assert.equal(dpadDefault(null, true, false), true);
     assert.equal(dpadDefault(null, true, true), false);
     assert.equal(dpadDefault(null, false, false), false);
     assert.equal(dpadDefault(null, false, true), false);
+  });
+
+  test('the pad game list: the GameBase.csv code must equal a listed code; a missing file or code never matches', () => {
+    const csv = (body: string, path = 'CSV/GameBase.csv') => ({ [path]: body });
+    const list = ['123'];
+    assert.equal(needsPad(csv('コード,123\r\nタイトル,x'), list), true);
+    assert.equal(needsPad(csv('\uFEFFコード , 123 \nタイトル,x'), list), true); // BOM and padding around the value
+    assert.equal(needsPad(csv('コード,123', 'game/csv/gamebase.csv'), list), true); // wrapper folder, any letter case
+    assert.equal(needsPad(csv('コード,1234'), list), false); // a longer number is another code
+    assert.equal(needsPad(csv('コード,12'), list), false);
+    assert.equal(needsPad(csv('タイトル,123'), list), false); // the title is not the code
+    assert.equal(needsPad(csv('コード,123', 'CSV/Other.csv'), list), false); // not the GameBase file
+    assert.equal(needsPad({}, list), false);
+    assert.equal(needsPad(csv('コード,123'), []), false);
   });
 
   test('quick values: bad data gives none; strings only; at most 8; at most 40 characters each', () => {

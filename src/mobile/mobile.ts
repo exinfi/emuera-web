@@ -18,7 +18,7 @@ import { attachDrop } from './drop';
 import { FontRegistry, type FontEntry } from '../host/web/fonts';
 import { FontStore } from '../host/web/fontstore';
 import { familyKey } from '../host/screen';
-import { padShapes, dpadDefault, parseQuickVals, type Pt } from './rules';
+import { padShapes, dpadDefault, needsPad, parseQuickVals, type Pt } from './rules';
 // @ts-ignore injected by the build script
 declare const WORKER_SRC: string;
 // @ts-ignore injected by the build script: bundled OFL fonts as base64
@@ -876,9 +876,9 @@ interface XBtn {
 }
 let xCfg: XBtn[] = [],
   selX = ''; // custom buttons of the open game (below)
-let netGame = false; // an Emuera.NET game (setting.json next to ERB/CSV), e.g. eraMegaten: its exploration is a 2D map moved with 8/4/6/2
+let padGame = false; // the open game is one that needs the direction pad (its GameBase.csv code is in PAD_GAME_CODES): its exploration is a 2D map moved with 8/4/6/2
 const dpadEnabled = () => {
-  return dpadDefault(lsGet('emu.w.dpad'), netGame, V.desktop); // the automatic default is for touch devices only; the player's own choice always wins
+  return dpadDefault(lsGet('emu.w.dpad'), padGame, V.desktop); // the automatic default is for touch devices only; the player's own choice always wins
 };
 function applyWidgets() {
   const on = dpadEnabled() && !!gameId; // the pad belongs to a game: nothing to show or press before one is open
@@ -896,11 +896,11 @@ function applyWidgets() {
   wquick.checked = quickOn();
   quick.hidden = !wquick.checked;
   qcfg.hidden = !wquick.checked;
-  $('wnote').textContent = !netGame
+  $('wnote').textContent = !padGame
     ? ''
     : V.desktop
-      ? 'Emuera.NET game detected (eraMegaten style): the direction pad is off on a desktop unless you turn it on here. The header button shows or hides it.'
-      : 'Emuera.NET game detected (eraMegaten style): the direction pad is on and shown at the start unless you turn it off here. The header button shows or hides it.';
+      ? 'This game uses a map moved with the direction keys: the direction pad is off on a desktop unless you turn it on here. The header button shows or hides it.'
+      : 'This game uses a map moved with the direction keys: the direction pad is on and shown at the start unless you turn it off here. The header button shows or hides it.';
   refreshPad();
 }
 /** show the pad now (what the header button does when it is off) */
@@ -1773,11 +1773,11 @@ async function load(blob: Blob, name: string) {
     void tl?.newGame(m.gameId);
     loadX();
     patchUi.onGame(g.csv, m.gameId);
-    netGame = Object.keys(g.csv).some((p) => /(^|\/)setting\.json$/i.test(p));
+    padGame = needsPad(g.csv);
     dpad.hidden = true;
     bdpad.classList.remove('on');
-    applyWidgets(); // the pad starts hidden on every game, unless the game is detected as one that needs it (Emuera.NET)
-    if (netGame && dpadEnabled()) showPad();
+    applyWidgets(); // the pad starts hidden on every game, unless the game is one that needs it (PAD_GAME_CODES)
+    if (padGame && dpadEnabled()) showPad();
     fonts.override = lsGet('emu.font:' + gameId) || null;
     applyFonts();
     const xfer: Transferable[] = [...Object.values(g.images), ...Object.values(g.erbBytes ?? {})];
@@ -2145,7 +2145,7 @@ void memory.refreshUi();
 document.addEventListener('fullscreenchange', () => V.layoutChanged());
 (window as any).__m = {
   setNet: (v: boolean) => {
-    netGame = v;
+    padGame = v;
     applyWidgets();
   },
   setGame: (id: string) => {
