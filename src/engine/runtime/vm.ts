@@ -195,42 +195,6 @@ export class VM {
   /** QUIT_AND_RESTART / FORCE_QUIT_AND_RESTART: the host boots the game again once the run ends */
   restart = false;
   textFiles = new Map<string, string>();
-  /**
-   * Shipped text files the host left in their zip (option `xrefs`): key (as in `textFiles`) -> a reader that returns the decoded text, or undefined
-   * when it cannot be read. `textFiles` wins when a key is in both (a file the game saved over it). Decoded texts are kept in a bounded
-   * least-recently-used cache and read again when dropped.
-   */
-  lazyTexts = new Map<string, () => string | undefined>();
-  private textCache = new Map<string, string>();
-  private textCacheChars = 0;
-  /** decoded characters kept (about 32 MB as JS strings) */
-  textCacheBudget = 16_000_000;
-  hasText(k: string): boolean {
-    return this.textFiles.has(k) || this.lazyTexts.has(k);
-  }
-  /** the text of a game file by key, or undefined when there is none (or a lazy one could not be read) */
-  getText(k: string): string | undefined {
-    const t = this.textFiles.get(k);
-    if (t !== undefined) return t;
-    const rd = this.lazyTexts.get(k);
-    if (!rd) return undefined;
-    const hit = this.textCache.get(k);
-    if (hit !== undefined) {
-      this.textCache.delete(k); // most recently used goes last
-      this.textCache.set(k, hit);
-      return hit;
-    }
-    const s = rd();
-    if (s === undefined) return undefined;
-    this.textCache.set(k, s);
-    this.textCacheChars += s.length;
-    for (const [o, v] of this.textCache) {
-      if (this.textCacheChars <= this.textCacheBudget || o === k) break;
-      this.textCache.delete(o);
-      this.textCacheChars -= v.length;
-    }
-    return s;
-  }
   /** lower-cased relative names of the files under sound/ (EXISTSOUND / PLAYSOUND check these; the host owns the bytes) */
   soundFiles = new Set<string>();
   /** family names of the fonts the host registered (game-embedded or user-imported); CHKFONT answers 1 for them */

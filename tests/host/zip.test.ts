@@ -1,7 +1,15 @@
 import test, { describe } from 'node:test';
 import assert from 'node:assert/strict';
 import { deflateRawSync } from 'node:zlib';
-import { loadThin, readEntryRef, readHeadSync, readEntrySync, sweepHeads, crc32 } from '../../src/host/web/zipindex.ts';
+import {
+  loadThin,
+  readEntryRef,
+  readHeadSync,
+  readEntrySync,
+  sweepHeads,
+  sweepFull,
+  crc32,
+} from '../../src/host/web/zipindex.ts';
 import { sniffSize } from '../../src/engine/runtime/imagestore.ts';
 import { GameLoader, decodeZipName } from '../../src/host/web/gamezip.ts';
 
@@ -510,6 +518,53 @@ describe('image sizes read in one forward pass', () => {
   });
 });
 
+describe('whole entries read in one forward pass', () => {
+  // text entries of every size, stored and deflated, with an image between each so that the entries are not neighbors
+  const sizes = [0, 1, 5, 300, 4000, 70000, 200000];
+  const entries = (): E[] => {
+    const es: E[] = [{ name: 'ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' }];
+    sizes.forEach((n, i) => {
+      es.push({ name: `data/t${i}.txt`, data: String.fromCharCode(97 + i).repeat(n), deflate: i % 2 === 1 || i >= 5 }); // the long ones deflated: the test builder cannot push a long stored entry
+      es.push({ name: `resources/p${i}.png`, data: png(3, 4) });
+    });
+    return es;
+  };
+  for (const sliceSize of [64, 5000, 1 << 20]) {
+    test(`every entry comes back whole, stored or deflated, also when it is longer than a slice (slice ${sliceSize} bytes)`, async () => {
+      const zip = build(entries());
+      const z = await loadThin(new Blob([zip]));
+      const refs = sizes.map((_, i) => z.files[`data/t${i}.txt`].ref);
+      const blob = new CountingBlob([zip]);
+      const got: (string | undefined)[] = [];
+      const st = await sweepFull(
+        blob,
+        refs,
+        (i, d) => (got[i] = d && new TextDecoder().decode(d)),
+        undefined,
+        sliceSize,
+      );
+      sizes.forEach((n, i) => assert.equal(got[i], String.fromCharCode(97 + i).repeat(n), `t${i}`));
+      assert.equal(st.reads, blob.starts.length);
+      for (let i = 1; i < blob.starts.length; i++)
+        assert.ok(blob.starts[i] >= blob.starts[i - 1], 'reads never move backwards');
+      if (sliceSize === 1 << 20) assert.equal(st.reads, 1);
+    });
+  }
+
+  test('an entry listed out of file order is still read, and one with a damaged stream comes back undefined', async () => {
+    const zip = build(entries());
+    const z = await loadThin(new Blob([zip]));
+    const good = z.files['data/t3.txt'].ref,
+      first = z.files['data/t1.txt'].ref;
+    const bad = { ...z.files['data/t5.txt'].ref, method: 99 };
+    const got = new Map<number, string | undefined>();
+    await sweepFull(new Blob([zip]), [good, bad, first], (i, d) => got.set(i, d && new TextDecoder().decode(d)));
+    assert.equal(got.get(0), 'd'.repeat(300));
+    assert.equal(got.get(1), undefined);
+    assert.equal(got.get(2), 'b');
+  });
+});
+
 describe('extra files outside the usual folders (option "extra file check")', () => {
   const game = (extra: E[] = []) =>
     build([
@@ -525,46 +580,41 @@ describe('extra files outside the usual folders (option "extra file check")', ()
       { name: 'g/pic/p.png', data: png(6, 7) },
       ...extra,
     ]);
-  const dec = (u: Uint8Array | undefined) => (u ? new TextDecoder().decode(u) : undefined);
 
-  test('ticked: every text file outside the usual folders is a reference, nothing is read, developer folders stay out', async () => {
+  test('ticked: every text file outside the usual folders is read and decoded at load, developer folders stay out', async () => {
     const log: string[] = [];
     const l = new GameLoader((x) => log.push(x), { scanReferences: true });
     await l.add({ name: 'game.zip', blob: game() });
     const f = l.finish();
-    assert.deepEqual(Object.keys(f.textRefs!).sort(), [
+    assert.deepEqual(Object.keys(f.texts).sort(), [
       'data/big.xml',
       'data/first.xml',
       'mapdata/m.txt',
       'xml/second.xml',
     ]);
-    assert.deepEqual(Object.keys(f.texts), []);
-    assert.equal(f.textRefs!['data/big.xml'].size, 100007);
-    // what the worker does: read one entry on first use, from the zip the reference names
-    for (const [k, want] of [
-      ['data/first.xml', '<a>first</a>'],
-      ['xml/second.xml', '<c>second</c>'],
-    ] as const) {
-      const r = f.textRefs![k];
-      assert.equal(dec(readEntrySync(f.imageSources![r.src], r, k)), want, k);
-    }
-    const big = f.textRefs!['data/big.xml'];
-    assert.equal(dec(readEntrySync(f.imageSources![big.src], big))!.length, 100007);
+    assert.equal(f.texts['data/first.xml'], '<a>first</a>');
+    assert.equal(f.texts['xml/second.xml'], '<c>second</c>'); // deflated entry
+    assert.equal(f.texts['data/big.xml'].length, 100007);
+    assert.equal(f.texts['mapdata/m.txt'], 'map');
     // they are not listed as missing files; the developer folders still are
     assert.ok(!f.unloaded!.some((p) => p.startsWith('data/') || p.startsWith('xml/') || p.startsWith('mapdata/')));
-    assert.ok(log.some((x) => x.includes('left in their zip')));
+    assert.ok(!('docs/readme.txt' in f.texts) && !('tools/t.txt' in f.texts));
+    assert.ok(
+      log.some((x) => x.includes('4 text file(s)') && x.includes('read(s)')),
+      log.join('|'),
+    );
   });
 
-  test('ticked: a text file at the top of the zip is a reference too; unticked it stays listed as not loaded', async () => {
+  test('ticked: a text file at the top of the zip is read too; unticked it stays listed as not loaded', async () => {
     const top: E[] = [{ name: 'g/FLconfig.xml', data: '<cfg/>' }];
     const log: string[] = [];
     const l = new GameLoader((x) => log.push(x), { scanReferences: true });
     await l.add({ name: 'game.zip', blob: game(top) });
     const f = l.finish();
-    assert.ok(f.textRefs!['FLconfig.xml'] || f.textRefs!['flconfig.xml'], Object.keys(f.textRefs!).join(','));
+    assert.equal(f.texts['FLconfig.xml'], '<cfg/>');
     assert.ok(!f.unloaded!.some((p) => /flconfig/i.test(p)));
-    const line = log.find((x) => x.includes('left in their zip'))!;
-    assert.ok(line.includes('(top level) (1)') && !/flconfig|\.xm\//i.test(line), line);
+    const line = log.find((x) => x.includes('extra files outside'))!;
+    assert.ok(line.includes('(top level) (1)') && !/flconfig|\.xml\b/i.test(line.split(';')[0]), line);
     const u = new GameLoader(undefined, {});
     await u.add({ name: 'game.zip', blob: game(top) });
     assert.ok(u.finish().unloaded!.some((p) => /flconfig/i.test(p)));
@@ -587,7 +637,6 @@ describe('extra files outside the usual folders (option "extra file check")', ()
     const l = new GameLoader(undefined, {});
     await l.add({ name: 'game.zip', blob: game() });
     const f = l.finish();
-    assert.equal(f.textRefs, undefined);
     assert.deepEqual(Object.keys(f.texts), []);
     assert.ok(f.unloaded!.includes('data/first.xml'));
     assert.ok(f.unloaded!.includes('xml/second.xml'));
@@ -603,10 +652,8 @@ describe('extra files outside the usual folders (option "extra file check")', ()
     await l.add({ name: 'game.zip', blob: game() });
     await l.add({ name: 'pack.zip', blob: pack });
     const f = l.finish();
-    const keys = Object.keys(f.textRefs!).filter((k) => k.toLowerCase().startsWith('data/'));
+    const keys = Object.keys(f.texts).filter((k) => k.toLowerCase().startsWith('data/'));
     assert.deepEqual(keys.sort(), ['Data/FIRST.xml', 'data/big.xml', 'data/new.xml']);
-    const r = f.textRefs!['Data/FIRST.xml'];
-    assert.equal(r.src, 1);
-    assert.equal(dec(readEntrySync(f.imageSources![r.src], r)), '<a>pack</a>');
+    assert.equal(f.texts['Data/FIRST.xml'], '<a>pack</a>');
   });
 });

@@ -122,12 +122,12 @@ def('SAVETEXT', (vm, a) => {
 });
 def('LOADTEXT', (vm, a) => {
   const k = textKey(vm, a[0], false);
-  if (k !== null && !vm.hasText(k)) vm.missedFile('LOADTEXT', typeof a[0] === 'string' ? a[0] : k);
-  return k === null ? '' : (vm.getText(k) ?? '').replace(/\r/g, '');
+  if (k !== null && !vm.textFiles.has(k)) vm.missedFile('LOADTEXT', typeof a[0] === 'string' ? a[0] : k);
+  return k === null ? '' : (vm.textFiles.get(k) ?? '').replace(/\r/g, '');
 });
 const tkey = (p: string) => p.replace(/\\/g, '/').toLowerCase();
 def('EXISTFILE', (vm, a) => {
-  if (vm.gfx.exists(S(a[0])) || vm.hasText(tkey(S(a[0])))) return 1;
+  if (vm.gfx.exists(S(a[0])) || vm.textFiles.has(tkey(S(a[0])))) return 1;
   vm.missedFile('EXISTFILE', S(a[0]));
   return 0;
 });

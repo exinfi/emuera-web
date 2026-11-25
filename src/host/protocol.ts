@@ -26,7 +26,7 @@ export interface StartOptions {
   xloader?: boolean;
   /** read resource images from the zip when first drawn instead of holding them all in memory (additive, optional, read by the page's loader, default on) */
   ximages?: boolean;
-  /** scan the game's code for folder names and load the extra files in them (additive, optional, read by the page's loader, default off) */
+  /** also load the text files and images the usual folders do not cover (additive, optional, read by the page's loader, default off) */
   xrefs?: boolean;
 }
 /** `hidden`: kept in the code and in `StartOptions` (so a host can still send it) but no checkbox is drawn; the page sends the default */
@@ -120,15 +120,6 @@ export interface ImageRef {
   ext: string;
   size: number;
   dim?: { w: number; h: number };
-}
-/** a text-like file left in its zip (option `xrefs`): where its data is (`src` indexes `StartMsg.imageSources`) and its size in bytes; the worker reads and decodes it when the game first asks for it */
-export interface TextRef {
-  src: number;
-  offset: number;
-  csize: number;
-  method: number;
-  nameLen: number;
-  size: number;
 }
 export interface SavedSlot {
   info: string;
@@ -256,10 +247,8 @@ export interface StartMsg extends StartOptions {
   images: Record<string, ArrayBuffer>;
   /** optional (additive, option `ximages`): resource images left in their zips; read by the worker on first use. `imageSources` are the zips (Blobs are posted as handles, not copied). */
   imageRefs?: Record<string, ImageRef>;
-  /** the zips that `imageRefs` and `textRefs` point into */
+  /** the zips that `imageRefs` point into */
   imageSources?: (Blob | Uint8Array)[];
-  /** optional (additive, option `xrefs`): text-like files outside the usual folders, left in their zips and read by the worker when the game first asks (LOADTEXT) */
-  textRefs?: Record<string, TextRef>;
   /** optional (additive): cap in MB on image files held in memory after being read on demand (default 128); least recently used are dropped and read again */
   imageCacheMB?: number;
   /** optional (additive): paths in the game zip the loader did not load; the engine notes it when the game asks for one of them */

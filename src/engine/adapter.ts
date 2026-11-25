@@ -172,16 +172,9 @@ async function run(files: GameFiles, opts: RunOptions & { maxSteps?: number } = 
     ...(((opts as any).extraFiles as string[]) ?? []),
   ];
   for (const f of ((opts as any).unloadedFiles as string[]) ?? []) vm.unloadedFiles.add(f);
-  // text files the game can LOADTEXT: held (`textFiles`) or left in their zip and read on first use (`lazyTextFiles`, key -> reader), as the page's worker sets them up
+  // text files the game can LOADTEXT, as the page's worker sets them up
   for (const [k, v] of Object.entries(((opts as any).textFiles as Record<string, string>) ?? {}))
     (vm.textFiles.set(k.toLowerCase(), v), vm.gameFiles.push(k));
-  for (const [k, rd] of Object.entries(
-    ((opts as any).lazyTextFiles as Record<string, () => string | undefined>) ?? {},
-  )) {
-    vm.lazyTexts.set(k.toLowerCase(), rd);
-    vm.gameFiles.push(k);
-  }
-  if ((opts as any).textCacheBudget) vm.textCacheBudget = (opts as any).textCacheBudget;
   vm.fontFamilies = ((opts as any).fontFamilies as string[]) ?? [];
   const sounds: unknown[] = [];
   for (const f of (opts as any).soundFiles ?? []) vm.soundFiles.add(String(f).toLowerCase());

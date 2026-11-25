@@ -1550,21 +1550,6 @@ async function start(m: StartMsg) {
   ];
   post({ type: 'patches', active: activePatches, width: vm.config.windowWidth, widthFrom, boot });
   for (const [k, v] of Object.entries(m.texts)) vm.textFiles.set(k.toLowerCase(), v);
-  // option `xrefs`: text files left in their zips are read and decoded when the game first asks (LOADTEXT), see VM.getText
-  for (const [p, r] of Object.entries(m.textRefs ?? {})) {
-    const zipSrc = m.imageSources?.[r.src];
-    if (!zipSrc) continue;
-    vm.lazyTexts.set(p.toLowerCase(), () => {
-      try {
-        const u = readEntrySync(zipSrc, r, p);
-        if (u) return decodeText(u);
-        vm.host.note(`LOADTEXT: "${p}" could not be read from the zip here (no synchronous read in this worker)`);
-      } catch (e) {
-        vm.host.note(`LOADTEXT: "${p}" could not be read from the zip: ${e instanceof Error ? e.message : e}`);
-      }
-      return undefined;
-    });
-  }
   for (const n of m.sounds ?? []) vm.soundFiles.add(n.toLowerCase());
   for (const n of m.unloaded ?? []) vm.unloadedFiles.add(n);
   await registerFonts(vm, m.fonts ?? []);
@@ -1575,7 +1560,6 @@ async function start(m: StartMsg) {
     ...Object.keys(m.images),
     ...Object.keys(m.imageRefs ?? {}),
     ...Object.keys(m.texts),
-    ...Object.keys(m.textRefs ?? {}),
     ...(m.sounds ?? []).map((n) => 'sound/' + n),
   ];
   theVm = vm;

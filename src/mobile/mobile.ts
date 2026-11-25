@@ -1802,7 +1802,6 @@ async function load(blob: Blob, name: string) {
         imageSources: g.imageSources,
         rescsv: g.rescsv,
         texts: g.texts,
-        textRefs: g.textRefs,
         fonts: fonts.startFonts(),
       },
       xfer,

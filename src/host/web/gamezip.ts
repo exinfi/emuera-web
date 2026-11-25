@@ -1,8 +1,8 @@
 /** Game zip reader (host-web tier). Takes a File/Blob (not a path); no DOM access. */
 import JSZip from 'jszip';
 import { decodeText } from '../../engine/textdecode';
-import type { ImageRef, TextRef } from '../protocol';
-import { loadThin, sweepHeads } from './zipindex';
+import type { ImageRef } from '../protocol';
+import { loadThin, sweepHeads, sweepFull, type EntryRef } from './zipindex';
 import { sniffSize } from '../../engine/runtime/imagestore';
 
 /**
@@ -24,10 +24,8 @@ export interface GameFiles {
   images: Record<string, ArrayBuffer>;
   /** option `lazyImages`: images by reference (no image bytes are read at load; the worker reads a header for the size when first asked, and the bytes on first use). Then `images` holds none of them; `imageSources[ref.src]` is the zip each one lives in */
   imageRefs?: Record<string, ImageRef>;
-  /** the zips that `imageRefs` and `textRefs` point into (`ref.src` is an index into this list) */
+  /** the zips that `imageRefs` point into (`ref.src` is an index into this list) */
   imageSources?: Bytes[];
-  /** option `xrefs` with the thin reader: text-like files outside the usual folders, by reference (nothing is read at load; the worker reads and decodes one when the game first asks for it). Same keys as `texts` would have had */
-  textRefs?: Record<string, TextRef>;
   /** lower-cased path under sound/ -> blob */
   sounds: Map<string, Blob>;
   /** .ttf and .otf files under font/ (Emuera EM+EE loads these into its private font collection) */
@@ -195,19 +193,20 @@ export class GameLoader {
   private extraBytes = 0;
   /** every skipped file outside developer folders, by lower-cased path (capped), for the engine's "asked for a file that was not loaded" note */
   private skipped = new Map<string, string>();
-  /** option `xrefs` (default off): scan the game's code for folder names and load the files in them that the fixed folders do not cover; when off those files are only listed so a miss can be explained */
+  /** option `xrefs` (default off): also load the files the fixed folders do not cover. With the thin reader every text-like one is taken (`registerExtras`); without it the game's code is scanned for folder names and the files in them are loaded within a size budget (`loadReferenced`). When off those files are only listed so a miss can be explained */
   private readonly scanReferences: boolean;
-  /** `scanReferences` with the thin reader: the extra files stay in their zips and are read when asked for (no folder guess, no size cap) */
-  private readonly lazyTexts: boolean;
+  /** `scanReferences` with the thin reader: every text-like file outside the usual folders is read in one forward pass over its zip while loading (no folder guess, no size cap) */
+  private readonly sweepTexts: boolean;
+  /** the zip of each source, by source index (the text sweep reads from it) */
+  private blobs: Bytes[] = [];
   constructor(
     private log?: (line: string) => void,
     opts: { erbBytes?: boolean; scanReferences?: boolean; lazyImages?: boolean } = {},
   ) {
     this.lazyImages = THIN_ZIP && !!opts.lazyImages;
-    this.lazyTexts = THIN_ZIP && !!opts.scanReferences;
+    this.sweepTexts = THIN_ZIP && !!opts.scanReferences;
     if (this.lazyImages) this.files.imageRefs = {};
-    if (this.lazyTexts) this.files.textRefs = {};
-    if (this.lazyImages || this.lazyTexts) this.files.imageSources = [];
+    if (this.lazyImages) this.files.imageSources = [];
     this.bytesMode = !!opts.erbBytes;
     this.scanReferences = !!opts.scanReferences;
     if (this.bytesMode) this.files.erbBytes = {};
@@ -217,7 +216,8 @@ export class GameLoader {
     const out = this.files,
       si = this.n++;
     const z = await openZip(src.blob);
-    if (this.lazyImages || this.lazyTexts) this.files.imageSources![si] = src.blob;
+    this.blobs[si] = src.blob;
+    if (this.lazyImages) this.files.imageSources![si] = src.blob;
     const entries = Object.entries(z.files).filter(([, f]) => !f.dir);
     const r = detectRoot(
       entries.map(([n]) => n),
@@ -249,8 +249,8 @@ export class GameLoader {
         const top = rel.indexOf('/') > 0 ? rel.slice(0, rel.indexOf('/')).toLowerCase() : '';
         if (!EXTRA_DENY.test(top) && this.skipped.size < SKIPPED_CAP)
           this.skipped.set(rel.toLowerCase().replace(/\\/g, '/'), rel);
-        // a file at the zip's top level (FLconfig.xml next to the exe) counts too, but only when extras stay in their zip: nothing is read at load then, so there is no cost to listing it
-        if ((top || this.lazyTexts) && EXTRA_EXT.test(rel) && !EXTRA_DENY.test(top))
+        // a file at the zip's top level (FLconfig.xml next to the exe) counts too, but only on the thin path, where reading it costs one slice of the sweep
+        if ((top || this.sweepTexts) && EXTRA_EXT.test(rel) && !EXTRA_DENY.test(top))
           this.pending.set(rel.toLowerCase(), { rel, f, src: src.name, si });
         continue;
       }
@@ -299,25 +299,26 @@ export class GameLoader {
         else out.images[rel] = await f.async('arraybuffer');
       } else out.texts[rel.replace(/\\/g, '/')] = decodeText(await f.async('uint8array'));
     }
-    await this.loadReferenced();
+    await this.loadReferenced(onProgress);
     if (si === 0) out.base = { erb: this.bytesMode ? { ...this.erbLen } : { ...out.erb }, csv: { ...out.csv } };
   }
   /** note the folders string literals in this code name; only folders that also exist in a zip matter, which removes the noise of dialogue that merely contains a slash */
   private scanRefs(code: string): void {
-    if (!this.scanReferences || this.lazyTexts) return; // the lazy path takes every such file, so the folder guess is not needed
+    if (!this.scanReferences || this.sweepTexts) return; // the sweep takes every such file, so the folder guess is not needed
     for (const m of code.matchAll(REF_RE)) this.refs.add(nfc(m[1]).toLowerCase());
   }
   /**
-   * The lazy form of `loadReferenced` (option `xrefs`, thin reader). Every text-like file outside the usual folders (developer folders already left
-   * out) becomes a reference into its zip: nothing is read now, the worker reads and decodes a file when the game first asks for it, so there is no
-   * size cap and no guess about which folders the code names. They also count as files of the game folder (ENUMFILES, EXISTFILE). Images among them
-   * follow the image option: by reference when images are read on demand, else read now (within the old cap).
+   * The thin-reader form of `loadReferenced` (option `xrefs`). Every text-like file outside the usual folders (developer folders already left
+   * out) is read in one forward pass over its zip and decoded into `texts`: no folder guess and no size cap, and the game's LOADTEXT, EXISTFILE and
+   * ENUMFILES find them like any loaded file. Reading in file order means a few large reads however many files there are (a small read at a
+   * scattered place is very slow on some phones). Images among them follow the image option: by reference when images are read on demand, else read
+   * now (within the old cap).
    */
-  private async registerExtras(): Promise<void> {
+  private async registerExtras(onProgress?: (done: number, total: number) => void): Promise<void> {
     const out = this.files,
       taken = new Map<string, number>();
-    let bytes = 0,
-      eagerImgs = 0;
+    const texts: { key: string; ref: EntryRef; si: number; rel: string }[] = [];
+    let eagerImgs = 0;
     for (const [lc, e] of [...this.pending]) {
       const isImg = IMG_EXT.test(e.rel);
       const size = (e.f as unknown as { _data?: { uncompressedSize?: number } })._data?.uncompressedSize ?? 0;
@@ -348,17 +349,42 @@ export class GameLoader {
         } else {
           const key = rel.replace(/\\/g, '/');
           this.keyOf.set(k, key);
-          out.textRefs![key] = { src: e.si, ...e.f.ref, size };
-          bytes += size;
+          texts.push({ key, ref: e.f.ref, si: e.si, rel });
         }
       }
       this.pending.delete(lc);
       this.skipped.delete(lc.replace(/\\/g, '/'));
       taken.set(top, (taken.get(top) ?? 0) + 1);
     }
+    // the text files, one forward pass per zip
+    let bytes = 0,
+      done = 0,
+      reads = 0;
+    const unreadable: string[] = [];
+    const bySrc = new Map<number, typeof texts>();
+    for (const t of texts) (bySrc.get(t.si) ?? bySrc.set(t.si, []).get(t.si)!).push(t);
+    for (const [si, list] of bySrc) {
+      const st = await sweepFull(
+        this.blobs[si],
+        list.map((t) => t.ref),
+        (i, data) => {
+          if (data) {
+            out.texts[list[i].key] = decodeText(data);
+            bytes += data.length;
+          } else unreadable.push(list[i].rel);
+        },
+        (n) => onProgress?.(done + n, texts.length),
+      );
+      done += list.length;
+      reads += st.reads;
+    }
     if (taken.size)
       this.log?.(
-        `extra files outside the usual folders, left in their zip and read when the game asks: ${[...taken].map(([f, n]) => `${f ? f + '/' : '(top level)'} (${n})`).join(', ')}${bytes ? `, ${(bytes / 1048576).toFixed(1)} MB of text` : ''}${eagerImgs ? `; ${eagerImgs} image(s) read now` : ''}`,
+        `extra files outside the usual folders: ${[...taken].map(([f, n]) => `${f ? f + '/' : '(top level)'} (${n})`).join(', ')}${texts.length ? `; ${texts.length} text file(s), ${(bytes / 1048576).toFixed(1)} MB read in ${reads} read(s)` : ''}${eagerImgs ? `; ${eagerImgs} image(s) read now` : ''}`,
+      );
+    if (unreadable.length)
+      this.log?.(
+        `${unreadable.length} text file(s) could not be read from the zip and were left out: ${unreadable.slice(0, 5).join(', ')}${unreadable.length > 5 ? ', ...' : ''}`,
       );
   }
   /**
@@ -367,9 +393,9 @@ export class GameLoader {
    * what was left. Folders never named by the code (docs/, patch archives, tools) stay unread. Paths a game builds entirely at run time
    * cannot be seen here; those are the misses to handle per game.
    */
-  private async loadReferenced(): Promise<void> {
+  private async loadReferenced(onProgress?: (done: number, total: number) => void): Promise<void> {
     if (!this.scanReferences || !this.pending.size) return;
-    if (this.lazyTexts) return this.registerExtras();
+    if (this.sweepTexts) return this.registerExtras(onProgress);
     const out = this.files,
       taken = new Map<string, number>();
     let skippedCap = 0,
@@ -505,7 +531,6 @@ function dropEarlier(out: GameFiles, table: string, lc: string, key?: string) {
   else if (table === 'r') kill(out.rescsv);
   else if (table === 't') {
     kill(out.texts);
-    if (out.textRefs) kill(out.textRefs);
   } else if (table === 'i') {
     kill(out.images);
     if (out.imageRefs) kill(out.imageRefs);

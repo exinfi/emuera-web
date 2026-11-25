@@ -115,8 +115,14 @@ export async function sweepHeads(
     bytes += d.length;
     return d;
   };
-  const headOf = (r: EntryRef, raw: Uint8Array) =>
-    r.method === 0 ? raw.slice(0, n) : r.method === 8 ? inflatePrefix(raw, n) : undefined;
+  const headOf = (r: EntryRef, raw: Uint8Array) => {
+    if (n !== Infinity) return r.method === 0 ? raw.slice(0, n) : r.method === 8 ? inflatePrefix(raw, n) : undefined;
+    try {
+      return r.method === 0 ? raw.slice() : r.method === 8 ? (pako.inflateRaw(raw) as Uint8Array) : undefined;
+    } catch {
+      return undefined; // a damaged stream: the caller reports the file
+    }
+  };
   while (k < order.length) {
     const start = refs[order[k]].offset;
     const end = Math.min(total, start + sliceSize);
@@ -151,6 +157,15 @@ export async function sweepHeads(
   }
   return { reads, bytes };
 }
+
+/** every entry's whole content, read in one forward pass (`sweepHeads` with no length limit); `each` gets undefined for an entry that cannot be read (bad header, damaged stream, unknown method) */
+export const sweepFull = (
+  src: Bytes,
+  refs: EntryRef[],
+  each: (i: number, bytes: Uint8Array | undefined) => void,
+  onProgress?: (done: number, total: number) => void,
+  sliceSize = WINDOW,
+) => sweepHeads(src, refs, Infinity, each, onProgress, sliceSize);
 
 /** the first `n` bytes a deflate stream's prefix inflates to (the prefix may be cut anywhere; whatever inflates before the cut is returned) */
 function inflatePrefix(raw: Uint8Array, n: number): Uint8Array {
