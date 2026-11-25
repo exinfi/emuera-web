@@ -48,6 +48,7 @@ import { Cursor } from '../engine/compiler/cursor';
 import { compile } from '../engine/runtime/eval';
 import { formatStack } from '../engine/runtime/errctx';
 import { ENGINE_NAME } from '../version';
+import { posToPx } from './htmlpos';
 
 type Img = {
   n: string;
@@ -411,8 +412,9 @@ export class WebRenderer implements Renderer {
         case 'nonbutton':
           if (!close) {
             const pv = attr(tk, 'pos');
-            if (pv !== undefined && /^\s*-?\d+\s*$/.test(pv)) pendPos = parseInt(pv, 10);
-          } // pos=N: the first part of the tag starts at x=N px
+            if (pv !== undefined && /^\s*-?\d+\s*$/.test(pv))
+              pendPos = posToPx(parseInt(pv, 10), theVm?.config.fontSize ?? 16);
+          } // pos=N: the first part of the tag starts at N/100 of the font size from the line's left edge
           if (name === 'button') {
             if (close) {
               btn = null;

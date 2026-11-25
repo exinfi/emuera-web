@@ -188,6 +188,13 @@ function tokenize(s: string): Tok[] {
       i++;
       continue;
     }
+    // a number ends where its digits end: .NET's scanner reads "1AND ITEMNUM > 0" as 1, AND, ITEMNUM... (games build filters with no space before AND)
+    const nm = /^\d+(\.\d+)?/.exec(s.slice(i));
+    if (nm) {
+      out.push({ t: 'num', v: nm[0] });
+      i += nm[0].length;
+      continue;
+    }
     let j = i;
     while (j < s.length && !/[\s=<>()+\-*/%,'[\]]/.test(s[j])) j++;
     const w = s.slice(i, j);

@@ -59,7 +59,7 @@ Inside the worker, the interpreter is written as a generator. When a script need
 | `src/engine/profile.ts` | Which Emuera a game was written for (`em-ee`, `emuera-net`, `puchi`). A profile switches behavior only where the engines differ. |
 | `src/engine/textdecode.ts`, `src/engine/util/` | Text decoding (UTF-8, then Shift_JIS), line splitting the way Emuera reads files, case-insensitive keys, .NET regex translation. |
 | `src/engine/adapter.ts` | A headless way to run the engine for tests; not used by the page. |
-| `src/play/` | The worker entry (`worker.ts`), and engine-adjacent code shared with the page: memory cards (`cards.ts`), HTML unescaping and colors, the automatic `[N]` buttons. |
+| `src/play/` | The worker entry (`worker.ts`), and engine-adjacent code shared with the page: memory cards (`cards.ts`), HTML unescaping and colors, the position of `pos` in HTML tags (`htmlpos.ts`), the automatic `[N]` buttons. |
 | `src/host/` | The platform-neutral host layer: the message protocol, the worker client (`client.ts`, which also holds the input rules every shell must share), pure screen helpers. No DOM. |
 | `src/host/web/` | Browser implementations: the zip loader, the screen view, fonts, audio, resource packs, the memory-card session, native save recognition. |
 | `src/mobile/` | The page shell. Despite the name it serves phones and desktops: control panel, pan/zoom viewport, touch and mouse handling, widgets, translation panel, drag and drop. |

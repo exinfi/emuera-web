@@ -40,3 +40,10 @@ describe('DT_SELECT expression functions', () => {
     assert.match(res.errors.join('|'), /unknown function/);
   });
 });
+
+describe('DT_SELECT number scanning', () => {
+  // a number ends where its digits end, so a keyword may follow with no space (a filter built as "n = 5" + "OR n = 3")
+  test('keyword right after a number', async () => assert.equal(await sel('n = 5OR n = 3'), '2:5,3'));
+  test('keyword after a decimal number', async () => assert.equal(await sel('n > 2.5AND n < 6'), '2:5,3'));
+  test('a column name starting with a letter is unchanged', async () => assert.equal(await sel('n = 12'), '1:12,0'));
+});
