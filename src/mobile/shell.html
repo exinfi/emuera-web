@@ -37,7 +37,7 @@
     <div class="row"><button type="button" class="pick" data-for="file">Load game zip…</button><input class="fpick" tabindex="-1" type="file" id="file" accept=".zip,application/zip,application/x-zip-compressed,application/octet-stream"><button id="bundled" hidden>Load bundled game</button><button id="reload" type="button" disabled title="Start the loaded game again from the beginning (tap twice)">Reload Game</button></div>
     <div id="status">Pick a game zip.</div>
     <h3>Options</h3>
-    <div class="small">Launcher options. Default settings will work for most games. If the game reports a missing file or can't read a data file, try enable extra file check.</div>
+    <div class="small">Launcher options. Default settings will work for most games. If a game loads slowly or runs out of memory, try unticking enable extra file check.</div>
     <div class="opts">%%OPTIONS%%</div>
     <div class="row"><button id="optreset" type="button" hidden>Reset to default</button></div>
     <h3>Memory card</h3>
@@ -77,7 +77,7 @@
     <div id="tlmodelrow" class="opts" hidden><label>Model <select id="tlmodel"></select></label></div>
     <div id="tlinfo" class="small" style="white-space:pre-line"></div>
     <h3>View</h3>
-    <div class="opts"><label><input type="checkbox" id="assist" checked> nearest-button assist</label><label><input type="checkbox" id="bbtn"> mobile buttons</label><label><input type="checkbox" id="autoclose" checked> close this panel when the game starts</label><label title="Scrolled text dims out under the top bar instead of being cut off"><input type="checkbox" id="edgefade" checked> fade text under the top bar</label><label class="desk"><input type="checkbox" id="mbot"> extra space below last line</label><label class="desk"><input type="checkbox" id="tsel"> enable text selection</label><label><input type="checkbox" id="mtap"> override mouse with tap settings</label></div>
+    <div class="opts"><label><input type="checkbox" id="assist" checked> nearest-button assist</label><label><input type="checkbox" id="bbtn"> mobile buttons</label><label><input type="checkbox" id="autoclose" checked> close this panel when the game starts</label><label title="Scrolled text dims out under the top bar instead of being cut off"><input type="checkbox" id="edgefade" checked> fade text under the top bar</label><label class="desk"><input type="checkbox" id="mbot"> extra space below last line</label><label class="desk"><input type="checkbox" id="tsel"> enable text selection</label><label><input type="checkbox" id="mtap"> override mouse with tap settings</label><label id="qtaprow" title="The tap toggle (L / R / H) becomes almost invisible: a thin outline in the tap color. It still works."><input type="checkbox" id="qtap"> unobtrusive tap toggle</label></div>
     <button id="patchopen" type="button">List…</button><div id="patchpanel" hidden></div>
     <div class="row"><label>Window width <input type="number" id="winw" min="200" max="4000" inputmode="numeric" placeholder="game default" style="width:7em"></label><button id="winwreset" hidden>Reset</button></div><div id="winwhint" class="small"></div>
     <div class="row"><label>History log lines <input type="number" id="logcap" min="500" max="1000000" inputmode="numeric" style="width:7em"></label><button id="logcapreset" hidden>Reset</button></div><div id="logcaphint" class="small"></div>

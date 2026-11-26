@@ -44,7 +44,6 @@ If you are changing the code, there is a test suite to check your work. Run `npm
     - If on mobile, the **L / R / H** button at the top left sets what a tap does: left click, right click, or hover. You can hold the tap to perform the other click (for example, when set to **L** hold-tap to right-click instead).
 4. **Reload Game** starts the loaded game again from the beginning.
 
-The default options work for most games. If a game keeps its files in an unusual folder layout, you may need to turn on the extra file check in **Options**.
 
 
 1. ページを開き、メニューボタン（三本線のアイコン）を押してコントロールパネルを表示します。
@@ -56,7 +55,6 @@ The default options work for most games. If a game keeps its files in an unusual
     - モバイルでは、左上の **L / R / H** ボタンでタップの動作（左クリック、右クリック、ホバー）を切り替えます（長押しでもう一方のクリックになります）。
 4. **Reload Game** を押すと、読み込み済みのゲームを最初からやり直します。
 
-ほとんどのゲームは、初期設定のままで動作します。ゲームのファイルが特殊なフォルダ構成になっている場合は、**Options** の追加のファイル確認（extra file check）を有効にする必要があるかもしれません。
 
 ### Saves
 

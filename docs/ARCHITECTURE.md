@@ -174,7 +174,7 @@ All storage access is guarded: the page keeps working with storage blocked, it j
 | Fonts look wrong | `src/host/web/fonts.ts` (resolution and fallbacks), `fontinfo.ts` |
 | Saves | `src/engine/runtime/savedata.ts` (engine), `src/play/cards.ts` and `cardsession.ts` (storage), `nativesave.ts` (native `.sav`) |
 | Resource packs | `src/host/web/packs.ts` (scan and storage), `src/mobile/packs.ts` (UI) |
-| Zip reading, overrides, images on demand | `src/host/web/zipindex.ts` (reader), `src/host/web/gamezip.ts` (loader, override rule), `src/engine/runtime/imagestore.ts` (tiers, size on first ask), `GameLoader.sweepImageSizes` and `sweepHeads` (sizes at load), `start()` in `src/play/worker.ts` (registers the references); tests in `tests/host/zip.test.ts` and `tests/engine/imagestore.test.ts`; extra text files read in one pass: `registerExtras` in `gamezip.ts`, `sweepFull` in `zipindex.ts` |
+| Zip reading, overrides, images on demand | `src/host/web/zipindex.ts` (reader), `src/host/web/gamezip.ts` (loader, override rule), `src/engine/runtime/imagestore.ts` (tiers, size on first ask), `GameLoader.sweepImageSizes` and `sweepHeads` (sizes at load), `start()` in `src/play/worker.ts` (registers the references); tests in `tests/host/zip.test.ts` and `tests/engine/imagestore.test.ts`; extra text files read in one pass: `registerExtras` in `gamezip.ts`, `sweepFull` in `zipindex.ts`; the debug-list summary of what the extra file check took: `GameLoader.extrasSummary` |
 | Translation | `src/translate/` |
 | Page layout or panel UI | `src/mobile/shell.html`, `mobile.css`, `mobile.ts` |
 

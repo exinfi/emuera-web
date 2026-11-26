@@ -161,6 +161,15 @@ body.hdrc #top{background:none;border:0}
 #mode[data-mode=left]{background:var(--tap-l);border-color:var(--tap-l)}#mode[data-mode=left] b{color:var(--aink)}
 #mode[data-mode=right]{background:var(--tap-r);border-color:var(--tap-r)}#mode[data-mode=right] b{color:var(--aink)}
 #mode[data-mode=hover]{background:var(--tap-h);border-color:var(--tap-h)}#mode[data-mode=hover] b{color:var(--aink)}
+/* View > unobtrusive tap toggle: almost invisible, a thin outline and letter in the tap color (the button keeps its size and still takes taps) */
+body.qtap #mode{border:1px solid;background:transparent}
+body.qtap #mode[data-mode=left]{border-color:color-mix(in srgb,var(--tap-l) 28%,transparent);background:color-mix(in srgb,var(--tap-l) 0%,transparent)}
+body.qtap #mode[data-mode=right]{border-color:color-mix(in srgb,var(--tap-r) 28%,transparent);background:color-mix(in srgb,var(--tap-r) 0%,transparent)}
+body.qtap #mode[data-mode=hover]{border-color:color-mix(in srgb,var(--tap-h) 28%,transparent);background:color-mix(in srgb,var(--tap-h) 0%,transparent)}
+body.qtap #mode[data-mode=left] b{color:color-mix(in srgb,var(--tap-l) 16%,transparent)}
+body.qtap #mode[data-mode=right] b{color:color-mix(in srgb,var(--tap-r) 16%,transparent)}
+body.qtap #mode[data-mode=hover] b{color:color-mix(in srgb,var(--tap-h) 16%,transparent)}
+.opts label[hidden]{display:none}
 #bdbg.warn{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}#bdbg.err{background:var(--errbg);border-color:var(--err);color:var(--err)}
 #quick button.run{background:var(--warnbg);border-color:var(--warn);color:var(--warn)}
 #vp{background:var(--bg)}
@@ -221,7 +230,7 @@ body.bbtn .emu-screen a.btn:active{background:var(--btnon)}
 #dpadgrip{left:0;top:0;width:24px;height:24px;border-radius:0;background:transparent;color:var(--aink);font-size:14px}
 #dpadx{right:0;top:0;width:24px;height:24px;border-radius:0;background:transparent;color:var(--aink)}
 .xb{background:color-mix(in srgb,var(--btn) 86%,transparent);opacity:1}.xb.off{opacity:.3}
-/* immersive view (hold the hide button 3 s, see mobile.ts): every control is hidden but the hide button, which is dimmed; the bar's layout is the collapsed one (body.hdrc is set too) */
+/* immersive view (hold the hide button 1.8 s, see mobile.ts): every control is hidden but the hide button, which is dimmed; the bar's layout is the collapsed one (body.hdrc is set too) */
 body.imm #top{z-index:30!important}
 body.imm #mode,body.imm #quick,body.imm #tools>.tb:not(#bhide),body.imm #dpad,body.imm #xpad,body.imm #dpadbar,body.imm #padedit,body.imm #padscrim,body.imm #inbar,body.imm #tltab,body.imm #tlpanel,body.imm .sheet{display:none!important}
 body.imm #bhide{opacity:.16;background:transparent;border-color:transparent;box-shadow:none;transition:opacity .2s}

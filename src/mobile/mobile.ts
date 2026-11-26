@@ -174,10 +174,10 @@ $('binp').onclick = () => {
 // the top bar can hide (chevron at its right end): see `body.hdrc` in mobile.css
 const hdrBtn = $('bhide');
 let hdrCollapsed = lsGet('emu.hdr') === '1';
-// Immersive view: holding the hide button for 3 s hides every control (bar, buttons, tabs, input window, direction pad, custom buttons, translation panel and sheets; the busy indicator stays)
+// Immersive view: holding the hide button for 1.8 s hides every control (bar, buttons, tabs, input window, direction pad, custom buttons, translation panel and sheets; the busy indicator stays)
 // and leaves only that button, dimmed; a click on it brings everything back as it was. The state is not stored (a reload starts with the controls) and nothing else is changed:
 // the controls are only hidden by `body.imm` in mobile.css, so each keeps the state it had.
-const IMM_HOLD_MS = 3000;
+const IMM_HOLD_MS = 1800;
 let immersive = false;
 let immTimer: ReturnType<typeof setTimeout> | undefined;
 let immFired = false; // the hold ended in immersive view: the click that follows the release must not also toggle the bar
@@ -187,8 +187,8 @@ function applyHeader() {
   hdrBtn.title = immersive
     ? 'Show the controls again'
     : hdrCollapsed
-      ? 'Show the top bar (hold for 3 seconds: hide all controls)'
-      : 'Hide the top bar (the tap mode, quick buttons, control panel and input buttons stay; hold for 3 seconds: hide all controls)';
+      ? 'Show the top bar (hold for 1.8 seconds: hide all controls)'
+      : 'Hide the top bar (the tap mode, quick buttons, control panel and input buttons stay; hold for 1.8 seconds: hide all controls)';
 }
 function enterImmersive() {
   immersive = true;
@@ -596,8 +596,19 @@ applyMtap();
 V.desktop = matchMedia('(hover: hover) and (pointer: fine)').matches;
 V.reset();
 // the tap mode (L/R/H) is for fingers: on a desktop with the mouse left to act as a mouse (tap settings off), the button is not needed
+// "unobtrusive tap toggle" (View): the toggle is drawn almost invisible, a thin outline in the tap color; the option is offered only where the toggle is shown
+const qtapChk = $('qtap') as HTMLInputElement;
+const qtapRow = $('qtaprow');
+qtapChk.checked = lsGet('emu.qtap') === '1';
+const applyQtap = () => document.body.classList.toggle('qtap', qtapChk.checked);
+qtapChk.onchange = () => {
+  lsSet('emu.qtap', qtapChk.checked ? '1' : '0');
+  applyQtap();
+};
+applyQtap();
 const applyModeBtn = () => {
   modeBtn.hidden = V.desktop && !mtapChk.checked;
+  qtapRow.hidden = modeBtn.hidden;
 };
 applyModeBtn();
 attachGestures(V, {
@@ -1762,6 +1773,8 @@ async function load(blob: Blob, name: string) {
     ($('reload') as HTMLButtonElement).disabled = false;
     issues.length = 0;
     setInfo('page', loadInfo);
+    const extras = loader.extrasSummary();
+    if (extras) setInfo('extras', extras); // the extra file check is on: what it loaded
     crashSnap = crashText = '';
     refreshDebugBtn();
     view.clearSprites();

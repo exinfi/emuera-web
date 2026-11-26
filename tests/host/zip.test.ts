@@ -605,6 +605,29 @@ describe('extra files outside the usual folders (option "extra file check")', ()
     );
   });
 
+  test('the debug-list summary counts what was taken, by folder, and what was skipped', async () => {
+    const l = new GameLoader(undefined, { scanReferences: true });
+    await l.add({ name: 'game.zip', blob: game() });
+    // texts: 12 + 100007 + 13 + 3 = 100035 bytes (98 KB); the picture is read now (images are not lazy here); docs/ and tools/ hold one text file each
+    const s = l.extrasSummary()!;
+    assert.match(s, /^Extra files: 4 text file\(s\), 98 KB in \d+ read\(s\), 1 image\(s\) read now; /, s);
+    assert.ok(s.includes('by folder: data/ 2, xml/ 1, mapdata/ 1, pic/ 1'), s);
+    assert.ok(s.endsWith('2 file(s) in docs, backup, tool or similar folders skipped'), s);
+  });
+
+  test('the summary says so when there is nothing extra, and is absent when the option is off', async () => {
+    const bare = build([
+      { name: 'g/ERB/MAIN.ERB', data: '@SYSTEM_TITLE\nQUIT' },
+      { name: 'g/CSV/GameBase.csv', data: 'コード,1' },
+    ]);
+    const on = new GameLoader(undefined, { scanReferences: true });
+    await on.add({ name: 'game.zip', blob: bare });
+    assert.equal(on.extrasSummary(), 'Extra files: none found outside the usual folders');
+    const off = new GameLoader(undefined, {});
+    await off.add({ name: 'game.zip', blob: game() });
+    assert.equal(off.extrasSummary(), undefined);
+  });
+
   test('ticked: a text file at the top of the zip is read too; unticked it stays listed as not loaded', async () => {
     const top: E[] = [{ name: 'g/FLconfig.xml', data: '<cfg/>' }];
     const log: string[] = [];

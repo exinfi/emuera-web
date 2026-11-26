@@ -16,6 +16,12 @@ describe('launcher options', () => {
     assert.notEqual(def('ximages')?.hidden, true);
   });
 
+  test('the extra file check is on by default, so the other text files and images in a zip are visible to the game', () => {
+    assert.equal(def('xrefs')?.default, true);
+    assert.notEqual(def('xrefs')?.hidden, true);
+    assert.equal(DEFAULT_OPTIONS.xrefs, true);
+  });
+
   test('decoding every image up front is off by default and has no checkbox, but the key still exists for a host to send', () => {
     assert.equal(def('eager')?.default, false);
     assert.equal(def('eager')?.hidden, true);

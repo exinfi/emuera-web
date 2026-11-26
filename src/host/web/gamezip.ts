@@ -193,10 +193,23 @@ export class GameLoader {
   private extraBytes = 0;
   /** every skipped file outside developer folders, by lower-cased path (capped), for the engine's "asked for a file that was not loaded" note */
   private skipped = new Map<string, string>();
-  /** option `xrefs` (default off): also load the files the fixed folders do not cover. With the thin reader every text-like one is taken (`registerExtras`); without it the game's code is scanned for folder names and the files in them are loaded within a size budget (`loadReferenced`). When off those files are only listed so a miss can be explained */
+  /** option `xrefs` (default on): also load the files the fixed folders do not cover. With the thin reader every text-like one is taken (`registerExtras`); without it the game's code is scanned for folder names and the files in them are loaded within a size budget (`loadReferenced`). When off those files are only listed so a miss can be explained */
   private readonly scanReferences: boolean;
   /** `scanReferences` with the thin reader: every text-like file outside the usual folders is read in one forward pass over its zip while loading (no folder guess, no size cap) */
   private readonly sweepTexts: boolean;
+  /** what the extra file check took, for the debug list (`extrasSummary`) */
+  private readonly xs = {
+    folders: new Map<string, number>(),
+    texts: 0,
+    bytes: 0,
+    reads: 0,
+    imgRef: 0,
+    imgNow: 0,
+    unreadable: 0,
+    denied: 0,
+    capSkipped: 0,
+    notNamed: 0,
+  };
   /** the zip of each source, by source index (the text sweep reads from it) */
   private blobs: Bytes[] = [];
   constructor(
@@ -247,6 +260,7 @@ export class GameLoader {
       const kind = classify(rel);
       if (kind === 'ignored') {
         const top = rel.indexOf('/') > 0 ? rel.slice(0, rel.indexOf('/')).toLowerCase() : '';
+        if (EXTRA_DENY.test(top) && EXTRA_EXT.test(rel)) this.xs.denied++;
         if (!EXTRA_DENY.test(top) && this.skipped.size < SKIPPED_CAP)
           this.skipped.set(rel.toLowerCase().replace(/\\/g, '/'), rel);
         // a file at the zip's top level (FLconfig.xml next to the exe) counts too, but only on the thin path, where reading it costs one slice of the sweep
@@ -378,6 +392,14 @@ export class GameLoader {
       done += list.length;
       reads += st.reads;
     }
+    const xs = this.xs;
+    for (const [f, n] of taken) xs.folders.set(f, (xs.folders.get(f) ?? 0) + n);
+    xs.texts += texts.length - unreadable.length;
+    xs.bytes += bytes;
+    xs.reads += reads;
+    xs.imgNow += eagerImgs;
+    xs.imgRef += [...taken.values()].reduce((a, b) => a + b, 0) - texts.length - eagerImgs;
+    xs.unreadable += unreadable.length;
     if (taken.size)
       this.log?.(
         `extra files outside the usual folders: ${[...taken].map(([f, n]) => `${f ? f + '/' : '(top level)'} (${n})`).join(', ')}${texts.length ? `; ${texts.length} text file(s), ${(bytes / 1048576).toFixed(1)} MB read in ${reads} read(s)` : ''}${eagerImgs ? `; ${eagerImgs} image(s) read now` : ''}`,
@@ -423,21 +445,53 @@ export class GameLoader {
         const ab = await e.f.async('arraybuffer');
         this.extraBytes += ab.byteLength;
         out.images[rel] = ab;
+        this.xs.imgNow++;
       } else {
         const u = await e.f.async('uint8array');
         this.extraBytes += u.byteLength;
+        this.xs.texts++;
+        this.xs.bytes += u.byteLength;
         out.texts[rel.replace(/\\/g, '/')] = decodeText(u);
       }
       this.pending.delete(lc);
       this.skipped.delete(lc.replace(/\\/g, '/'));
       taken.set(top, (taken.get(top) ?? 0) + 1);
     }
+    for (const [f, n] of taken) this.xs.folders.set(f, (this.xs.folders.get(f) ?? 0) + n);
+    this.xs.capSkipped += skippedCap;
+    this.xs.notNamed += left;
     if (taken.size)
       this.log?.(
         `referenced files outside the usual folders: ${[...taken].map(([f, n]) => `${f}/ (${n})`).join(', ')}, ${(this.extraBytes / 1024).toFixed(0)} KB${skippedCap ? `; ${skippedCap} more skipped at the ${EXTRA_CAP >> 20} MB limit` : ''}`,
       );
     else if (skippedCap) this.log?.(`${skippedCap} referenced file(s) skipped at the ${EXTRA_CAP >> 20} MB limit`);
     if (left) this.log?.(`${left} readable file(s) in folders the game's code never names were not loaded`);
+  }
+  /**
+   * One line for the debug list about the extra file check (option `xrefs`), or undefined when the option is off: how many text files and
+   * images were taken and from which folders, what the read cost, and what was left out. Call after the last `add`.
+   */
+  extrasSummary(): string | undefined {
+    if (!this.scanReferences) return undefined;
+    const x = this.xs,
+      mb = (n: number) => (n >= 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
+    const n = x.texts + x.imgRef + x.imgNow;
+    const parts: string[] = [];
+    if (!n && !x.unreadable) parts.push('none found outside the usual folders');
+    else {
+      const what: string[] = [];
+      if (x.texts) what.push(`${x.texts} text file(s), ${mb(x.bytes)}${x.reads ? ` in ${x.reads} read(s)` : ''}`);
+      if (x.imgRef) what.push(`${x.imgRef} image(s) left in the zip`);
+      if (x.imgNow) what.push(`${x.imgNow} image(s) read now`);
+      parts.push(what.join(', '));
+      if (x.folders.size)
+        parts.push(`by folder: ${[...x.folders].map(([f, c]) => `${f ? f + '/' : '(top level)'} ${c}`).join(', ')}`);
+    }
+    if (x.unreadable) parts.push(`${x.unreadable} unreadable (left out)`);
+    if (x.denied) parts.push(`${x.denied} file(s) in docs, backup, tool or similar folders skipped`);
+    if (x.capSkipped) parts.push(`${x.capSkipped} skipped at the ${EXTRA_CAP >> 20} MB limit`);
+    if (x.notNamed) parts.push(`${x.notNamed} in folders the game's code never names not loaded`);
+    return `Extra files: ${parts.join('; ')}`;
   }
   /** closes the log with the override total; call once after the last source */
   /**

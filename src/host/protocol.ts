@@ -26,7 +26,7 @@ export interface StartOptions {
   xloader?: boolean;
   /** read resource images from the zip when first drawn instead of holding them all in memory (additive, optional, read by the page's loader, default on) */
   ximages?: boolean;
-  /** also load the text files and images the usual folders do not cover (additive, optional, read by the page's loader, default off) */
+  /** also load the text files and images the usual folders do not cover (additive, optional, read by the page's loader, default on) */
   xrefs?: boolean;
 }
 /** `hidden`: kept in the code and in `StartOptions` (so a host can still send it) but no checkbox is drawn; the page sends the default */
@@ -99,10 +99,10 @@ export const OPTION_DEFS: readonly OptionDef[] = [
   {
     id: 'xrefs',
     key: 'xrefs',
-    default: false,
+    default: true,
     label: 'enable extra file check',
     title:
-      'Normally only the standard game folders (ERB, CSV, resources, sound, font, dat) are loaded. Tick this to also let the game read the other text files (XML, JSON, TXT, CSV and similar) and images in the zip. Folders such as docs, backups and tools are skipped. Tick it if the game reports a missing file or an XML or data file error, then reload.',
+      'Lets the game read the other text files (XML, JSON, TXT, CSV and similar) and images in the zip, outside the standard game folders (ERB, CSV, resources, sound, font, dat), as it would from a game folder on disk. Folders such as docs, backups and tools are skipped. On by default. Untick it if a game loads slowly or runs out of memory, then reload. The debug list shows what was loaded.',
   },
 ];
 export const DEFAULT_OPTIONS: StartOptions = Object.fromEntries(
