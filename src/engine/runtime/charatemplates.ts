@@ -50,6 +50,43 @@ const intLoose = (s: string): number | undefined => {
   return /^[+-]?\d+$/.test(t) ? Number(t) : undefined;
 };
 
+/** Value field of a chara CSV line: Emuera's ConstantData.tryToInt64 -> LexicalAnalyzer.ReadInt64. Optional sign, must start with a digit, then 0x hex / 0b binary / decimal, an optional p/e exponent in the same base, and any trailing text is ignored. */
+export const csvInt64 = (str: string): number | undefined => {
+  if (!str) return undefined;
+  let i = 0;
+  let sign = 1;
+  if (str[i] === '+') i++;
+  else if (str[i] === '-') { sign = -1; i++; }
+  if (!(str[i] >= '0' && str[i] <= '9')) return undefined;
+  let base = 10;
+  if (str[i] === '0' && /[xXbB]/.test(str[i + 1] ?? '')) {
+    base = /[xX]/.test(str[i + 1]) ? 16 : 2;
+    i += 2;
+  }
+  const digits = (): number => {
+    let sgn = 1;
+    if (str[i] === '+') i++;
+    else if (str[i] === '-') { sgn = -1; i++; }
+    let v = 0n;
+    const B = BigInt(base);
+    for (; i < str.length; i++) {
+      const d = parseInt(str[i], 16);
+      if (!/[0-9a-fA-F]/.test(str[i]) || d >= base) break;
+      v = v * B + BigInt(d);
+    }
+    return Number(v) * sgn;
+  };
+  let sig = digits();
+  const e = str[i];
+  const expBase = e === 'p' || e === 'P' ? 2 : e === 'e' || e === 'E' ? 10 : 0;
+  if (expBase) {
+    i++;
+    const ex = digits();
+    if (ex !== 0) sig = Math.trunc(sig * Math.pow(expBase, ex));
+  }
+  return sig * sign;
+};
+
 /** Join `{ ... }` continuation blocks, drop comments. As in EraStreamReader every joined line is followed by Config.ReplaceContinuationBR (default " "), so a multi-line CSTR value starts with a space. */
 function logicalLines(text: string): { line: string; no: number }[] {
   const raw = splitLines(text);
@@ -174,7 +211,7 @@ export class CharaTemplates {
       }
       if (sec.str) (t.cstr as Map<number, string>).set(idx, tok[2] ?? '');
       else {
-        const v = tok.length < 3 ? undefined : intLoose(tok[2]);
+        const v = tok.length < 3 ? undefined : csvInt64(tok[2]);
         (t[sec.key] as Map<number, number>).set(idx, v ?? 1);
       }
     }
